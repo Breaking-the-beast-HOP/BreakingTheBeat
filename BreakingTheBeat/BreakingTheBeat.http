@@ -1,0 +1,6 @@
+@BreakingTheBeat_HostAddress = http://localhost:5187
+
+GET {{BreakingTheBeat_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
