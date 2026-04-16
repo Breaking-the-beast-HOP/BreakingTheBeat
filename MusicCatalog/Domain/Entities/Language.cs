@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicCatalog.Domain
+namespace MusicCatalog.Domain.Entities
 {
     public class Language
     {

@@ -1,4 +1,4 @@
-﻿namespace MusicCatalog.Domain
+﻿namespace MusicCatalog.Domain.Entities
 {
     public class Track
     {

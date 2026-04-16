@@ -1,0 +1,72 @@
+﻿@page "/create-track"
+@rendermode InteractiveServer
+@using MudBlazor
+@inject HttpClient Http
+
+<MudPaper Class="pa-4 ma-4" Style="max-width: 500px;">
+    <MudText Typo="Typo.h5" Class="mb-4">Opret track</MudText>
+
+    <MudTextField Label="Titel" @bind-Value="_model.Title" Class="mb-3" />
+    <MudTextField Label="Version" @bind-Value="_model.Version" Class="mb-3" />
+    <MudTextField Label="ISRC" @bind-Value="_model.ISRC" Class="mb-3" />
+
+    <MudSelect T="string" Label="Genre" @bind-Value="_model.Genre" Class="mb-3">
+        <MudSelectItem T="string" Value="@("Pop")">Pop</MudSelectItem>
+        <MudSelectItem T="string" Value="@("Rock")">Rock</MudSelectItem>
+        <MudSelectItem T="string" Value="@("Hip Hop")">Hip Hop</MudSelectItem>
+        <MudSelectItem T="string" Value="@("Electronic")">Electronic</MudSelectItem>
+    </MudSelect>
+
+    <MudSelect T="string" Label="Sprog" @bind-Value="_model.Language" Class="mb-3">
+        @if (_languages is null)
+        {
+            <MudSelectItem T="string" Value="@string.Empty" Disabled="true">Indlæser...</MudSelectItem>
+        }
+        else
+        {
+            @foreach (var language in _languages)
+            {
+                <MudSelectItem T="string" Value="@language.ISO">
+                    @language.Name
+                </MudSelectItem>
+            }
+        }
+    </MudSelect>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">
+        Gem
+    </MudButton>
+</MudPaper>
+
+@code {
+    private TrackModel _model = new();
+    private List<LanguageDto>? _languages;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("Language");
+        }
+        catch
+        {
+            _languages = new List<LanguageDto>();
+        }
+    }
+
+    public class TrackModel
+    {
+        public string? Title { get; set; }
+        public string? Version { get; set; }
+        public string? ISRC { get; set; }
+        public string? Genre { get; set; }
+        public string? Language { get; set; }
+    }
+
+    public class LanguageDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string ISO { get; set; } = "";
+    }
+}

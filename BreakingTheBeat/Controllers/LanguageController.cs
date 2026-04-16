@@ -1,32 +1,27 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BreakingTheBeat.Models;
+﻿using Gateway.Models;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using MusicCatalog.Features.Language.GetLanguages;
+using MusicCatalog.Features.Languages.GetLanguages;
 
-namespace BreakingTheBeat.Controllers
+namespace Gateway.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class LanguageController : ControllerBase
     {
-        private readonly ILogger<LanguageController> _logger;
+        private readonly IMediator _mediator;
 
-        public LanguageController(ILogger<LanguageController> logger)
+        public LanguageController(IMediator mediator)
         {
-            _logger = logger;
+            _mediator = mediator;
         }
 
         [HttpGet(Name = "GetLanguages")]
-        public IEnumerable<LanguageDto> Get()
+        public async Task<ActionResult<List<LanguageResponse>>> Get(CancellationToken cancellationToken)
         {
-            var languages = new List<LanguageDto>
-            {
-                new LanguageDto { Id = 1, Name = "Dansk", ISO = "da-DK" },
-                new LanguageDto { Id = 2, Name = "English", ISO = "en-US" },
-                new LanguageDto { Id = 3, Name = "Deutsch", ISO = "de-DE" }
-            };
-
-            _logger.LogInformation("Languages endpoint was called");
-
-            return languages;
+            var result = await _mediator.Send(new GetLanguagesQuery(), cancellationToken);
+            return Ok(result);
         }
     }
 }

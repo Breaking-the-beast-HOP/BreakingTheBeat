@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicCatalog.Domain
+namespace MusicCatalog.Domain.Entities
 {
     public class Contribution
     {
@@ -13,7 +13,7 @@ namespace MusicCatalog.Domain
         public Track? Track { get; set; }
         public Release? Release { get; set; }
 
-        public Contribution(Contributor contributor, ContributorRole role, Track track )
+        public Contribution(Contributor contributor, ContributorRole role, Track track)
         {
             Contributor = contributor;
             Role = role;
