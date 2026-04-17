@@ -1,53 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PodcastCatalog.Models
+﻿namespace PodcastCatalog.Models
 {
-    internal class Language
+    public class Language
     {
-        private int _id;
+        public int Id { get; private set; }
+        public string Name { get; private set; }
+        public string ISO { get; private set; }
 
-        public int Id
+        private Language(int id, string name, string iso)
         {
-            get { return _id; }
-            set { _id = value; }
+            Id = id;
+            Name = name;
+            ISO = iso;
         }
 
-        private string _name;
-
-        public string Name
+        public static Language Create(int id, string name, string iso)
         {
-            get { return _name; }
-            set { _name = value; }
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Language name is required");
+            if (string.IsNullOrWhiteSpace(iso))
+                throw new ArgumentException("ISO code is required");
+
+            return new Language(id, name, iso);
         }
 
-        private string _iso;
-
-        public string ISO
+        public void Update(string name, string iso)
         {
-            get { return _iso; }
-            set { _iso = value; }
-        }
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Language name is required");
+            if (string.IsNullOrWhiteSpace(iso))
+                throw new ArgumentException("ISO code is required");
 
-        public Language CreateLanguage(int id, string name, string iso)
-        {
-            var language = new Language
-            {
-                Id = id,
-                Name = name,
-                ISO = iso
-            };
-            return language;
-        }
-
-        public Language UpdateLanguage(Language entity, string name, string iso)
-        {
-            entity.Name = name;
-            entity.ISO = iso;
-            return entity;
+            Name = name;
+            ISO = iso;
         }
     }
 }

@@ -1,48 +1,33 @@
 ﻿namespace PodcastCatalog.Models
 {
-    internal class Category
+    public class Category
     {
-        private int _id;
+        public int Id { get; private set; }
+        public string Name { get; private set; }
+        public string Description { get; private set; }
 
-        public int Id
+        private Category(int id, string name, string description)
         {
-            get { return _id; }
-            set { _id = value; }
+            Id = id;
+            Name = name;
+            Description = description;
         }
 
-        private string _name;
-
-        public string Name
+        public static Category Create(int id, string name, string description)
         {
-            get { return _name; }
-            set { _name = value; }
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Category name is required");
+
+            return new Category(id, name, description);
         }
 
-
-        private string _description;
-
-        public string Description
+        public void Update(string name, string description)
         {
-            get { return _description; }
-            set { _description = value; }
-        }
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Category name is required");
 
-        public Category CreateCategory(int id, string name, string description)
-        {
-            var category = new Category
-            {
-                Id = id,
-                Name = name,
-                Description = description
-            };
-            return category;
-        }
-
-        public Category UpdateCategory(Category entity, string name, string description)
-        {
-            entity.Name = name;
-            entity.Description = description;
-            return entity;
+            Name = name;
+            Description = description;
         }
     }
 }
