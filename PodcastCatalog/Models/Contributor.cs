@@ -2,47 +2,27 @@
 {
     public class Contributor
     {
-        private int _id;
+        public Guid Id { get; }
+        public string Name { get; private set; }
+        public string Description { get; private set; }
 
-        public int Id
+        public Contributor(Guid id, string name, string description)
         {
-            get { return _id; }
-            set { _id = value; }
-        }
-        private string _name;
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name required");
 
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
-
-        private string _description;
-
-        public string Description
-        {
-            get { return _description; }
-            set { _description = value; }
+            Id = id;
+            Name = name;
+            Description = description;
         }
 
-        public Contributor() : this(0, string.Empty, string.Empty) { }
-        public Contributor(int id, string name, string description)
+        public void Update(string name, string description)
         {
-            _id = id;
-            _name = name;
-            _description = description;
-        }
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name required");
 
-        public Contributor CreateContributor(int id, string name, string description)
-        {
-            return new Contributor(id, name, description);
-        }
-
-        public Contributor UpdateContributor(Contributor entity, string name, string description)
-        {
-            entity.Name = name;
-            entity.Description = description;
-            return entity;
+            Name = name;
+            Description = description;
         }
     }
 }

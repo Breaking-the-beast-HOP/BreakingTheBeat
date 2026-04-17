@@ -4,58 +4,28 @@ namespace PodcastCatalog.Models
 {
     public class Contribution
     {
-        private int _id;
+        public Guid Id { get; }
+        public bool HasRights { get; private set; }
+        public Role Role { get; private set; }
+        public Contributor Contributor { get; }
 
-        public int Id
+        public Contribution(Guid id, Contributor contributor, Role role, bool hasRights)
         {
-            get { return _id; }
-            set { _id = value; }
-        }
+            Contributor = contributor ?? throw new ArgumentNullException(nameof(contributor));
+            Role = role ?? throw new ArgumentNullException(nameof(role));
 
-        private bool _rights;
-
-        public bool Rights
-        {
-            get { return _rights; }
-            set { _rights = value; }
-        }
-
-        private Role _role;
-
-        public Role Role
-        {
-            get { return _role; }
-            set { _role = value; }
-        }
-
-        private Contributor _contributor;
-
-        public Contributor Contributor
-        {
-            get { return _contributor; }
-            set { _contributor = value; }
-        }
-
-        public Contribution() : this(0, false, new Role(), new Contributor()) { }
-        public Contribution(int id, bool rights, Role role, Contributor contributor)
-        {
             Id = id;
-            Rights = rights;
-            Role = role;
-            Contributor = contributor;
-        }
-        public Contribution CreateContribution(int id, bool rights, Role role, Contributor contributor)
-        {
-            var contribution = new Contribution(id, rights, role, contributor);
-            return contribution;
+            HasRights = hasRights;
         }
 
-        public Contribution UpdateContribution(Contribution entity, bool rights, Role role, Contributor contributor)
+        public void ChangeRole(Role role)
         {
-            entity.Rights = rights;
-            entity.Role = role;
-            entity.Contributor = contributor;
-            return entity;
+            Role = role ?? throw new ArgumentNullException(nameof(role));
+        }
+
+        public void SetRights(bool hasRights)
+        {
+            HasRights = hasRights;
         }
     }
 }

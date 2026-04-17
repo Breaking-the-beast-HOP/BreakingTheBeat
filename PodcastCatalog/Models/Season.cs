@@ -2,81 +2,60 @@
 {
     public class Season
     {
-        private int _id;
+        private readonly List<Episode> _episodes = new();
 
-        public int Id
-        {
-            get { return _id; }
-            set { _id = value; }
-        }
-
-        private string _name;
-
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
-
-        private DateOnly _productionYear;
-
-        public DateOnly ProductionYear
-        {
-            get { return _productionYear; }
-            set { _productionYear = value; }
-        }
-
-        private readonly List<Episode> _episodes;
+        public Guid Id { get; }
+        public string Name { get; private set; }
+        public DateOnly ProductionYear { get; private set; }
 
         public IReadOnlyList<Episode> Episodes => _episodes.AsReadOnly();
 
-        private readonly List<Contribution> _guests;
-
-        public IReadOnlyList<Contribution> Guests => _guests.AsReadOnly();
-
-        public Season()
+        public Season(Guid id, string name, DateOnly productionYear)
         {
-            _episodes = new List<Episode>();
+            Id = id;
+            Update(name, productionYear);
         }
 
-        public Season CreateSeason(int id, string name, DateOnly productionYear)
+        public void Update(string name, DateOnly productionYear)
         {
-            return new Season
-            {
-                Id = id,
-                Name = name,
-                ProductionYear = productionYear
-            };
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Season name required");
+
+            Name = name;
+            ProductionYear = productionYear;
         }
 
-        public Season UpdateSeason(Season entity, string name, DateOnly productionYear)
+        // 🔥 Aggregate behavior
+
+        public Episode CreateEpisode(string title, string description, TimeSpan duration, DateOnly airingDate)
         {
-            entity.Name = name;
-            entity.ProductionYear = productionYear;
-            return entity;
+            var episode = new Episode(Guid.NewGuid(), title, description, duration, airingDate);
+
+            _episodes.Add(episode);
+
+            return episode;
         }
 
         public void AddEpisode(Episode episode)
         {
+            if (episode == null)
+                throw new ArgumentNullException(nameof(episode));
+
+            if (_episodes.Any(e => e.Id == episode.Id))
+                return;
+
             _episodes.Add(episode);
         }
 
-        public void AddEpisodes(IEnumerable<Episode> episodes)
+        public void RemoveEpisode(Guid episodeId)
         {
-            _episodes.AddRange(episodes);
+            _episodes.RemoveAll(e => e.Id == episodeId);
         }
 
-        public void UpdateEpisode(Episode episode)
+        public Episode GetEpisode(Guid episodeId)
         {
-            var existingEpisode = _episodes.FirstOrDefault(e => e.Id == episode.Id);
-            if (existingEpisode != null)
-            {
-                existingEpisode.UpdateEpisode(existingEpisode, episode.Title, episode.Description, episode.Duration, episode.AiringDate);
-            }
-        }
-        public void RemoveEpisode(Episode episode)
-        {
-            _episodes.Remove(episode);
+            return _episodes.FirstOrDefault(e => e.Id == episodeId);
         }
     }
+
 }

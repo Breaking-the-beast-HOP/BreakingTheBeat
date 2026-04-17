@@ -9,9 +9,9 @@ namespace PodcastCatalog.Models
 {
     internal class Podcast
     {
-        private int _id;
+        private Guid _id;
 
-        public int Id
+        public Guid Id
         {
             get { return _id; }
             set { _id = value; }
@@ -26,7 +26,11 @@ namespace PodcastCatalog.Models
 
         private string _description;
 
-        public string Description { get { return _description; } set { _description = value; } }
+        public string Description
+        {
+            get { return _description; }
+            set { _description = value; }
+        }
 
         private readonly List<Language> _languages;
 

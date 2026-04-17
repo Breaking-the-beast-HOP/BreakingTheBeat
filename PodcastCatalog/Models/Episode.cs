@@ -4,103 +4,69 @@ namespace PodcastCatalog.Models
 {
     public class Episode
     {
-        private int _id;
+        private readonly List<Tag> _tags = new();
+        private readonly List<Contribution> _contributions = new();
 
-        public int Id
-        {
-            get { return _id; }
-            set { _id = value; }
-        }
-
-        private string _title;
-
-        public string Title
-        {
-            get { return _title; }
-            set { _title = value; }
-        }
-
-        private DateOnly _airingDate;
-
-        public DateOnly AiringDate
-        {
-            get { return _airingDate; }
-            set { _airingDate = value; }
-        }
-
-        private TimeSpan _duration;
-
-        public TimeSpan Duration
-        {
-            get { return _duration; }
-            set { _duration = value; }
-        }
-
-        private string _description;
-
-        public string Description
-        {
-            get { return _description; }
-            set { _description = value; }
-        }
-
-
-        private readonly List<Tag> _tags;
+        public Guid Id { get; }
+        public string Title { get; private set; }
+        public string Description { get; private set; }
+        public TimeSpan Duration { get; private set; }
+        public DateOnly AiringDate { get; private set; }
 
         public IReadOnlyList<Tag> Tags => _tags.AsReadOnly();
+        public IReadOnlyList<Contribution> Contributions => _contributions.AsReadOnly();
 
-        private readonly List<Contribution> _guests;
-
-        public IReadOnlyList<Contribution> Guests => _guests.AsReadOnly();
-
-        public Episode UpdateEpisode(Episode entity, string title, string description, TimeSpan duration, DateOnly airingDate)
+        public Episode(Guid id, string title, string description, TimeSpan duration, DateOnly airingDate)
         {
-            entity.Title = title;
-            entity.Description = description;
-            entity.Duration = duration;
-            entity.AiringDate = airingDate;
-            return entity;
-        }
-        public Episode CreateEpisode(int id, string title, string description, TimeSpan duration, DateOnly airingDate)
-        {
-            return new Episode
-            {
-                Id = id,
-                Title = title,
-                Description = description,
-                Duration = duration,
-                AiringDate = airingDate
-            };
+            Id = id;
+            Update(title, description, duration, airingDate);
         }
 
-        public Episode CreateEpisode(Episode entity)
+        public void Update(string title, string description, TimeSpan duration, DateOnly airingDate)
         {
-            return new Episode
-            {
-                Id = entity.Id,
-                Title = entity.Title,
-                Description = entity.Description,
-                Duration = entity.Duration,
-                AiringDate = entity.AiringDate
-            };
+            if (string.IsNullOrWhiteSpace(title))
+                throw new ArgumentException("Title required");
+
+            Title = title;
+            Description = description;
+            Duration = duration;
+            AiringDate = airingDate;
         }
 
+        // 🔹 TAGS
         public void AddTag(Tag tag)
         {
+            if (tag == null) throw new ArgumentNullException(nameof(tag));
+
+            if (_tags.Any(t => t.Id == tag.Id))
+                return;
+
             _tags.Add(tag);
         }
 
-        public void AddTags(IEnumerable<Tag> tags)
+        public void RemoveTag(Guid tagId)
         {
-            foreach (var tag in tags)
-            {
-                _tags.Add(tag);
-            }
+            _tags.RemoveAll(t => t.Id == tagId);
         }
 
-        public void DeleteTag(Tag tag)
+        // 🔹 CONTRIBUTIONS
+        public void AddContribution(Contributor contributor, Role role, bool hasRights)
         {
-            _tags.Remove(tag);
+            if (_contributions.Any(c =>
+                c.Contributor.Id == contributor.Id &&
+                c.Role.Id == role.Id))
+            {
+                return;
+            }
+
+            _contributions.Add(new Contribution(Guid.NewGuid(), contributor, role, hasRights));
+        }
+
+        public void RemoveContribution(Guid contributorId, Guid roleId)
+        {
+            _contributions.RemoveAll(c =>
+                c.Contributor.Id == contributorId &&
+                c.Role.Id == roleId);
         }
     }
 }

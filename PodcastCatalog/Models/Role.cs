@@ -2,34 +2,16 @@
 {
     public class Role
     {
-        private int _id;
+        public Guid Id { get; }
+        public string Name { get; }
 
-        public int Id
+        public Role(Guid id, string name)
         {
-            get { return _id; }
-            set { _id = value; }
-        }
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Role name required");
 
-        private string _name;
-
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
-        public Role() : this(0, string.Empty) { }
-        public Role(int id, string name)
-        {
             Id = id;
             Name = name;
         }
-
-        public Role CreateRole(int id, string name)
-        {
-            var role = new Role(id, name);
-            return role;
-        }
-
-        public Role UpdateRole(Role entity, string name) { Name = name; return entity; }
     }
 }

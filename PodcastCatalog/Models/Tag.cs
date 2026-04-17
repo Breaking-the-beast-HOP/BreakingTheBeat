@@ -2,36 +2,24 @@
 {
     public class Tag
     {
-        private int _id;
+        public Guid Id { get; }
+        public string Name { get; private set; }
 
-        public int Id
+        public Tag(Guid id, string name)
         {
-            get { return _id; }
-            set { _id = value; }
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Tag name required");
+
+            Id = id;
+            Name = name;
         }
 
-        private string _name;
-
-        public string Name
+        public void Rename(string name)
         {
-            get { return _name; }
-            set { _name = value; }
-        }
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Tag name required");
 
-        public Tag CreateTag(int id, string name)
-        {
-            var tag = new Tag
-            {
-                Id = id,
-                Name = name
-            };
-            return tag;
-        }
-
-        public Tag UpdateTag(Tag entity, string name)
-        {
-            entity.Name = name;
-            return entity;
+            Name = name;
         }
     }
 }
