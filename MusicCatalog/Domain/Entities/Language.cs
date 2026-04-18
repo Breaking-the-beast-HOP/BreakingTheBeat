@@ -9,12 +9,23 @@ namespace MusicCatalog.Domain.Entities
 {
     public class Language
     {
-        public int Id { get; }
-        public string Name { get; }
-        public string ISO { get; }
+        public Guid Id { get; private set; }
+        public string Name { get; private set; }
+        public string ISO { get; private set; }
 
-        public Language(int id, string name, string iso)
+        private Language() { } // EF Core
+
+        public Language(Guid id, string name, string iso)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Language name cannot be empty");
+
+            if (string.IsNullOrWhiteSpace(iso))
+                throw new ArgumentException("ISO code cannot be empty");
+
+            if (iso.Length > 10)
+                throw new ArgumentException("ISO code too long");
+
             Id = id;
             Name = name;
             ISO = iso;

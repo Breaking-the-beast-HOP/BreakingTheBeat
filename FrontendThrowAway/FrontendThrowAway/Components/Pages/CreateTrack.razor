@@ -11,10 +11,19 @@
     <MudTextField Label="ISRC" @bind-Value="_model.ISRC" Class="mb-3" />
 
     <MudSelect T="string" Label="Genre" @bind-Value="_model.Genre" Class="mb-3">
-        <MudSelectItem T="string" Value="@("Pop")">Pop</MudSelectItem>
-        <MudSelectItem T="string" Value="@("Rock")">Rock</MudSelectItem>
-        <MudSelectItem T="string" Value="@("Hip Hop")">Hip Hop</MudSelectItem>
-        <MudSelectItem T="string" Value="@("Electronic")">Electronic</MudSelectItem>
+        @if (_genres is null)
+        {
+            <MudSelectItem T="string" Value="@string.Empty" Disabled="true">Indlæser...</MudSelectItem>
+        }
+        else
+        {
+            @foreach (var genre in _genres)
+            {
+                <MudSelectItem T="Guid" Value="@genre.Id">
+                    @genre.Name
+                </MudSelectItem>
+            }
+        }
     </MudSelect>
 
     <MudSelect T="string" Label="Sprog" @bind-Value="_model.Language" Class="mb-3">
@@ -41,16 +50,19 @@
 @code {
     private TrackModel _model = new();
     private List<LanguageDto>? _languages;
+    private List<GenreDto>? _genres;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("Language");
+            _genres = await Http.GetFromJsonAsync<List<GenreDto>>("Genre");
         }
         catch
         {
             _languages = new List<LanguageDto>();
+            _genres = new List<GenreDto>();
         }
     }
 
@@ -65,8 +77,13 @@
 
     public class LanguageDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; } = "";
         public string ISO { get; set; } = "";
+    }
+    public class GenreDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
     }
 }

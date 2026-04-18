@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MusicCatalog.Domain.Entities;
+﻿using SharedKernel.Interfaces.Base;
 
 namespace MusicCatalog.Features.Language.Interfaces
 {
-    public interface ILanguageRepository
+    public interface ILanguageRepository:IReadRepository<Domain.Entities.Language>
     {
-        IEnumerable<Domain.Entities.Language> GetAll();
-        Domain.Entities.Language GetById(int id);
+       
     }
 }

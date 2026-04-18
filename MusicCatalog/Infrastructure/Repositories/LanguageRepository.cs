@@ -1,23 +1,31 @@
-﻿using MusicCatalog.Features.Language.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using MusicCatalog.Domain.Entities;
+using MusicCatalog.Features.Language.Interfaces;
 
 namespace MusicCatalog.Infrastructure.Repositories
 {
     public class LanguageRepository : ILanguageRepository
     {
-        public IEnumerable<Language> GetAll()
+        private readonly MusicCatalogDbContext _context;
+
+        public LanguageRepository(MusicCatalogDbContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
+        }
+        public async Task<List<Language>> GetAllAsync()
+        {
+            //return await Task.FromResult(new List<Language>
+            //{
+            //    new Language(Guid.NewGuid(), "Dansk","da-DK"),
+            //    new Language (Guid.NewGuid(), "English","en-US" ),
+            //    new Language (Guid.NewGuid(), "Deutsch", "de-DE" ),
+            //});
+            return await _context.Languages.ToListAsync();
         }
 
-        public Language GetById(int id)
+        public async Task<Language?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _context.Languages.FindAsync(id);
         }
     }
 }

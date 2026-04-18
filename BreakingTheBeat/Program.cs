@@ -4,6 +4,7 @@ using MusicCatalog.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using MusicCatalog.Features.Language.Interfaces;
 using MusicCatalog.Infrastructure.Repositories;
+using MusicCatalog.Features.Genre;
 
 namespace Gateway
 {
@@ -21,6 +22,7 @@ namespace Gateway
 
             // 3. Repositories
             builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+            builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 
             //4. services
 
@@ -28,6 +30,8 @@ namespace Gateway
             //5. Command/query handlers are registered by MediatR
             builder.Services.AddMediatR(cfg =>
                cfg.RegisterServicesFromAssembly(typeof(GetLanguagesQuery).Assembly));
+            builder.Services.AddMediatR(cfg =>
+             cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly));
 
             //6. Controllers
             builder.Services.AddControllers();

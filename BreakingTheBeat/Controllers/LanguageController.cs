@@ -1,8 +1,7 @@
-﻿using Gateway.Models;
+﻿using Gateway.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Language.GetLanguages;
-using MusicCatalog.Features.Languages.GetLanguages;
 
 namespace Gateway.Controllers
 {

@@ -1,21 +1,27 @@
 ﻿using MediatR;
-using MusicCatalog.Features.Language.GetLanguages;
+using MusicCatalog.Features.Language.Interfaces;
 
-namespace MusicCatalog.Features.Languages.GetLanguages
+namespace MusicCatalog.Features.Language.GetLanguages
 {
     public class GetLanguagesHandler : IRequestHandler<GetLanguagesQuery, List<LanguageDTO>>
     {
-        public Task<List<LanguageDTO>> Handle(GetLanguagesQuery request, CancellationToken cancellationToken)
-        {
-            var languages = new List<LanguageDTO>
-            {
-                new LanguageDTO { Id = 1, Name = "Dansk", ISO = "da-DK" },
-                new LanguageDTO { Id = 2, Name = "English", ISO = "en-US" },
-                new LanguageDTO { Id = 3, Name = "Deutsch", ISO = "de-DE" },
-                new LanguageDTO { Id = 4, Name = "Français", ISO = "fr-FR" },
-            };
+        private readonly ILanguageRepository _repository;
 
-            return Task.FromResult(languages);
+        public GetLanguagesHandler(ILanguageRepository repository)
+        {
+            _repository = repository;
+        }
+
+        public async Task<List<LanguageDTO>> Handle(GetLanguagesQuery request, CancellationToken cancellationToken)
+        {
+            var languages = await _repository.GetAllAsync();
+
+            return languages.Select(l => new LanguageDTO
+            {
+                Id = l.Id,
+                Name = l.Name,
+                ISO = l.ISO
+            }).ToList();
         }
     }
 }
