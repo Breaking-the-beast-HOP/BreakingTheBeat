@@ -1,25 +1,38 @@
 ﻿using System.Formats.Asn1;
 
-namespace PodcastCatalog.Models
+namespace PodcastCatalog.Shared.Models
 {
     public class Episode
     {
         private readonly List<Tag> _tags = new();
-        private readonly List<Contribution> _contributions = new();
+        private readonly List<EpisodeContribution> _contributions = new();
 
         public Guid Id { get; }
-        public string Title { get; private set; }
-        public string Description { get; private set; }
+        public string Title { get; private set; } = null!;
+        public string? Description { get; private set; }
         public TimeSpan Duration { get; private set; }
         public DateOnly AiringDate { get; private set; }
 
         public IReadOnlyList<Tag> Tags => _tags.AsReadOnly();
-        public IReadOnlyList<Contribution> Contributions => _contributions.AsReadOnly();
+        public IReadOnlyList<EpisodeContribution> Contributions => _contributions.AsReadOnly();
 
-        public Episode(Guid id, string title, string description, TimeSpan duration, DateOnly airingDate)
+        // Database Relationships
+        public int SeasonId { get; set; }
+        public Season Season { get; set; } = null!;
+
+        public Episode(string title, string description, TimeSpan duration, DateOnly airingDate, int seasonId, Season season)
+        {
+            Id = Guid.NewGuid();
+            Update(title, description, duration, airingDate);
+            SeasonId = seasonId;
+            Season = season ?? throw new ArgumentNullException(nameof(season));
+        }
+        public Episode(Guid id, string title, string description, TimeSpan duration, DateOnly airingDate, int seasonId, Season season)
         {
             Id = id;
             Update(title, description, duration, airingDate);
+            SeasonId = seasonId;
+            Season = season ?? throw new ArgumentNullException(nameof(season));
         }
 
         public void Update(string title, string description, TimeSpan duration, DateOnly airingDate)
@@ -59,7 +72,16 @@ namespace PodcastCatalog.Models
                 return;
             }
 
-            _contributions.Add(new Contribution(Guid.NewGuid(), contributor, role, hasRights));
+            _contributions.Add(new EpisodeContribution(
+                Guid.NewGuid(),
+                int.Parse(this.Id.ToString()),
+                this,
+                int.Parse(contributor.Id.ToString()),
+                contributor,
+                int.Parse(role.Id.ToString()),
+                role,
+                hasRights));
+
         }
 
         public void RemoveContribution(Guid contributorId, Guid roleId)

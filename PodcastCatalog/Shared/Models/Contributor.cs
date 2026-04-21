@@ -1,12 +1,18 @@
-﻿namespace PodcastCatalog.Models
+﻿namespace PodcastCatalog.Shared.Models
 {
     public class Contributor
     {
         public Guid Id { get; }
-        public string Name { get; private set; }
-        public string Description { get; private set; }
+        public string Name { get; private set; } = null!;
+        public string? Description { get; private set; }
+        public Contributor(string name, string description)
+        {
+            Id = Guid.NewGuid();
+            Name = name;
+            Description = description;
+        }
 
-        public Contributor(Guid id, string name, string description)
+        public Contributor(Guid id, string name, string? description)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name required");

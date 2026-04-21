@@ -1,0 +1,6 @@
+@PodcastCatalogue_HostAddress = http://localhost:5125
+
+GET {{PodcastCatalogue_HostAddress}}/podcast
+Accept: application/json
+
+###

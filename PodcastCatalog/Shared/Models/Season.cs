@@ -1,4 +1,4 @@
-﻿namespace PodcastCatalog.Models
+﻿namespace PodcastCatalog.Shared.Models
 {
     public class Season
     {
@@ -10,10 +10,23 @@
 
         public IReadOnlyList<Episode> Episodes => _episodes.AsReadOnly();
 
-        public Season(Guid id, string name, DateOnly productionYear)
+        // Database Relationships
+        public int PodcastId { get; set; }
+        public Podcast Podcast { get; set; } = null!;
+
+        public Season(string name, DateOnly productionYear, int podcastId, Podcast podcast)
+        {
+            Id = Guid.NewGuid();
+            Update(name, productionYear);
+            PodcastId = podcastId;
+            Podcast = podcast ?? throw new ArgumentNullException(nameof(podcast));
+        }
+        public Season(Guid id, string name, DateOnly productionYear, int podcastId, Podcast podcast)
         {
             Id = id;
             Update(name, productionYear);
+            PodcastId = podcastId;
+            Podcast = podcast ?? throw new ArgumentNullException(nameof(podcast));
         }
 
         public void Update(string name, DateOnly productionYear)
@@ -25,16 +38,24 @@
             ProductionYear = productionYear;
         }
 
-        // 🔥 Aggregate behavior
+        // Aggregate behavior
 
         public Episode CreateEpisode(string title, string description, TimeSpan duration, DateOnly airingDate)
         {
-            var episode = new Episode(Guid.NewGuid(), title, description, duration, airingDate);
+            var episode = new Episode(
+                Guid.NewGuid(),
+                title,
+                description,
+                duration,
+                airingDate,
+                int.Parse(this.Id.ToString()),
+                this);
 
             _episodes.Add(episode);
 
             return episode;
         }
+
 
         public void AddEpisode(Episode episode)
         {

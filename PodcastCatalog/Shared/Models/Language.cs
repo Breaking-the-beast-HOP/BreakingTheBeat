@@ -1,19 +1,25 @@
-﻿namespace PodcastCatalog.Models
+﻿namespace PodcastCatalog.Shared.Models
 {
     public class Language
     {
-        public int Id { get; private set; }
+        public Guid Id { get; private set; }
         public string Name { get; private set; }
         public string ISO { get; private set; }
 
-        private Language(int id, string name, string iso)
+        public Language(string name, string iso)
+        {
+            Id = Guid.NewGuid();
+            Name = name;
+            ISO = iso;
+        }
+        public Language(Guid id, string name, string iso)
         {
             Id = id;
             Name = name;
             ISO = iso;
         }
 
-        public static Language Create(int id, string name, string iso)
+        public static Language Create(Guid id, string name, string iso)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Language name is required");
