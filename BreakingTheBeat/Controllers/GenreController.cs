@@ -6,7 +6,7 @@ using MusicCatalog.Features.Genre;
 namespace Gateway.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class GenreController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -16,7 +16,7 @@ namespace Gateway.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet(Name = "GetLGenres")]
+        [HttpGet(Name = "GetGenres")]
         public async Task<ActionResult<List<GenreResponse>>> Get(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetGenresQuery(), cancellationToken);

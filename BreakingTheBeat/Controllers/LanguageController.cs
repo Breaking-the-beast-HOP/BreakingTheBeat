@@ -6,7 +6,7 @@ using MusicCatalog.Features.Language.GetLanguages;
 namespace Gateway.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class LanguageController : ControllerBase
     {
         private readonly IMediator _mediator;

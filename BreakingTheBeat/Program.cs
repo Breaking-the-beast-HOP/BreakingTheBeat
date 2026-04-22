@@ -6,6 +6,8 @@ using MusicCatalog.Features.Language.Interfaces;
 using MusicCatalog.Infrastructure.Repositories;
 using MusicCatalog.Features.Genre;
 using MusicCatalog.Features.Genre.Interfaces;
+using MusicCatalog.Features.Track;
+using MusicCatalog.Features.Track.Create;
 
 namespace Gateway
 {
@@ -24,6 +26,7 @@ namespace Gateway
             // 3. Repositories
             builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
+            builder.Services.AddScoped<ITrackRepository, TrackRepository>();
 
             //4. services
 
@@ -33,6 +36,8 @@ namespace Gateway
                cfg.RegisterServicesFromAssembly(typeof(GetLanguagesQuery).Assembly));
             builder.Services.AddMediatR(cfg =>
              cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly));
+            builder.Services.AddMediatR(cfg =>
+             cfg.RegisterServicesFromAssembly(typeof(CreateTrackCommand).Assembly));
 
             //6. Controllers
             builder.Services.AddControllers();

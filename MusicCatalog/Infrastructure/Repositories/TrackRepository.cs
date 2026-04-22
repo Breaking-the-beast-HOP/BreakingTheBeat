@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MusicCatalog.Domain.Entities;
 using MusicCatalog.Features.Track;
+using System.Threading;
 
 namespace MusicCatalog.Infrastructure.Repositories
 {
@@ -13,9 +14,11 @@ namespace MusicCatalog.Infrastructure.Repositories
             _context = context;
         }
 
-        public Task<Track> AddAsync(Track entity)
+        public async Task<Track> AddAsync(Track entity)
         {
-            throw new NotImplementedException();
+            _context.Tracks.Add(entity);
+            await _context.SaveChangesAsync();
+            return entity;
         }
 
         public Task DeleteAsync(Track entity)

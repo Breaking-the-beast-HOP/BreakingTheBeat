@@ -10,39 +10,43 @@
     <MudTextField Label="Version" @bind-Value="_model.Version" Class="mb-3" />
     <MudTextField Label="ISRC" @bind-Value="_model.ISRC" Class="mb-3" />
 
-    <MudSelect T="string" Label="Genre" @bind-Value="_model.Genre" Class="mb-3">
+    <MudSelect T="Guid?" Label="Genre" @bind-Value="_model.GenreId" Class="mb-3">
         @if (_genres is null)
         {
-            <MudSelectItem T="string" Value="@string.Empty" Disabled="true">Indlæser...</MudSelectItem>
+            <MudSelectItem T="Guid?" Value="@((Guid?)null)" Disabled="true">
+                Indlæser...
+            </MudSelectItem>
         }
         else
         {
             @foreach (var genre in _genres)
             {
-                <MudSelectItem T="Guid" Value="@genre.Id">
+                <MudSelectItem T="Guid?" Value="@((Guid?)genre.Id)">
                     @genre.Name
                 </MudSelectItem>
             }
         }
     </MudSelect>
 
-    <MudSelect T="string" Label="Sprog" @bind-Value="_model.Language" Class="mb-3">
+    <MudSelect T="Guid?" Label="Sprog" @bind-Value="_model.LanguageId" Class="mb-3">
         @if (_languages is null)
         {
-            <MudSelectItem T="string" Value="@string.Empty" Disabled="true">Indlæser...</MudSelectItem>
+            <MudSelectItem T="Guid?" Value="@((Guid?)null)" Disabled="true">
+                Indlæser...
+            </MudSelectItem>
         }
         else
         {
             @foreach (var language in _languages)
             {
-                <MudSelectItem T="string" Value="@language.ISO">
+                <MudSelectItem T="Guid?" Value="@((Guid?)language.Id)">
                     @language.Name
                 </MudSelectItem>
             }
         }
     </MudSelect>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2"  OnClick="SaveTrack">
         Gem
     </MudButton>
 </MudPaper>
@@ -56,8 +60,8 @@
     {
         try
         {
-            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("Language");
-            _genres = await Http.GetFromJsonAsync<List<GenreDto>>("Genre");
+            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/Language");
+            _genres = await Http.GetFromJsonAsync<List<GenreDto>>("api/Genre");
         }
         catch
         {
@@ -66,13 +70,28 @@
         }
     }
 
+    private async Task SaveTrack()
+    {
+        var response = await Http.PostAsJsonAsync("api/Track", _model);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // reset form eller vis success
+            
+        }
+        else
+        {
+            // evt. fejlhåndtering
+        }
+    }
+
     public class TrackModel
     {
         public string? Title { get; set; }
         public string? Version { get; set; }
         public string? ISRC { get; set; }
-        public string? Genre { get; set; }
-        public string? Language { get; set; }
+        public Guid? GenreId { get; set; }
+        public Guid? LanguageId { get; set; }
     }
 
     public class LanguageDto
