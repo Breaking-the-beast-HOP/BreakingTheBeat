@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MusicCatalog.Domain.Entities;
+using MusicCatalog.Features.Genre.Interfaces;
 using MusicCatalog.Features.Language.Interfaces;
 using System;
 using System.Collections.Generic;

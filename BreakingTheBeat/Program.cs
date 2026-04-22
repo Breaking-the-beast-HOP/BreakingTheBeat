@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MusicCatalog.Features.Language.Interfaces;
 using MusicCatalog.Infrastructure.Repositories;
 using MusicCatalog.Features.Genre;
+using MusicCatalog.Features.Genre.Interfaces;
 
 namespace Gateway
 {

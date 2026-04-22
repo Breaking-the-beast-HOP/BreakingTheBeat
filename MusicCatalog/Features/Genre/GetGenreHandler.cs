@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MusicCatalog.Features.Genre.Interfaces;
 using MusicCatalog.Features.Language.GetLanguages;
 using MusicCatalog.Features.Language.Interfaces;
 using System;
