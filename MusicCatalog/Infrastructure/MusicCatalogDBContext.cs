@@ -15,7 +15,7 @@ namespace MusicCatalog.Infrastructure
         {
             modelBuilder.Entity<Language>(entity =>
             {
-                entity.ToTable("Languages");
+                entity.ToTable("Language");
 
                 entity.HasKey(x => x.Id);
 
@@ -30,6 +30,22 @@ namespace MusicCatalog.Infrastructure
                     .HasColumnName("ISO")
                     .HasMaxLength(10)
                     .IsRequired();
+            });
+
+            modelBuilder.Entity<Genre>(entity =>
+            {
+                entity.ToTable("Genre");
+
+                entity.HasKey(x => x.Id);
+
+                entity.Property(x => x.Id)
+                    .ValueGeneratedNever();
+
+                entity.Property(x => x.Name)
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+      
             });
         }
 
