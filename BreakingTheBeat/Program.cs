@@ -1,3 +1,6 @@
+using MediatR;
+using PodcastCatalog.Features.Podcast.Create;
+using PodcastCatalog.Shared.Infrastructure.Repositories;
 
 namespace BreakingTheBeat
 {
@@ -7,7 +10,19 @@ namespace BreakingTheBeat
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // 1. Connection strings
+            var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatalog")
+                ?? throw new InvalidOperationException("Connection string 'PodcastCatalog' not found.");
+
+            // 2. DbContext
+
+            // 3. Repositories
+            builder.Services.AddScoped<PodcastRepository, PodcastRepository>();
+
+            // 4. Services
+
+            // 5. Command/query handlers are registered by MediatR
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreatePodcastHandler).Assembly));
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
