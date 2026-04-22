@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PodcastCatalog.Features.Podcast.Create
+namespace PodcastCatalog.Features.Podcasts.Get
 {
     public class PodcastDTO
     {

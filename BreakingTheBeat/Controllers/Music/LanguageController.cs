@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BreakingTheBeat.Models;
 
-namespace BreakingTheBeat.Controllers
+namespace Gateway.Controllers.Music
 {
     [ApiController]
     [Route("[controller]")]

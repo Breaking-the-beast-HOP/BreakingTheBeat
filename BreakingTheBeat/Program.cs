@@ -1,6 +1,12 @@
+using FluentValidation;
 using MediatR;
-using PodcastCatalog.Features.Podcast.Create;
+using PodcastCatalog.Domain.Entities;
+using PodcastCatalog.Features.Podcasts.Create;
+using PodcastCatalog.Features.Podcasts.Get;
+using PodcastCatalog.Features.Podcasts.Update;
 using PodcastCatalog.Shared.Infrastructure.Repositories;
+using SharedKernel;
+using SharedKernel.Interfaces.Base;
 
 namespace BreakingTheBeat
 {
@@ -17,9 +23,13 @@ namespace BreakingTheBeat
             // 2. DbContext
 
             // 3. Repositories
+            builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
             builder.Services.AddScoped<PodcastRepository, PodcastRepository>();
 
             // 4. Services
+            builder.Services.AddValidatorsFromAssemblyContaining<CreatePodcastValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<UpdatePodcastValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<GetPodcastValidator>();
 
             // 5. Command/query handlers are registered by MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreatePodcastHandler).Assembly));

@@ -1,8 +1,13 @@
-﻿using PodcastCatalog.Shared.Models;
+﻿// Shared/Infrastructure/Repositories/PodcastRepository.cs
+using Microsoft.EntityFrameworkCore;
+using PodcastCatalog.Domain.Entities;
+using PodcastCatalog.Features.Podcasts;
+using SharedKernel;
+using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Shared.Infrastructure.Repositories
 {
-    public class PodcastRepository : IPodcastRepository
+    public class PodcastRepository : ICrudRepository<Podcast>
     {
         private readonly PodcastCatalogDbContext _dbContext;
 
@@ -11,35 +16,45 @@ namespace PodcastCatalog.Shared.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task AddAsync(Podcast podcast, CancellationToken ct)
+        // ICreateRepository<Podcast>
+        public async Task<Podcast> AddAsync(Podcast entity)
         {
-            await _dbContext.Podcasts.AddAsync(podcast, ct);
-            await _dbContext.SaveChangesAsync(ct);
+            await _dbContext.Podcasts.AddAsync(entity);
+            await _dbContext.SaveChangesAsync();
+            return entity;
         }
 
-        public Task DeleteAsync(Guid id, CancellationToken ct)
+        // IReadRepository<Podcast>
+        public async Task<Podcast?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Podcasts
+                .Include(p => p.Seasons)
+                .Include(p => p.Categories)
+                .Include(p => p.Hosts)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public Task<Podcast?> GetByIdAsync(Guid id, CancellationToken ct)
+        public async Task<List<Podcast>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _dbContext.Podcasts
+                .Include(p => p.Seasons)
+                .Include(p => p.Categories)
+                .Include(p => p.Hosts)
+                .ToListAsync();
         }
 
-        //public async Task<Podcast?> GetByIdAsync(Guid id, CancellationToken ct)
-        //{
-        //    return await _dbContext.Podcasts
-        //        .Include(p => p.Seasons)
-        //        .Include(p => p.Languages)
-        //        .Include(p => p.Categories)
-        //        .Include(p => p.Hosts)
-        //        .FirstOrDefaultAsync(p => p.Id == id, ct);
-        //}
-
-        public Task UpdateAsync(Podcast podcast, CancellationToken ct)
+        // IUpdateRepository<Podcast>
+        public async Task UpdateAsync(Podcast entity)
         {
-            throw new NotImplementedException();
+            _dbContext.Podcasts.Update(entity);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // IDeleteRepository<Podcast>
+        public async Task DeleteAsync(Podcast entity)
+        {
+            _dbContext.Podcasts.Remove(entity);
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
