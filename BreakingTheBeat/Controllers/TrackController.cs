@@ -5,6 +5,7 @@ using MusicCatalog.Features.Genre;
 using MusicCatalog.Features.Language.GetLanguages;
 using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Features.Track.Get;
+using MusicCatalog.Features.Track.GetById;
 
 namespace Gateway.Controllers
 {
@@ -36,5 +37,12 @@ namespace Gateway.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<TrackDetailsResponse>> Get(Guid id,CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new GetTrackByIdQuery(id), cancellationToken);
+
+            return Ok(result);
+        }
     }
 }

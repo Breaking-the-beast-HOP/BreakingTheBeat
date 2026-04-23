@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
 @* Required *@
-<MudThemeProvider />
+<MudThemeProvider Theme="_theme" />
 <MudPopoverProvider />
 
 @* Needed for dialogs *@
@@ -9,6 +9,8 @@
 
 @* Needed for snackbars *@
 <MudSnackbarProvider />
+
+
 
 <div class="page">
     <div class="sidebar">
@@ -31,3 +33,14 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private MudTheme _theme = new MudTheme()
+        {
+            PaletteLight = new PaletteLight()
+            {
+                Primary = Colors.Gray.Default,
+                Secondary = Colors.Orange.Default
+            }
+        };
+}

@@ -1,5 +1,6 @@
 ﻿@page "/tracks"
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 <PageTitle>Track Catalog</PageTitle>
 
@@ -47,9 +48,12 @@
         <MudPaper Class="pa-4">
 
             <MudTable Items="FilteredTracks"
+                      T="TrackDto"
                       Hover="true"
                       Dense="true"
-                      Elevation="0">
+                      Elevation="0"
+                      OnRowClick="@(args => OnRowClicked(args))">
+                
 
                 <HeaderContent>
                     <MudTh>Title</MudTh>
@@ -135,6 +139,11 @@
     {
         var ts = TimeSpan.FromSeconds(durationSeconds);
         return ts.ToString(@"mm\:ss");
+    }
+
+    private void OnRowClicked(TableRowClickEventArgs<TrackDto> args)
+    {
+        Navigation.NavigateTo($"/tracks/{args.Item.Id}");
     }
 
     public class TrackDto

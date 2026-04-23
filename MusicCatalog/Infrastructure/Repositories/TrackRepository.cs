@@ -35,9 +35,13 @@ namespace MusicCatalog.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public Task<Track?> GetByIdAsync(Guid id)
+        public async Task<Track?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _context.Tracks
+                .Include(t => t.Genre)
+                .Include(t => t.MetadataLanguage)
+                .Include(t => t.AudioLanguage)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public Task UpdateAsync(Track entity)

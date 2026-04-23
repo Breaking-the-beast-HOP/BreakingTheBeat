@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace MusicCatalog.Features.Track.Get
 {
-    public class GetTrackHandler : IRequestHandler<GetTracksQuery, List<TrackDTO>>
+    public class GetTracksHandler : IRequestHandler<GetTracksQuery, List<TrackDTO>>
     {
         private readonly ITrackRepository _repository;
 
-        public GetTrackHandler(ITrackRepository repository)
+        public GetTracksHandler(ITrackRepository repository)
         {
             _repository = repository;
         }
