@@ -2,5 +2,5 @@
 
 namespace MusicCatalog.Features.Track.Create
 {
-    public record CreateTrackCommand( string Title, string Version,string ISRC, Guid GenreId, Guid LanguageId) : IRequest<Guid>;
+    public record CreateTrackCommand( string Title, string Version,string ISRC, Guid GenreId, Guid AudioLanguageId, Guid MetadataLanguageId) : IRequest<Guid>;
 }

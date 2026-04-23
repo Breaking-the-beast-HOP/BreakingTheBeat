@@ -63,7 +63,7 @@ namespace MusicCatalog.Infrastructure
                 entity.Property(x => x.Version)
                     .HasMaxLength(200);
 
-                entity.Property(x => x.Isrc)
+                entity.Property(x => x.ISRC)
                     .HasColumnName("ISRC")
                     .HasMaxLength(50);
 

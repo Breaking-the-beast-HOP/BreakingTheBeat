@@ -5,7 +5,7 @@
         public Guid Id { get; private set; }
         public string Title { get; private set; }
         public string? Version { get; private set; }
-        public string Isrc { get; private set; }
+        public string ISRC { get; private set; }
         public TimeSpan Duration { get; private set; }
 
         public Guid GenreId { get; private set; }
@@ -22,7 +22,7 @@
 
         private Track() { }
 
-        public static Track Create( string title, string? version,string isrc,Guid genreId,Guid metadataLanguageId,Guid audioLanguageId)
+        public static Track Create( string title, string? version,string isrc,Guid genreId,Guid audioLanguageId, Guid metadataLanguageId)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title is required.");
@@ -41,7 +41,7 @@
                 Id = Guid.NewGuid(),
                 Title = title,
                 Version = version,
-                Isrc = isrc,
+                ISRC = isrc,
                 GenreId = genreId,
                 MetadataLanguageId = metadataLanguageId,
                 AudioLanguageId = audioLanguageId,

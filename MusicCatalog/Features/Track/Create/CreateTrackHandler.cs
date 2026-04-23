@@ -19,8 +19,8 @@ namespace MusicCatalog.Features.Track.Create
                   request.Version,
                   request.ISRC,
                   request.GenreId,
-                  request.LanguageId,
-                  request.LanguageId);
+                  request.AudioLanguageId,
+                  request.MetadataLanguageId);
 
             await _repository.AddAsync(track);
 
