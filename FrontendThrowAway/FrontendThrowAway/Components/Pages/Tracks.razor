@@ -45,7 +45,7 @@
     }
     else
     {
-        <MudPaper Class="pa-4">
+        <MudPaper Class="pa-4" Elevation="5">
 
             <MudTable Items="FilteredTracks"
                       T="TrackDto"
@@ -98,6 +98,21 @@
                             @(context.GenreName ?? "-")
                         </MudChip>
                     </MudTd>
+
+                    <!-- Edit -->
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Warning"
+                                   Size="Size.Small"
+                                   Title="Edit track"
+                                   OnClick="@(() => GoToEdit(context.Id))" />
+
+                    <!-- Delete -->
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   Title="Delete track"
+                                   OnClick="@(async () => await DeleteTrack(context.Id))" />
+
                 </RowTemplate>
 
             </MudTable>
@@ -145,6 +160,37 @@
     {
         Navigation.NavigateTo($"/tracks/{args.Item.Id}");
     }
+
+    private void GoToEdit(Guid id)
+    {
+        Navigation.NavigateTo($"/tracks/edit/{id}");
+    }
+    private async Task DeleteTrack(Guid id)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/track/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var trackToRemove = _tracks.FirstOrDefault(t => t.Id == id);
+                if (trackToRemove is not null)
+                {
+                    _tracks.Remove(trackToRemove);
+                }
+            }
+            else
+            {
+                errorMessage = $"Could not delete track. Status code: {(int)response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Could not delete track: {ex.Message}";
+        }
+    }
+
+
 
     public class TrackDto
     {

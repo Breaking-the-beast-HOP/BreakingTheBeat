@@ -8,6 +8,6 @@ namespace SharedKernel.Interfaces.Base
 {
     public interface IUpdateRepository<T> where T : class
     {
-        Task UpdateAsync(T entity);
+        Task<bool> UpdateAsync(T entity);
     }
 }

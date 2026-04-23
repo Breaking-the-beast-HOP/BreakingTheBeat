@@ -1,11 +1,11 @@
 ﻿using Gateway.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Features.Genre;
-using MusicCatalog.Features.Language.GetLanguages;
 using MusicCatalog.Features.Track.Create;
+using MusicCatalog.Features.Track.Delete;
 using MusicCatalog.Features.Track.Get;
 using MusicCatalog.Features.Track.GetById;
+using MusicCatalog.Features.Track.Update;
 
 namespace Gateway.Controllers
 {
@@ -43,6 +43,37 @@ namespace Gateway.Controllers
             var result = await _mediator.Send(new GetTrackByIdQuery(id), cancellationToken);
 
             return Ok(result);
+        }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateTrack(Guid id, [FromBody] UpdateTrackRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(
+                new UpdateTrackCommand(
+                    id,
+                    request.Title,
+                    request.Version,
+                    request.ISRC,
+                    request.GenreId,
+                    request.AudioLanguageId,
+                    request.MetadataLanguageId),
+                cancellationToken);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteTrack(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new DeleteTrackCommand(id), cancellationToken);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
         }
     }
 }

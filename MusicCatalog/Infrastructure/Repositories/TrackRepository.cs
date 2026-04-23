@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MusicCatalog.Domain.Entities;
 using MusicCatalog.Features.Track;
+using SharedKernel.Interfaces.Base;
 using System.Threading;
 
 namespace MusicCatalog.Infrastructure.Repositories
@@ -21,9 +22,17 @@ namespace MusicCatalog.Infrastructure.Repositories
             return entity;
         }
 
-        public Task DeleteAsync(Track entity)
+        public async Task<bool> DeleteAsync(Guid Id)
         {
-            throw new NotImplementedException();
+            var track = await _context.Tracks.FirstOrDefaultAsync(t => t.Id == Id);
+
+            if (track is null)
+                return false;
+
+            _context.Tracks.Remove(track);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<List<Track>> GetAllAsync()
@@ -44,9 +53,19 @@ namespace MusicCatalog.Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public Task UpdateAsync(Track entity)
+        public async Task<bool> UpdateAsync(Track entity)
         {
-            throw new NotImplementedException();
+            var existingTrack = await _context.Tracks.FirstOrDefaultAsync(t => t.Id == entity.Id);
+
+            if (existingTrack is null)
+                return false;
+
+            _context.Entry(existingTrack).CurrentValues.SetValues(entity);
+
+            await _context.SaveChangesAsync();
+            return true;
         }
+
+        
     }
 }

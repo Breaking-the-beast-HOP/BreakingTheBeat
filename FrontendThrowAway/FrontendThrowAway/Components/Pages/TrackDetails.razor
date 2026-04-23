@@ -1,13 +1,14 @@
 ﻿@page "/tracks/{Id:guid}"
 @using FrontendThrowAway.Components.Layout
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 <PageTitle>Track</PageTitle>
 
 <MudStack Spacing="3">
 
     <!-- Header -->
-    <MudPaper Class="pa-4" Elevation="1">
+    <MudPaper Class="pa-4" Elevation="5">
         <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
             <div>
                 <MudText Typo="Typo.h4">@(_track?.Title ?? "Track")</MudText>
@@ -32,7 +33,8 @@
 
                 <MudButton Variant="Variant.Text"
                            Color="Color.Error"
-                           StartIcon="@Icons.Material.Filled.Delete">
+                           StartIcon="@Icons.Material.Filled.Delete"
+                           OnClick="@(async () => await DeleteTrack(Id))">
                     Delete
                 </MudButton>
             </MudStack>
@@ -62,7 +64,7 @@
             <!-- LEFT -->
             <MudItem xs="12" md="7">
                 <MudStack Spacing="3">
-                <MudPaper Class="pa-4" Elevation="1">
+                <MudPaper Class="pa-4" Elevation="5">
                     <MudText Typo="Typo.h6" Class="mb-3">Track Info</MudText>
                     <MudGrid Spacing="2">
                         <MudItem xs="12">
@@ -87,7 +89,7 @@
                 </MudPaper>
 
 
-                    <MudPaper Class="pa-4" Elevation="1">
+                    <MudPaper Class="pa-4" Elevation="5">
                         <MudText Typo="Typo.h6" Class="mb-3">Contributors</MudText>
 
                         @if (_track.Contributors is null || !_track.Contributors.Any())
@@ -115,7 +117,7 @@
                         }
                     </MudPaper>
 
-                    <MudPaper Class="pa-4" Elevation="1">
+                    <MudPaper Class="pa-4" Elevation="5">
                         <MudText Typo="Typo.h6" Class="mb-3">System Info</MudText>
 
                         <MudGrid Spacing="2">
@@ -136,7 +138,7 @@
             <MudItem xs="12" md="5">
                 <MudStack Spacing="3">
 
-                    <MudPaper Class="pa-4" Elevation="1">
+                    <MudPaper Class="pa-4" Elevation="5">
                         <MudText Typo="Typo.h6" Class="mb-3">Audio</MudText>
 
                         <MudPaper Class="dropzone pa-6" Outlined="true">
@@ -185,7 +187,7 @@
                         </MudStack>
                     </MudPaper>
 
-                    <MudPaper Class="pa-4" Elevation="1">
+                    <MudPaper Class="pa-4" Elevation="5">
                         <MudText Typo="Typo.h6" Class="mb-3">Appears On</MudText>
 
                         @if (_track.Releases is null || !_track.Releases.Any())
@@ -249,6 +251,28 @@
         return value?.ToString("dd-MM-yyyy HH:mm") ?? "-";
     }
 
+    private string? errorMessage;
+    private async Task DeleteTrack(Guid id)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/track/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo($"/tracks");
+            }
+            else
+            {
+                errorMessage = $"Could not delete track. Status code: {(int)response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Could not delete track: {ex.Message}";
+        }
+    }
+
     public class TrackDetailsDto
     {
         public Guid Id { get; set; }
@@ -272,6 +296,8 @@
 
         public List<ContributorDto> Contributors { get; set; } = new();
         public List<ReleaseDto> Releases { get; set; } = new();
+
+
     }
 
     public class ContributorDto
