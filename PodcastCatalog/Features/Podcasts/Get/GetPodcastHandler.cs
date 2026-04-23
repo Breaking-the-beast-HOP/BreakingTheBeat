@@ -1,21 +1,22 @@
 ﻿// Feature/Podcasts/Get/GetPodcastHandler.cs
+using FluentValidation;
+using MediatR;
+using PodcastCatalog.Domain.Entities;
+using SharedKernel;
+using SharedKernel.Interfaces.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentValidation;
-using MediatR;
-using PodcastCatalog.Domain.Entities;
-using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Features.Podcasts.Get
 {
     public class GetPodcastHandler : IRequestHandler<GetPodcastQuery, PodcastDTO>
     {
-        private readonly IReadRepository<Podcast> _podcastRepository;
+        private readonly ICrudRepository<Podcast> _podcastRepository;
         private readonly IValidator<GetPodcastQuery> _validator;
 
-        public GetPodcastHandler(IReadRepository<Podcast> podcastRepository, IValidator<GetPodcastQuery> validator)
+        public GetPodcastHandler(ICrudRepository<Podcast> podcastRepository, IValidator<GetPodcastQuery> validator)
         {
             _podcastRepository = podcastRepository;
             _validator = validator;

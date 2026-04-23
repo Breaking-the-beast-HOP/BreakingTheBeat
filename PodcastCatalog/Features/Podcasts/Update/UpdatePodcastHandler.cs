@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using PodcastCatalog.Domain.Entities;
+using SharedKernel;
 using SharedKernel.Interfaces.Base;
 using System;
 using System.Collections.Generic;
@@ -12,17 +13,14 @@ namespace PodcastCatalog.Features.Podcasts.Update
 {
     public class UpdatePodcastHandler : IRequestHandler<UpdatePodcastCommand, PodcastDTO>
     {
-        private readonly IReadRepository<Podcast> _readRepository;
-        private readonly IUpdateRepository<Podcast> _podcastRepository;
+        private readonly ICrudRepository<Podcast> _podcastRepository;
         private readonly IValidator<UpdatePodcastCommand> _validator;
 
         public UpdatePodcastHandler(
-        IUpdateRepository<Podcast> podcastRepository,
-        IReadRepository<Podcast> readRepository,
+        ICrudRepository<Podcast> podcastRepository,
         IValidator<UpdatePodcastCommand> validator)
         {
             _podcastRepository = podcastRepository;
-            _readRepository = readRepository;
             _validator = validator;
         }
 
@@ -36,7 +34,7 @@ namespace PodcastCatalog.Features.Podcasts.Update
             }
 
             // Hent den eksisterende podcast
-            var existingPodcast = await _readRepository.GetByIdAsync(request.Id);
+            var existingPodcast = await _podcastRepository.GetByIdAsync(request.Id);
             if (existingPodcast == null)
             {
                 throw new KeyNotFoundException($"Podcast with ID {request.Id} not found.");

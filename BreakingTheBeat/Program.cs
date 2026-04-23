@@ -1,9 +1,14 @@
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PodcastCatalog.Domain.Entities;
 using PodcastCatalog.Features.Podcasts.Create;
 using PodcastCatalog.Features.Podcasts.Get;
+using PodcastCatalog.Features.Podcasts.GetAll;
 using PodcastCatalog.Features.Podcasts.Update;
+using PodcastCatalog.Infrastructure;
+using PodcastCatalog.Infrastructure.Data;
+using PodcastCatalog.Infrastructure.Repositories;
 using PodcastCatalog.Shared.Infrastructure.Repositories;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
@@ -21,24 +26,46 @@ namespace BreakingTheBeat
                 ?? throw new InvalidOperationException("Connection string 'PodcastCatalog' not found.");
 
             // 2. DbContext
+            builder.Services.AddDbContext<PodcastCatalogDbContext>(options =>
+                options.UseNpgsql(podcastCatalogConnectionString));
 
-            // 3. Repositories
+            // 3.1.  Podcast Repositories
             builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
-            builder.Services.AddScoped<PodcastRepository, PodcastRepository>();
+            builder.Services.AddScoped<ICrudRepository<Language>, LanguageRepository>();
 
-            // 4. Services
+            // 4.1. Podcast services
             builder.Services.AddValidatorsFromAssemblyContaining<CreatePodcastValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdatePodcastValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetPodcastValidator>();
 
-            // 5. Command/query handlers are registered by MediatR
+            // 5.1. Podcast command/query handlers are registered by MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreatePodcastHandler).Assembly));
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdatePodcastHandler).Assembly));
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetPodcastHandler).Assembly));
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllPodcastsHandler).Assembly));
+
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            // Seed the database with initial data
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<PodcastCatalogDbContext>();
+                    DbInitializer.Initialize(context);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding the database.");
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

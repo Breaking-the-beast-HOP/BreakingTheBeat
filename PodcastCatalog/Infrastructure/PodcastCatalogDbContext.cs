@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
 using PodcastCatalog.Domain.Entities;
 
-namespace PodcastCatalog.Shared.Infrastructure
+namespace PodcastCatalog.Infrastructure.Data
 {
     public class PodcastCatalogDbContext : DbContext
     {
@@ -11,123 +10,148 @@ namespace PodcastCatalog.Shared.Infrastructure
         {
         }
 
-        // Podcasts
+        // DbSets for alle entiteter
         public DbSet<Podcast> Podcasts { get; set; }
-        public DbSet<PodcastContribution> PodcastContributions { get; set; }
-        public DbSet<Language> Languages { get; set; }
-        public DbSet<Category> Categories { get; set; }
-
-        // Seasons
         public DbSet<Season> Seasons { get; set; }
-
-        // Episodes
         public DbSet<Episode> Episodes { get; set; }
-        public DbSet<EpisodeContribution> EpisodeContributions { get; set; }
-        public DbSet<Tag> Tags { get; set; }
-
-        // Contributors & Roles
+        public DbSet<Contribution> Contributions { get; set; }
         public DbSet<Contributor> Contributors { get; set; }
-        public DbSet<Role> Roles { get; set; }
-
+        public DbSet<ContributorRole> ContributorRoles { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Language> Languages { get; set; }
+        public DbSet<Tag> Tags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Podcast
-            ConfigurePodcast(modelBuilder);
+            // Konfiguration af Podcast
+            modelBuilder.Entity<Podcast>(entity =>
+            {
+                entity.HasKey(p => p.Id);
+                entity.Property(p => p.Title).IsRequired();
+                entity.Property(p => p.Description).IsRequired(false);
 
-            // Languages (Many-to-Many)
-            ConfigurePodcastLanguages(modelBuilder);
+                // Relation til Category
+                entity.HasOne(p => p.Category)
+                    .WithMany(c => c.Podcasts)
+                    .HasForeignKey(p => p.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            // Categories (Many-to-Many)
-            ConfigurePodcastCategories(modelBuilder);
+                // Relation til Language
+                entity.HasOne(p => p.Language)
+                    .WithMany()
+                    .HasForeignKey(p => p.LanguageId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            // Seasons
-            ConfigureSeason(modelBuilder);
+            // Konfiguration af Season
+            modelBuilder.Entity<Season>(entity =>
+            {
+                entity.HasKey(s => s.Id);
+                entity.Property(s => s.Name).IsRequired();
+                entity.Property(s => s.ProductionYear).IsRequired();
 
-            // Episodes
-            ConfigureEpisode(modelBuilder);
+                // Relation til Podcast
+                entity.HasOne(s => s.Podcast)
+                    .WithMany(p => p.Seasons)
+                    .HasForeignKey(s => s.PodcastId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
-            // Contributions
-            ConfigurePodcastContributions(modelBuilder);
-            ConfigureEpisodeContributions(modelBuilder);
+            // Konfiguration af Episode
+            modelBuilder.Entity<Episode>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Title).IsRequired();
+                entity.Property(e => e.Description).IsRequired(false);
+                entity.Property(e => e.Duration).IsRequired();
+                entity.Property(e => e.AiringDate).IsRequired();
 
-            // Tags (Many-to-Many)
-            ConfigureEpisodeTags(modelBuilder);
-        }
+                // Relation til Season
+                entity.HasOne(e => e.Season)
+                    .WithMany(s => s.Episodes)
+                    .HasForeignKey(e => e.SeasonId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
+            // Konfiguration af Contribution
+            modelBuilder.Entity<Contribution>(entity =>
+            {
+                entity.HasKey(c => c.Id);
 
-        // Podcast to Seasons: 1-to-many
-        private void ConfigurePodcast(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Podcast>()
-                .HasMany(p => p.Seasons)
-                .WithOne(s => s.Podcast)
-                .HasForeignKey(s => s.PodcastId);
-        }
+                // Relation til Contributor
+                entity.HasOne(c => c.Contributor)
+                    .WithMany()
+                    .HasForeignKey(c => c.ContributorId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-        // Season to Episodes: 1-to-many
-        private void ConfigureEpisode(ModelBuilder modelBuilder)
-        {
+                // Relation til Podcast (nullable)
+                entity.HasOne(c => c.Podcast)
+                    .WithMany(p => p.Hosts)
+                    .HasForeignKey(c => c.PodcastId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired(false);
+
+                // Relation til Episode (nullable)
+                entity.HasOne(c => c.Episode)
+                    .WithMany(e => e.Contributions)
+                    .HasForeignKey(c => c.EpisodeId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired(false);
+
+                // Relation til ContributorRole
+                entity.HasOne(c => c.Role)
+                    .WithMany()
+                    .HasForeignKey(c => c.RoleId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Konfiguration af Contributor
+            modelBuilder.Entity<Contributor>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Name).IsRequired();
+                entity.Property(c => c.Description).IsRequired(false);
+            });
+
+            // Konfiguration af ContributorRole
+            modelBuilder.Entity<ContributorRole>(entity =>
+            {
+                entity.HasKey(cr => cr.Id);
+                entity.Property(cr => cr.Name).IsRequired();
+            });
+
+            // Konfiguration af Category
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Name).IsRequired();
+                entity.Property(c => c.Description).IsRequired(false);
+            });
+
+            // Konfiguration af Language
+            modelBuilder.Entity<Language>(entity =>
+            {
+                entity.HasKey(l => l.Id);
+                entity.Property(l => l.Name).IsRequired();
+                entity.Property(l => l.ISO).IsRequired();
+            });
+
+            // Konfiguration af Tag
+            modelBuilder.Entity<Tag>(entity =>
+            {
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.Name).IsRequired();
+            });
+
+            // Konfiguration af mange-til-1 relation mellem Episode og Tag
             modelBuilder.Entity<Episode>()
-                .HasOne(e => e.Season)
-                .WithMany(s => s.Episodes)
-                .HasForeignKey(e => e.SeasonId);
-        }
-
-        // Podcast to Languages: One-to-Many
-        private void ConfigurePodcastLanguages(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Podcast>()
-                .HasOne(p => p.Language)
-                .WithMany()
-                .HasForeignKey("LanguageId");
-        }
-
-        // Podcast to Categories: Many-to-Many
-        private void ConfigurePodcastCategories(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Podcast>()
-                .HasMany(p => p.Categories)
-                .WithMany(c => c.Podcasts)
-                .UsingEntity<PodcastCategories>(j => j.ToTable("PodcastCategories"));
-        }
-
-        // Season to Episodes: 1-to-many
-        private void ConfigureSeason(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Season>()
-                .HasMany(s => s.Episodes)
-                .WithOne(e => e.Season)
-                .HasForeignKey(e => e.SeasonId);
-        }
-
-        // Episode to Tags: Many-to-Many
-        private void ConfigureEpisodeTags(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Episode>()
-                .HasMany(e => e.Tags)
+                .HasOne(e => e.EpisodeTag)
                 .WithMany(t => t.Episodes)
-                .UsingEntity(j => j.ToTable("EpisodeTags"));
-        }
-
-        // Episode to EpisodeContributions: 1-to-many
-        private void ConfigureEpisodeContributions(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Episode>()
-                .HasMany(e => e.Contributions)
-                .WithOne()
-                .HasForeignKey(c => c.EpisodeId);
-        }
-
-        // Podcast to PodcastContributions: 1-to-many
-        private void ConfigurePodcastContributions(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Podcast>()
-                .HasMany(p => p.Hosts)
-                .WithOne(c => c.Podcast)
-                .HasForeignKey(c => c.PodcastId);
+                .HasForeignKey(e => e.TagId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
+
 }

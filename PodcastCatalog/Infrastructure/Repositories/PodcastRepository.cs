@@ -1,9 +1,7 @@
-﻿// Shared/Infrastructure/Repositories/PodcastRepository.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PodcastCatalog.Domain.Entities;
-using PodcastCatalog.Features.Podcasts;
+using PodcastCatalog.Infrastructure.Data;
 using SharedKernel;
-using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Shared.Infrastructure.Repositories
 {
@@ -29,7 +27,7 @@ namespace PodcastCatalog.Shared.Infrastructure.Repositories
         {
             return await _dbContext.Podcasts
                 .Include(p => p.Seasons)
-                .Include(p => p.Categories)
+                .Include(p => p.Category)
                 .Include(p => p.Hosts)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
@@ -38,7 +36,7 @@ namespace PodcastCatalog.Shared.Infrastructure.Repositories
         {
             return await _dbContext.Podcasts
                 .Include(p => p.Seasons)
-                .Include(p => p.Categories)
+                .Include(p => p.Category)
                 .Include(p => p.Hosts)
                 .ToListAsync();
         }

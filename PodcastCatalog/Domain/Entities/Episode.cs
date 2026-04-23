@@ -1,38 +1,39 @@
-﻿using System.Formats.Asn1;
-
-namespace PodcastCatalog.Domain.Entities
+﻿namespace PodcastCatalog.Domain.Entities
 {
     public class Episode
     {
-        private readonly List<Tag> _tags = new();
-        private readonly List<EpisodeContribution> _contributions = new();
+        // Parameterløs konstruktør til EF Core
+        public Episode() { }
 
-        public Guid Id { get; }
+        private readonly List<Contribution> _contributions = new();
+
+        public Guid Id { get; private set; }
         public string Title { get; private set; } = null!;
         public string? Description { get; private set; }
         public TimeSpan Duration { get; private set; }
         public DateOnly AiringDate { get; private set; }
 
-        public IReadOnlyList<Tag> Tags => _tags.AsReadOnly();
-        public IReadOnlyList<EpisodeContribution> Contributions => _contributions.AsReadOnly();
+        public Guid TagId { get; private set; }
+        public Tag EpisodeTag { get; private set; }
+        public IReadOnlyList<Contribution> Contributions => _contributions.AsReadOnly();
 
         // Database Relationships
-        public int SeasonId { get; set; }
-        public Season Season { get; set; } = null!;
+        public Guid SeasonId { get; private set; }
+        public Season Season { get; private set; } = null!;
 
-        public Episode(string title, string description, TimeSpan duration, DateOnly airingDate, int seasonId, Season season)
+        // Konstruktør uden Season-parameter
+        public Episode(string title, string description, TimeSpan duration, DateOnly airingDate, Season season)
+            : this(Guid.NewGuid(), title, description, duration, airingDate, season)
         {
-            Id = Guid.NewGuid();
-            Update(title, description, duration, airingDate);
-            SeasonId = seasonId;
-            Season = season ?? throw new ArgumentNullException(nameof(season));
         }
-        public Episode(Guid id, string title, string description, TimeSpan duration, DateOnly airingDate, int seasonId, Season season)
+
+        // Primær konstruktør
+        public Episode(Guid id, string title, string description, TimeSpan duration, DateOnly airingDate, Season season)
         {
             Id = id;
             Update(title, description, duration, airingDate);
-            SeasonId = seasonId;
-            Season = season ?? throw new ArgumentNullException(nameof(season));
+            this.Season = season;
+            SeasonId = season.Id;
         }
 
         public void Update(string title, string description, TimeSpan duration, DateOnly airingDate)
@@ -46,24 +47,27 @@ namespace PodcastCatalog.Domain.Entities
             AiringDate = airingDate;
         }
 
-        // 🔹 TAGS
-        public void AddTag(Tag tag)
+        public void SetSeason(Season season)
+        {
+            Season = season ?? throw new ArgumentNullException(nameof(season));
+            SeasonId = season.Id;
+        }
+
+        public void SetTag(Tag tag)
         {
             if (tag == null) throw new ArgumentNullException(nameof(tag));
-
-            if (_tags.Any(t => t.Id == tag.Id))
-                return;
-
-            _tags.Add(tag);
+            EpisodeTag = tag;
+            TagId = tag.Id;
         }
 
         public void RemoveTag(Guid tagId)
         {
-            _tags.RemoveAll(t => t.Id == tagId);
+            EpisodeTag = null!;
+            TagId = Guid.Empty;
         }
 
-        // 🔹 CONTRIBUTIONS
-        public void AddContribution(Contributor contributor, Role role, bool hasRights)
+        // Contributions
+        public void AddContribution(Contributor contributor, ContributorRole role, bool hasRights)
         {
             if (_contributions.Any(c =>
                 c.Contributor.Id == contributor.Id &&
@@ -72,16 +76,10 @@ namespace PodcastCatalog.Domain.Entities
                 return;
             }
 
-            _contributions.Add(new EpisodeContribution(
-                Guid.NewGuid(),
-                int.Parse(Id.ToString()),
-                this,
-                int.Parse(contributor.Id.ToString()),
+            _contributions.Add(new Contribution(
                 contributor,
-                int.Parse(role.Id.ToString()),
                 role,
-                hasRights));
-
+                this));
         }
 
         public void RemoveContribution(Guid contributorId, Guid roleId)

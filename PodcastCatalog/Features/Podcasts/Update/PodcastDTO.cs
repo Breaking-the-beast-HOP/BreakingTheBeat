@@ -6,10 +6,7 @@ using System.Threading.Tasks;
 
 namespace PodcastCatalog.Features.Podcasts.Update
 {
-    public class PodcastDTO
+    public class PodcastDTO : SharedDTO
     {
-        public Guid Id { get; set; }
-        public string Title { get; set; } = null!;
-        public string? Description { get; set; }
     }
 }

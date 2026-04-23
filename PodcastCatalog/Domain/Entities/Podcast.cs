@@ -2,26 +2,24 @@
 {
     public class Podcast
     {
+        public Podcast() { } // For EF Core
         private readonly List<Season> _seasons = new();
-        private readonly List<Category> _categories = new();
-        private readonly List<PodcastContribution> _hosts = new();
+        private readonly List<Contribution> _hosts = new();
 
         public Guid Id { get; private set; }
         public string Title { get; private set; } = null!;
         public string? Description { get; private set; }
 
-        public int LanguageId { get; private set; }
+        public Guid LanguageId { get; private set; }
         public Language Language { get; private set; }
 
         public IReadOnlyList<Season> Seasons => _seasons.AsReadOnly();
-        public IReadOnlyList<Category> Categories => _categories.AsReadOnly();
-        public IReadOnlyList<PodcastContribution> Hosts => _hosts.AsReadOnly();
+        public IReadOnlyList<Contribution> Hosts => _hosts.AsReadOnly();
 
-        public Podcast(string title, string description)
-        {
-            Id = Guid.NewGuid();
-            Update(title, description);
-        }
+        public Guid CategoryId { get; private set; }
+        public Category Category { get; private set; }
+
+        public Podcast(string title, string description) : this(Guid.NewGuid(), title, description) { }
         public Podcast(Guid id, string title, string description)
         {
             Id = id;
@@ -60,20 +58,23 @@
             if (language == null)
                 throw new ArgumentNullException(nameof(language));
             Language = language;
-            LanguageId = int.Parse(language.Id.ToString());
+            LanguageId = language.Id;
+        }
+        public void RemoveLanguage()
+        {
+            Language = null!;
+            LanguageId = Guid.Empty;
         }
 
         public void AddCategory(Category category)
         {
             if (category == null)
                 throw new ArgumentNullException(nameof(category));
-            if (_categories.Any(c => c.Id == category.Id))
-                return;
-
-            _categories.Add(category);
+            Category = category;
+            CategoryId = category.Id;
         }
 
-        public void AddHost(PodcastContribution host)
+        public void AddHost(Contribution host)
         {
             if (host == null)
                 throw new ArgumentNullException(nameof(host));

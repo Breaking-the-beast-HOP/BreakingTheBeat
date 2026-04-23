@@ -2,16 +2,13 @@
 {
     public class Contributor
     {
+
+        public Contributor() { } // For EF Core
         public Guid Id { get; }
         public string Name { get; private set; } = null!;
         public string? Description { get; private set; }
-        public Contributor(string name, string description)
-        {
-            Id = Guid.NewGuid();
-            Name = name;
-            Description = description;
-        }
-
+        public Contributor(string name) : this(name, null) { }
+        public Contributor(string name, string description) : this(Guid.NewGuid(), name, description) { }
         public Contributor(Guid id, string name, string? description)
         {
             if (string.IsNullOrWhiteSpace(name))

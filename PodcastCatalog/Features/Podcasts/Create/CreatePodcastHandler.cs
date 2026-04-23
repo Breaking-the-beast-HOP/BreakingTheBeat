@@ -2,16 +2,17 @@
 using FluentValidation;
 using MediatR;
 using PodcastCatalog.Domain.Entities;
+using SharedKernel;
 using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Features.Podcasts.Create;
 
 public class CreatePodcastHandler : IRequestHandler<CreatePodcastCommand, PodcastDTO>
 {
-    private readonly ICreateRepository<Podcast> _podcastRepository;
+    private readonly ICrudRepository<Podcast> _podcastRepository;
     private readonly IValidator<CreatePodcastCommand> _validator;
 
-    public CreatePodcastHandler(ICreateRepository<Podcast> podcastRepository,
+    public CreatePodcastHandler(ICrudRepository<Podcast> podcastRepository,
                                 IValidator<CreatePodcastCommand> validator)
     {
         _podcastRepository = podcastRepository;
