@@ -22,7 +22,16 @@ public class GetAllPodcastsHandler : IRequestHandler<GetAllPodcastsQuery, List<P
         // Hvis der ikke findes nogen podcasts, returner en tom liste
         if (podcasts == null || !podcasts.Any())
         {
-            return new List<PodcastDTO>();
+            return new List<PodcastDTO>
+            {
+                new PodcastDTO
+                {
+                    Title = "Ingen podcasts fundet, men her en til pynt",
+                    Description = "Repository returnerede ingen podcasts. denne her er ikke persisteret i databasen så nej du kan ikke lave get by id på den, men du kan se listen ",
+
+                }
+            };
+
         }
 
         // Map til DTO'er

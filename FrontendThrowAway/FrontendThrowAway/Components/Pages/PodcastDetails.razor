@@ -1,0 +1,287 @@
+﻿@page "/podcasts/{Id:guid}"
+@inject HttpClient Http
+
+<PageTitle>Podcast Details</PageTitle>
+
+<MudStack Spacing="3">
+
+    <MudPaper Class="pa-4" Elevation="1">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <div>
+                <MudText Typo="Typo.h4">@(_podcast?.Title ?? "Podcast")</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Podcast details
+                </MudText>
+            </div>
+
+            <MudStack Row="true" Spacing="2">
+                <MudButton Variant="Variant.Outlined"
+                StartIcon="@Icons.Material.Filled.ArrowBack"
+                Href="/podcasts">
+                    Back
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined"
+                Color="Color.Warning"
+                StartIcon="@Icons.Material.Filled.Edit">
+                    Edit
+                </MudButton>
+
+                <MudButton Variant="Variant.Text"
+                Color="Color.Error"
+                StartIcon="@Icons.Material.Filled.Delete">
+                    Delete
+                </MudButton>
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">
+            @_errorMessage
+        </MudAlert>
+    }
+    else if (_podcast is null)
+    {
+        <MudAlert Severity="Severity.Warning">
+            Podcast not found.
+        </MudAlert>
+    }
+    else
+    {
+        <MudGrid Spacing="3">
+
+            <MudItem xs="12" md="7">
+                <MudPaper Class="pa-4" Elevation="1">
+                    <MudText Typo="Typo.h6" Class="mb-3">Podcast Info</MudText>
+
+                    <MudGrid Spacing="2">
+                        <MudItem xs="12">
+                            <div class="detail-box">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Title</MudText>
+                                <MudText Typo="Typo.body1">@_podcast.Title</MudText>
+                            </div>
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <div class="detail-box description-box">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Description</MudText>
+                                <MudText Typo="Typo.body1">
+                                    @(string.IsNullOrWhiteSpace(_podcast.Description) ? "-" : _podcast.Description)
+                                </MudText>
+                            </div>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6">
+                            <div class="detail-box">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Category</MudText>
+                                <MudText Typo="Typo.body1">@(_podcast.CategoryName ?? "-")</MudText>
+                            </div>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6">
+                            <div class="detail-box">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Language</MudText>
+                                <MudText Typo="Typo.body1">@(_podcast.LanguageName ?? "-")</MudText>
+                            </div>
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+
+                <MudPaper Class="pa-4 mt-3" Elevation="1">
+                    <MudText Typo="Typo.h6" Class="mb-3">Contributions</MudText>
+
+                    @if (_podcast.Contributions is null || !_podcast.Contributions.Any())
+                    {
+                        <MudAlert Severity="Severity.Info" Dense="true">
+                            No contributors registered.
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <MudTable Items="_podcast.Contributions" Dense="true" Hover="true" Elevation="0">
+                            <HeaderContent>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Role</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Name">@context.Name</MudTd>
+                                <MudTd DataLabel="Role">
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">
+                                        @context.Role
+                                    </MudChip>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" md="5">
+                <MudPaper Class="pa-4" Elevation="1">
+
+                    <MudStack Row="true"
+                    Justify="Justify.SpaceBetween"
+                    AlignItems="AlignItems.Center"
+                    Class="mb-3">
+
+                        <MudText Typo="Typo.h6">Seasons</MudText>
+
+                        <MudButton Variant="Variant.Filled"
+                        Color="Color.Warning"
+                        StartIcon="@Icons.Material.Filled.Add"
+                        Href="@($"/podcasts/{Id}/create-episode")">
+
+                            Create Episode
+                        </MudButton>
+
+                    </MudStack>
+
+                    @if (_podcast.Episodes is null || !_podcast.Episodes.Any())
+                    {
+                        <MudAlert Severity="Severity.Info" Dense="true">
+                            No episodes created yet.
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+                            Seasons are currently a conceptual feature and not fully implemented yet.
+                            Episodes are grouped for UI presentation purposes only.
+                        </MudAlert>
+                        <MudExpansionPanels MultiExpansion="true">
+
+                            @foreach (var seasonGroup in _podcast.Episodes
+                          .GroupBy(e => e.SeasonNumber)
+                          .OrderBy(g => g.Key))
+                            {
+                                <MudExpansionPanel Text="@($"Season {seasonGroup.Key}")">
+
+                                    <MudStack Spacing="1">
+
+                                        @foreach (var episode in seasonGroup.OrderBy(e => e.EpisodeNumber))
+                                        {
+                                            <MudPaper Outlined="true" Class="pa-3">
+
+                                                <MudText Typo="Typo.subtitle2">
+                                                    Episode @episode.EpisodeNumber — @episode.Title
+                                                </MudText>
+
+                                                <MudText Typo="Typo.body2"
+                                                Color="Color.Secondary">
+
+                                                    @episode.Description
+                                                </MudText>
+
+                                            </MudPaper>
+                                        }
+
+                                    </MudStack>
+
+                                </MudExpansionPanel>
+                            }
+
+                        </MudExpansionPanels>
+                    }
+
+                </MudPaper>
+            </MudItem>
+
+        </MudGrid>
+    }
+
+</MudStack>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private PodcastDetailsDto? _podcast;
+    private bool _isLoading = true;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _podcast = await Http.GetFromJsonAsync<PodcastDetailsDto>($"api/podcasts/podcast/{Id}");
+        }
+        catch (Exception ex)
+        {
+            // _errorMessage = ex.Message;
+
+            _podcast = new PodcastDetailsDto
+                {
+                    Title = "Fallback Podcast",
+                    Description = "Der blev ikke fundet data i repository.",
+                    LanguageName = "N/A",
+                    CategoryName = "System",
+
+                    Episodes = new List<EpisodeDto>
+                {
+                    new EpisodeDto
+                    {
+                        Title = "Velkommen",
+                        Description = "Dette er en fallback episode.",
+                        SeasonNumber = 1,
+                        EpisodeNumber = 1
+                    },
+                    new EpisodeDto
+                    {
+                        Title = "Systembesked",
+                        Description = "Ingen data blev fundet i databasen.",
+                        SeasonNumber = 1,
+                        EpisodeNumber = 2
+                    },
+                    new EpisodeDto
+                    {
+                        Title = "Ny sæson teaser",
+                        Description = "Eksempel på sæsonopdeling.",
+                        SeasonNumber = 2,
+                        EpisodeNumber = 1
+                    }
+                }
+                };
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    public class PodcastDetailsDto
+    {
+        public Guid Id { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+
+        public Guid CategoryId { get; set; }
+        public string? CategoryName { get; set; }
+
+        public Guid LanguageId { get; set; }
+        public string? LanguageName { get; set; }
+
+        public List<ContributionDto> Contributions { get; set; } = new();
+        public List<EpisodeDto> Episodes { get; set; } = new();
+    }
+
+    public class ContributionDto
+    {
+        public string? Name { get; set; }
+        public string? Role { get; set; }
+    }
+
+    public class EpisodeDto
+    {
+        // public Guid Id { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public int SeasonNumber { get; set; }
+        public int EpisodeNumber{get; set;}
+    }
+}

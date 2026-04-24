@@ -6,7 +6,7 @@
 
         public Guid Id { get; private set; }
         public Guid ContributorId { get; private set; }
-        public Guid RoleId { get; private set; }
+        public Guid ContributorRoleId { get; private set; }
         public Guid? PodcastId { get; private set; }
         public Guid? EpisodeId { get; private set; }
 
@@ -26,7 +26,7 @@
             Episode = episode;
 
             ContributorId = contributor.Id;
-            RoleId = role.Id;
+            ContributorRoleId = role.Id;
             PodcastId = podcast?.Id;
             EpisodeId = episode?.Id;
         }
@@ -50,7 +50,7 @@
         public void ChangeRole(ContributorRole role)
         {
             Role = role ?? throw new ArgumentNullException(nameof(role));
-            RoleId = role.Id;
+            ContributorRoleId = role.Id;
         }
 
         public void SetRights(bool hasRights)

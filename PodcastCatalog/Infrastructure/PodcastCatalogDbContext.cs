@@ -28,6 +28,7 @@ namespace PodcastCatalog.Infrastructure.Data
             // Konfiguration af Podcast
             modelBuilder.Entity<Podcast>(entity =>
             {
+                entity.ToTable("Podcast");
                 entity.HasKey(p => p.Id);
                 entity.Property(p => p.Title).IsRequired();
                 entity.Property(p => p.Description).IsRequired(false);
@@ -48,6 +49,7 @@ namespace PodcastCatalog.Infrastructure.Data
             // Konfiguration af Season
             modelBuilder.Entity<Season>(entity =>
             {
+                entity.ToTable("Season");
                 entity.HasKey(s => s.Id);
                 entity.Property(s => s.Name).IsRequired();
                 entity.Property(s => s.ProductionYear).IsRequired();
@@ -62,6 +64,7 @@ namespace PodcastCatalog.Infrastructure.Data
             // Konfiguration af Episode
             modelBuilder.Entity<Episode>(entity =>
             {
+                entity.ToTable("Episode");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Title).IsRequired();
                 entity.Property(e => e.Description).IsRequired(false);
@@ -78,6 +81,7 @@ namespace PodcastCatalog.Infrastructure.Data
             // Konfiguration af Contribution
             modelBuilder.Entity<Contribution>(entity =>
             {
+                entity.ToTable("Contribution");
                 entity.HasKey(c => c.Id);
 
                 // Relation til Contributor
@@ -103,13 +107,14 @@ namespace PodcastCatalog.Infrastructure.Data
                 // Relation til ContributorRole
                 entity.HasOne(c => c.Role)
                     .WithMany()
-                    .HasForeignKey(c => c.RoleId)
+                    .HasForeignKey(c => c.ContributorRoleId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Konfiguration af Contributor
             modelBuilder.Entity<Contributor>(entity =>
             {
+                entity.ToTable("Contributor");
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Name).IsRequired();
                 entity.Property(c => c.Description).IsRequired(false);
@@ -118,6 +123,7 @@ namespace PodcastCatalog.Infrastructure.Data
             // Konfiguration af ContributorRole
             modelBuilder.Entity<ContributorRole>(entity =>
             {
+                entity.ToTable("ContributorRole");
                 entity.HasKey(cr => cr.Id);
                 entity.Property(cr => cr.Name).IsRequired();
             });
@@ -125,6 +131,7 @@ namespace PodcastCatalog.Infrastructure.Data
             // Konfiguration af Category
             modelBuilder.Entity<Category>(entity =>
             {
+                entity.ToTable("Category");
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Name).IsRequired();
                 entity.Property(c => c.Description).IsRequired(false);
@@ -133,6 +140,7 @@ namespace PodcastCatalog.Infrastructure.Data
             // Konfiguration af Language
             modelBuilder.Entity<Language>(entity =>
             {
+                entity.ToTable("Language");
                 entity.HasKey(l => l.Id);
                 entity.Property(l => l.Name).IsRequired();
                 entity.Property(l => l.ISO).IsRequired();
@@ -141,6 +149,7 @@ namespace PodcastCatalog.Infrastructure.Data
             // Konfiguration af Tag
             modelBuilder.Entity<Tag>(entity =>
             {
+                entity.ToTable("Tag");
                 entity.HasKey(t => t.Id);
                 entity.Property(t => t.Name).IsRequired();
             });

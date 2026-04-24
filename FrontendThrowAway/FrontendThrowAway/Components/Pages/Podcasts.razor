@@ -1,0 +1,114 @@
+﻿@page "/podcasts"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Podcast Catalog</PageTitle>
+
+<MudStack Spacing="3">
+
+    <!-- Header -->
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h4">Podcast Catalog</MudText>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/create-podcast">
+            Create Podcast
+        </MudButton>
+    </MudStack>
+
+    <!-- Search -->
+    <MudTextField @bind-Value="_searchString"
+                  Placeholder="Search title..."
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Variant="Variant.Outlined"
+                  Immediate="true" />
+
+    <!-- Content -->
+    @if (isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">
+            @errorMessage
+        </MudAlert>
+    }
+    else if (_podcasts == null || !_podcasts.Any())
+    {
+        <MudAlert Severity="Severity.Info">
+            No podcasts found.
+        </MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4">
+
+            <MudTable Items="FilteredPodcasts"
+                      T="PodcastDto"
+                      Hover="true"
+                      Dense="true"
+                      Elevation="0"
+                      OnRowClick="@(args => OnRowClicked(args))">
+
+                <HeaderContent>
+                    <MudTh>Title</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Title">
+                        <MudText Typo="Typo.subtitle2">@context.Title</MudText>
+                    </MudTd>
+                </RowTemplate>
+
+            </MudTable>
+        </MudPaper>
+    }
+
+</MudStack>
+
+@code {
+    private List<PodcastDto> _podcasts = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+    private string _searchString = string.Empty;
+
+    private IEnumerable<PodcastDto> FilteredPodcasts =>
+        _podcasts.Where(p =>
+            string.IsNullOrWhiteSpace(_searchString) ||
+            (p.Title?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _podcasts = await Http.GetFromJsonAsync<List<PodcastDto>>("api/podcasts/podcast")
+                         ?? new List<PodcastDto>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Could not fetch podcasts: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OnRowClicked(TableRowClickEventArgs<PodcastDto> args)
+    {
+        if (args.Item is not null)
+        {
+            Navigation.NavigateTo($"/podcasts/{args.Item.Id}");
+        }
+    }
+
+    public class PodcastDto
+    {
+        public Guid Id { get; set; }
+        public string? Title { get; set; }
+    }
+}
