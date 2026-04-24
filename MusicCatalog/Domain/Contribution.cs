@@ -13,7 +13,7 @@ namespace MusicCatalog.Domain
         public Track? Track { get; set; }
         public Release? Release { get; set; }
 
-        public Contribution(Contributor contributor, ContributorRole role, Track track )
+        public Contribution(Contributor contributor, ContributorRole role, Track track)
         {
             Contributor = contributor;
             Role = role;

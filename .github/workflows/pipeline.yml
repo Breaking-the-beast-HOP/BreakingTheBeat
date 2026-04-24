@@ -6,19 +6,18 @@ on:
         branches: ["feature/**", "main"]
 
 jobs:
-    integration_pipeline:
+    linting:
         name: Linting
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@4
+              uses: actions/checkout@v4
 
             - name: Setup .NET Core
               uses: actions/setup-dotnet@v4
               with:
                 dotnet-version: 9.0.x
 
-             
             - name: Cache NuGet packages
               uses: actions/cache@v4
               with:
@@ -27,18 +26,14 @@ jobs:
                 restore-keys: |
                         ${{ runner.os }}-nuget-
 
-            # Restore dependencies
             - name: Restore dependencies
-              run: dotnet restore CatchUp.Social.sln
+              run: dotnet restore BreakingTheBeat.sln --verbosity detailed
 
-            # Restore local dotnet tools
             - name: Restore dotnet tools
               run: dotnet tool restore
 
-            # Build
             - name: Build solution
-              run: dotnet build BreakingTheBeat.sln --configuration Release
+              run: dotnet build BreakingTheBeat.sln --configuration Release --verbosity detailed
 
-            # Run linting
             - name: Run linting (dotnet format)
               run: dotnet format --verify-no-changes --severity error
