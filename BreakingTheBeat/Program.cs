@@ -38,11 +38,13 @@ namespace BreakingTheBeat
             builder.Services.AddValidatorsFromAssemblyContaining<UpdatePodcastValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetPodcastValidator>();
 
+
             // 5.1. Podcast command/query handlers are registered by MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreatePodcastHandler).Assembly));
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdatePodcastHandler).Assembly));
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetPodcastHandler).Assembly));
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllPodcastsHandler).Assembly));
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetPodcastHandler).Assembly));
 
 
             builder.Services.AddControllers();

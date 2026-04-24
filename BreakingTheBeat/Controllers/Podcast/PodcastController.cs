@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PodcastCatalog.Features.Podcasts.Create;
+using PodcastCatalog.Features.Podcasts.Delete;
 using PodcastCatalog.Features.Podcasts.Get;
+using PodcastCatalog.Features.Podcasts.GetAll;
 using PodcastCatalog.Features.Podcasts.Update;
 
 namespace Gateway.Controllers.Podcast
@@ -49,5 +51,21 @@ namespace Gateway.Controllers.Podcast
             return Ok(result);
         }
 
+        [HttpGet()]
+        public async Task<ActionResult<List<PodcastDTO>>> GetAllPodcasts(
+            CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new GetAllPodcastsQuery(), cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePodcast(
+            Guid id,
+            CancellationToken cancellationToken)
+        {
+            await _mediator.Send(new DeletePodcastCommand(id), cancellationToken);
+            return NoContent();
+        }
     }
 }

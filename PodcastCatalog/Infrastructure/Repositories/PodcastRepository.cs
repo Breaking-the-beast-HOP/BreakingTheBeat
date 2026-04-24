@@ -26,6 +26,7 @@ namespace PodcastCatalog.Shared.Infrastructure.Repositories
         public async Task<Podcast?> GetByIdAsync(Guid id)
         {
             return await _dbContext.Podcasts
+                .AsNoTracking()
                 .Include(p => p.Seasons)
                 .Include(p => p.Category)
                 .Include(p => p.Hosts)
@@ -35,6 +36,7 @@ namespace PodcastCatalog.Shared.Infrastructure.Repositories
         public async Task<List<Podcast>> GetAllAsync()
         {
             return await _dbContext.Podcasts
+                .AsNoTracking()
                 .Include(p => p.Seasons)
                 .Include(p => p.Category)
                 .Include(p => p.Hosts)
