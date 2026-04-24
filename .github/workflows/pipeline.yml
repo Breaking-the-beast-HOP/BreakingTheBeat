@@ -1,0 +1,44 @@
+name: BreakingTheBeat Pipeline
+on:
+    push:
+        branches: ["feature/**", "main"]
+    pull_request:
+        branches: ["feature/**", "main"]
+
+jobs:
+    integration_pipeline:
+        name: Linting
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@4
+
+            - name: Setup .NET Core
+              uses: actions/setup-dotnet@v4
+              with:
+                dotnet-version: 9.0.x
+
+             
+            - name: Cache NuGet packages
+              uses: actions/cache@v4
+              with:
+                path: ~/.nuget/packages
+                key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+                restore-keys: |
+                        ${{ runner.os }}-nuget-
+
+            # Restore dependencies
+            - name: Restore dependencies
+              run: dotnet restore CatchUp.Social.sln
+
+            # Restore local dotnet tools
+            - name: Restore dotnet tools
+              run: dotnet tool restore
+
+            # Build
+            - name: Build solution
+              run: dotnet build BreakingTheBeat.sln --configuration Release
+
+            # Run linting
+            - name: Run linting (dotnet format)
+              run: dotnet format --verify-no-changes --severity error
