@@ -1,12 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using MusicCatalog.Domain.Entities;
+using MusicCatalog.Features.Track;
+using System.Threading;
 
 namespace MusicCatalog.Infrastructure.Repositories
 {
-    internal class TrackRepository
+    public class TrackRepository : ITrackRepository
     {
+        private readonly MusicCatalogDbContext _context;
+
+        public TrackRepository(MusicCatalogDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<Track> AddAsync(Track entity)
+        {
+            _context.Tracks.Add(entity);
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+
+        public Task DeleteAsync(Track entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<Track>> GetAllAsync()
+        {
+            return await _context.Tracks
+                .Include(t => t.Genre)
+                .Include(t => t.MetadataLanguage)
+                .Include(t => t.AudioLanguage)
+                .ToListAsync();
+        }
+
+        public async Task<Track?> GetByIdAsync(Guid id)
+        {
+            return await _context.Tracks
+                .Include(t => t.Genre)
+                .Include(t => t.MetadataLanguage)
+                .Include(t => t.AudioLanguage)
+                .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public Task UpdateAsync(Track entity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

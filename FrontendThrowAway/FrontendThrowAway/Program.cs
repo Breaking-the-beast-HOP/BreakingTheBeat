@@ -1,5 +1,6 @@
 using FrontendThrowAway.Client.Pages;
 using FrontendThrowAway.Components;
+using MudBlazor.Services;
 
 namespace FrontendThrowAway
 {
@@ -13,6 +14,13 @@ namespace FrontendThrowAway
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents()
                 .AddInteractiveWebAssemblyComponents();
+
+            builder.Services.AddMudServices();
+
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost:7194/")
+            });
 
             var app = builder.Build();
 

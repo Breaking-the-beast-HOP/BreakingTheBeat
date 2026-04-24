@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>383c97fd-b8e3-4901-ba87-f85f6f60db57</UserSecretsId>
+    <UserSecretsId>805f5d21-192e-4052-965c-dab403858002</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PodcastCatalog\PodcastCatalog.csproj" />
+    <ProjectReference Include="..\MusicCatalog\MusicCatalog.csproj" />
   </ItemGroup>
 
 </Project>
