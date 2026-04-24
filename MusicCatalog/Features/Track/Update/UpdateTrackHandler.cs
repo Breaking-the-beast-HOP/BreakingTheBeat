@@ -8,5 +8,8 @@ namespace MusicCatalog.Features.Track.Update
 {
     internal class UpdateTrackHandler
     {
+
+
+
     }
 }

@@ -26,7 +26,7 @@ namespace Gateway.Controllers
         {
             var result = await _mediator.Send(new CreateTrackCommand(request.Title, request.Version, request.ISRC, request.GenreId, request.AudioLanguageId, request.MetadataLanguageId), cancellationToken);
             return Ok(result);
-      
+
         }
 
         [HttpGet(Name = "GetTracks")]
@@ -38,7 +38,7 @@ namespace Gateway.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<TrackDetailsResponse>> Get(Guid id,CancellationToken cancellationToken)
+        public async Task<ActionResult<TrackDetailsResponse>> Get(Guid id, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetTrackByIdQuery(id), cancellationToken);
 

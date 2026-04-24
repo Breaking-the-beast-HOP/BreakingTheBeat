@@ -37,5 +37,5 @@ namespace MusicCatalog.Features.Track.Get
             }).ToList();
         }
     }
-    
+
 }

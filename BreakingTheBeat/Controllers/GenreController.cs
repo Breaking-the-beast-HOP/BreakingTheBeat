@@ -23,6 +23,6 @@ namespace Gateway.Controllers
             return Ok(result);
         }
     }
-    
+
 
 }

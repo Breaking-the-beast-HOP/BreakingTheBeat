@@ -2,7 +2,7 @@
 
 namespace MusicCatalog.Features.Genre.Interfaces
 {
-    public interface IGenreRepository: IReadRepository<Domain.Entities.Genre>
+    public interface IGenreRepository : IReadRepository<Domain.Entities.Genre>
     {
     }
 }
