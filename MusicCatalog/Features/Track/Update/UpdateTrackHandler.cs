@@ -19,7 +19,7 @@ namespace MusicCatalog.Features.Track.Update
             if (track is null)
                 return false;
 
-            track.Update(
+            track.UpdateDetails(
                 request.Title,
                 request.Version,
                 request.ISRC,

@@ -49,7 +49,7 @@
             };
         }
 
-        public void Update(string? title, string? version, string? isrc, Guid? genreId,Guid? metadataLanguageId,Guid? audioLanguageId)
+        public void UpdateDetails(string? title, string? version, string? isrc, Guid? genreId,Guid? metadataLanguageId,Guid? audioLanguageId)
         {
             if (!string.IsNullOrWhiteSpace(title))
                 Title = title;

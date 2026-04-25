@@ -12,8 +12,34 @@ namespace MusicCatalog.Infrastructure
         public DbSet<Language> Languages => Set<Language>();
         public DbSet<Genre> Genres => Set<Genre>();
         public DbSet<Track> Tracks => Set<Track>();
+        public DbSet<Contributor> Contributors => Set<Contributor>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Contributor>(entity =>
+            {
+                entity.ToTable("Contributor");
+
+                entity.HasKey(x => x.Id);
+
+                entity.Property(x => x.LegalName)
+                 .HasMaxLength(100)
+                 .IsRequired();
+
+                entity.Property(x => x.LegalName)
+                 .HasMaxLength(100)
+                 .IsRequired();
+
+                entity.Property(x => x.DisplayName)
+                 .HasMaxLength(100)
+                 .IsRequired();
+
+                entity.Property(X => X.IPI)
+                    .HasColumnName("IPI");
+
+                entity.Property(X => X.ISNI)
+                   .HasColumnName("ISNI");
+            });
+
             modelBuilder.Entity<Language>(entity =>
             {
                 entity.ToTable("Language");

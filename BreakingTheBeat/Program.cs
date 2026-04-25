@@ -8,6 +8,8 @@ using MusicCatalog.Features.Genre;
 using MusicCatalog.Features.Genre.Interfaces;
 using MusicCatalog.Features.Track;
 using MusicCatalog.Features.Track.Create;
+using MusicCatalog.Features.Contributor.Create;
+using MusicCatalog.Features.Contributor;
 
 namespace Gateway
 {
@@ -27,6 +29,7 @@ namespace Gateway
             builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
+            builder.Services.AddScoped<IContributorRepository, ContributorRepository>();
 
             //4. services
 
@@ -38,6 +41,9 @@ namespace Gateway
              cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly));
             builder.Services.AddMediatR(cfg =>
              cfg.RegisterServicesFromAssembly(typeof(CreateTrackCommand).Assembly));
+
+            builder.Services.AddMediatR(cfg =>
+          cfg.RegisterServicesFromAssembly(typeof(CreateContributorCommand).Assembly));
 
             //6. Controllers
             builder.Services.AddControllers();
