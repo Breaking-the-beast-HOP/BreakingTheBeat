@@ -1,14 +1,9 @@
 ﻿using MediatR;
-using MusicCatalog.Features.Track.Create;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MusicCatalog.Domain.Entities;
 
 namespace MusicCatalog.Features.Track.Update
 {
-    public class updateTrackHandler : IRequestHandler<UpdateTrackCommand, Guid>
+    public class UpdateTrackHandler : IRequestHandler<UpdateTrackCommand, bool>
     {
         private readonly ITrackRepository _repository;
 
@@ -17,13 +12,25 @@ namespace MusicCatalog.Features.Track.Update
             _repository = repository;
         }
 
-        public async Task<Guid> Handle(UpdateTrackCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(UpdateTrackCommand request, CancellationToken cancellationToken)
         {
+            var track = await _repository.GetByIdAsync(request.Id);
 
-           
-        //    await _repository.AddAsync(track);
+            if (track is null)
+                return false;
 
-        //    return track.Id;
+            track.Update(
+                request.Title,
+                request.Version,
+                request.ISRC,
+                request.GenreId,
+                request.MetadataLanguageId,
+                request.AudioLanguageId
+            );
+
+            await _repository.UpdateAsync(track);
+
+            return true;
         }
     }
 }
