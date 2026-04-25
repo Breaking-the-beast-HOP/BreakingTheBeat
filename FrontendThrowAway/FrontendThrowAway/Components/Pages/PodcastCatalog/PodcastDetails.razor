@@ -1,5 +1,6 @@
 ﻿@page "/podcasts/{Id:guid}"
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 <PageTitle>Podcast Details</PageTitle>
 
@@ -22,14 +23,16 @@
                 </MudButton>
 
                 <MudButton Variant="Variant.Outlined"
-                Color="Color.Warning"
-                StartIcon="@Icons.Material.Filled.Edit">
-                    Edit
+                    Color="Color.Warning"
+                    StartIcon="@Icons.Material.Filled.Edit"
+                    Href="@($"/podcasts/{Id}/edit")">
+                        Edit
                 </MudButton>
 
                 <MudButton Variant="Variant.Text"
                 Color="Color.Error"
-                StartIcon="@Icons.Material.Filled.Delete">
+                StartIcon="@Icons.Material.Filled.Delete"
+                           OnClick="@(async () => await DeletePodcast(Id))">
                     Delete
                 </MudButton>
             </MudStack>
@@ -251,6 +254,28 @@
         finally
         {
             _isLoading = false;
+        }
+    }
+
+   
+
+    private async Task DeletePodcast(Guid id)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/podcasts/podcast/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                // Navigation.NavigateTo("/podcasts");
+            }
+            else
+            {
+                _errorMessage = $"Could not delete podcast. Status code: {(int)response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Could not delete podcast: {ex.Message}";
         }
     }
 
