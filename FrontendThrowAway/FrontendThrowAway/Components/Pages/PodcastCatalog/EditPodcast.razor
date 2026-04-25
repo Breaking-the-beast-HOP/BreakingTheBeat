@@ -276,7 +276,7 @@
                 _categories = GetFallbackCategories();
             }
 
-            var podcast = await Http.GetFromJsonAsync<PodcastDetailsDto>($"api/podcast/{Id}");
+            var podcast = await Http.GetFromJsonAsync<PodcastDetailsDto>($"api/podcasts/podcast/{Id}");
 
             if (podcast is null)
             {
