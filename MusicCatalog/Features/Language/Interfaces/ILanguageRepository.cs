@@ -2,8 +2,8 @@
 
 namespace MusicCatalog.Features.Language.Interfaces
 {
-    public interface ILanguageRepository:IReadRepository<Domain.Entities.Language>
+    public interface ILanguageRepository : IReadRepository<Domain.Entities.Language>
     {
-       
+
     }
 }

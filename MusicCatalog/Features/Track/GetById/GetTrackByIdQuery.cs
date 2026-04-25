@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace MusicCatalog.Features.Track.GetById
 {
-    public record GetTrackByIdQuery(Guid Id): IRequest<TrackDTO>;
+    public record GetTrackByIdQuery(Guid Id) : IRequest<TrackDTO>;
 }

@@ -38,5 +38,5 @@ namespace MusicCatalog.Features.Track.GetById
             return trackDTO;
         }
     }
-    
+
 }

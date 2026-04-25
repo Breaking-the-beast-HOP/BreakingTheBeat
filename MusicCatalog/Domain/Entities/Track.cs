@@ -22,7 +22,7 @@
 
         private Track() { }
 
-        public static Track Create( string title, string? version,string isrc,Guid genreId,Guid audioLanguageId, Guid metadataLanguageId)
+        public static Track Create(string title, string? version, string isrc, Guid genreId, Guid audioLanguageId, Guid metadataLanguageId)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title is required.");

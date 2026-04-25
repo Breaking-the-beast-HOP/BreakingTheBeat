@@ -13,7 +13,7 @@ namespace MusicCatalog.Features.Track.Create
 
         public async Task<Guid> Handle(CreateTrackCommand request, CancellationToken cancellationToken)
         {
-           
+
             var track = Domain.Entities.Track.Create(
                   request.Title,
                   request.Version,
