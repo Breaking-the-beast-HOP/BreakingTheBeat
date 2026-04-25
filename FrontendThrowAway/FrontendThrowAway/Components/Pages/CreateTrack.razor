@@ -17,16 +17,16 @@
 
                 <MudStack Row="true" Spacing="2">
                     <MudButton Variant="Variant.Text"
-                               Color="Color.Default"
-                               Href="/tracks">
+                    Color="Color.Default"
+                    Href="/tracks">
                         Cancel
                     </MudButton>
 
                     <MudButton Variant="Variant.Filled"
-                               Color="Color.Warning"
-                               StartIcon="@Icons.Material.Filled.Save"
-                               OnClick="SaveTrack"
-                               Disabled="_isSaving || _isLoadingLookups">
+                    Color="Color.Warning"
+                    StartIcon="@Icons.Material.Filled.Save"
+                    OnClick="SaveTrack"
+                    Disabled="_isSaving || _isLoadingLookups">
                         @(_isSaving ? "Saving..." : "Save")
                     </MudButton>
                 </MudStack>
@@ -62,75 +62,75 @@
 
                             <MudItem xs="12">
                                 <MudTextField Label="Title"
-                                              @bind-Value="_model.Title"
-                                              Variant="Variant.Outlined"
-                                              Required="true"
-                                              FullWidth="true" />
+                                @bind-Value="_model.Title"
+                                Variant="Variant.Outlined"
+                                Required="true"
+                                FullWidth="true" />
                             </MudItem>
 
                             <MudItem xs="12" sm="6">
                                 <MudTextField Label="Version"
-                                              @bind-Value="_model.Version"
-                                              Variant="Variant.Outlined"
-                                              FullWidth="true" />
+                                @bind-Value="_model.Version"
+                                Variant="Variant.Outlined"
+                                FullWidth="true" />
                             </MudItem>
 
                             <MudItem xs="12" sm="6">
                                 <MudTextField Label="ISRC"
-                                              @bind-Value="_model.ISRC"
-                                              Variant="Variant.Outlined"
-                                              FullWidth="true" />
+                                @bind-Value="_model.ISRC"
+                                Variant="Variant.Outlined"
+                                FullWidth="true" />
                             </MudItem>
 
                             <MudItem xs="12">
                                 <MudAutocomplete T="GenreDto"
-                                                 Label="Genre"
-                                                 Variant="Variant.Outlined"
-                                                 Value="_selectedGenre"
-                                                 ValueChanged="OnGenreChanged"
-                                                 SearchFunc="SearchGenres"
-                                                 ToStringFunc="@(g => g?.Name ?? string.Empty)"
-                                                 Clearable="true"
-                                                 ResetValueOnEmptyText="true"
-                                                 CoerceText="false"
-                                                 Dense="true"
-                                                 FullWidth="true"
-                                                 MaxItems="8"
-                                                 Disabled="_isLoadingLookups" />
+                                Label="Genre"
+                                Variant="Variant.Outlined"
+                                Value="_selectedGenre"
+                                ValueChanged="OnGenreChanged"
+                                SearchFunc="SearchGenres"
+                                ToStringFunc="@(g => g?.Name ?? string.Empty)"
+                                Clearable="true"
+                                ResetValueOnEmptyText="true"
+                                CoerceText="false"
+                                Dense="true"
+                                FullWidth="true"
+                                MaxItems="8"
+                                Disabled="_isLoadingLookups" />
                             </MudItem>
 
                             <MudItem xs="12" sm="6">
                                 <MudAutocomplete T="LanguageDto"
-                                                 Label="Metadata language"
-                                                 Variant="Variant.Outlined"
-                                                 Value="_selectedMetadataLanguage"
-                                                 ValueChanged="OnMetadataLanguageChanged"
-                                                 SearchFunc="SearchLanguages"
-                                                 ToStringFunc="@(l => l?.Name ?? string.Empty)"
-                                                 Clearable="true"
-                                                 ResetValueOnEmptyText="true"
-                                                 CoerceText="false"
-                                                 Dense="true"
-                                                 FullWidth="true"
-                                                 MaxItems="8"
-                                                 Disabled="_isLoadingLookups" />
+                                Label="Metadata language"
+                                Variant="Variant.Outlined"
+                                Value="_selectedMetadataLanguage"
+                                ValueChanged="OnMetadataLanguageChanged"
+                                SearchFunc="SearchLanguages"
+                                ToStringFunc="@(l => l?.Name ?? string.Empty)"
+                                Clearable="true"
+                                ResetValueOnEmptyText="true"
+                                CoerceText="false"
+                                Dense="true"
+                                FullWidth="true"
+                                MaxItems="8"
+                                Disabled="_isLoadingLookups" />
                             </MudItem>
 
                             <MudItem xs="12" sm="6">
                                 <MudAutocomplete T="LanguageDto"
-                                                 Label="Audio language"
-                                                 Variant="Variant.Outlined"
-                                                 Value="_selectedAudioLanguage"
-                                                 ValueChanged="OnAudioLanguageChanged"
-                                                 SearchFunc="SearchLanguages"
-                                                 ToStringFunc="@(l => l?.Name ?? string.Empty)"
-                                                 Clearable="true"
-                                                 ResetValueOnEmptyText="true"
-                                                 CoerceText="false"
-                                                 Dense="true"
-                                                 FullWidth="true"
-                                                 MaxItems="8"
-                                                 Disabled="_isLoadingLookups" />
+                                Label="Audio language"
+                                Variant="Variant.Outlined"
+                                Value="_selectedAudioLanguage"
+                                ValueChanged="OnAudioLanguageChanged"
+                                SearchFunc="SearchLanguages"
+                                ToStringFunc="@(l => l?.Name ?? string.Empty)"
+                                Clearable="true"
+                                ResetValueOnEmptyText="true"
+                                CoerceText="false"
+                                Dense="true"
+                                FullWidth="true"
+                                MaxItems="8"
+                                Disabled="_isLoadingLookups" />
                             </MudItem>
 
                         </MudGrid>
@@ -138,10 +138,10 @@
 
                     <!-- Contributors -->
                     <ContributionEditor Title="Contributors"
-                                        Description="Add track-level contributors and their roles."
-                                        Rows="_contributions"
-                                        Contributors="_availableContributors"
-                                        AvailableRoles="_contributionRoles" />
+                    Description="Add track-level contributors and their roles."
+                    Rows="_contributions"
+                    Contributors="_availableContributors"
+                    AvailableRoles="_contributionRoles" />
 
                 </MudStack>
             </MudItem>
@@ -159,8 +159,8 @@
                             <MudPaper Class="dropzone pa-6" Outlined="true">
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
                                     <MudIcon Icon="@Icons.Material.Filled.AudioFile"
-                                             Size="Size.Large"
-                                             Color="Color.Warning" />
+                                    Size="Size.Large"
+                                    Color="Color.Warning" />
                                     <MudText Typo="Typo.subtitle1">Drop zone</MudText>
                                     <MudText Typo="Typo.body2" Color="Color.Secondary">
                                         Audio upload will be added later
@@ -214,7 +214,7 @@
 </MudContainer>
 
 @code {
-    @code {
+    
         private TrackModel _model = new();
 
         private List<LanguageDto> _languages = new();
@@ -226,22 +226,8 @@
 
         private List<ContributionEditor.ContributionRow> _contributions = new();
 
-        private List<ContributionEditor.ContributorOption> _availableContributors = new()
-    {
-        new() { Id = Guid.NewGuid(), DisplayName = "Gulddreng" },
-        new() { Id = Guid.NewGuid(), DisplayName = "Agnello De Lutio" },
-        new() { Id = Guid.NewGuid(), DisplayName = "Malte Ebert" }
-    };
-
-        private readonly List<string> _contributionRoles = new()
-    {
-        "Performing Artist",
-        "Composer",
-        "Lyricist",
-        "Producer",
-        "Mixer",
-        "Mastering Engineer"
-    };
+        private List<ContributionEditor.ContributorOption> _availableContributors = new();
+        private List<ContributionEditor.ContributorRoleDto> _contributionRoles = new();
 
         private bool _isLoadingLookups = true;
         private bool _isSaving = false;
@@ -255,8 +241,25 @@
                 _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/Language") ?? new();
                 _genres = await Http.GetFromJsonAsync<List<GenreDto>>("api/Genre") ?? new();
 
-                // Senere: hent contributors fra API
-                // _availableContributors = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorOption>>("api/contributor") ?? new();
+                try
+                {
+                    _contributionRoles =
+                        await Http.GetFromJsonAsync<List<ContributionEditor.ContributorRoleDto>>("api/ContributorRole") ?? new();
+                }
+                catch (Exception ex)
+                {
+                    _errorMessage = $"Could not load contributor roles: {ex.Message}";
+                }
+
+                try
+                {
+                    _availableContributors =
+                        await Http.GetFromJsonAsync<List<ContributionEditor.ContributorOption>>("api/Contributor") ?? new();
+                }
+                catch (Exception ex)
+                {
+                    _errorMessage = $"Could not load contributors: {ex.Message}";
+                }
             }
             catch (Exception ex)
             {
@@ -342,6 +345,15 @@
             {
                 _isSaving = true;
 
+                _model.Contributions = _contributions
+                    .Where(c => c.ContributorId.HasValue && c.Roles.Any())
+                    .Select(c => new CreateContributionRequest
+                        {
+                            ContributorId = c.ContributorId!.Value,
+                            RoleIds = c.Roles.Select(r => r.Id).ToList()
+                        })
+                        .ToList();
+
                 var response = await Http.PostAsJsonAsync("api/Track", _model);
 
                 if (response.IsSuccessStatusCode)
@@ -381,6 +393,13 @@
             public Guid? GenreId { get; set; }
             public Guid? MetadataLanguageId { get; set; }
             public Guid? AudioLanguageId { get; set; }
+            public List<CreateContributionRequest> Contributions { get; set; } = new();
+        }
+
+        public class CreateContributionRequest
+        {
+            public Guid ContributorId { get; set; }
+            public List<Guid> RoleIds { get; set; } = new();
         }
 
         public class LanguageDto
@@ -395,5 +414,6 @@
             public Guid Id { get; set; }
             public string Name { get; set; } = "";
         }
+       
     }
 }

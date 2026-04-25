@@ -54,13 +54,13 @@
                                 <MudStack Row="true" Spacing="1" Class="mt-1 mb-1" Style="flex-wrap: wrap;">
                                     @foreach (var role in row.value.Roles)
                                     {
-                                        <MudChip T="string"
+                                        <MudChip T="ContributorRoleDto"
                                                  Size="Size.Small"
                                                  Color="Color.Warning"
                                                  Variant="Variant.Filled"
                                                  Closeable="true"
                                                  OnClose="@(() => RemoveRole(row.index, role))">
-                                            @role
+                                            @role.Name
                                         </MudChip>
                                     }
                                 </MudStack>
@@ -72,7 +72,7 @@
                                 </MudText>
                             }
 
-                            <MudAutocomplete T="string"
+                            <MudAutocomplete T="ContributorRoleDto"
                                              Placeholder="Add role..."
                                              Variant="Variant.Text"
                                              Dense="true"
@@ -80,7 +80,7 @@
                                              Style="max-width: 260px;"
                                              SearchFunc="@(async (value, token) => await SearchRoles(value, row.value.Roles, token))"
                                              ValueChanged="@(role => AddRole(row.index, role))"
-                                             ToStringFunc="@(r => r ?? string.Empty)"
+                                             ToStringFunc="@(r => r?.Name ?? string.Empty)"
                                              Clearable="true" />
                         </MudItem>
 
@@ -112,33 +112,39 @@
     [Parameter] public string Description { get; set; } = "Add contributors and roles.";
     [Parameter] public List<ContributionRow> Rows { get; set; } = new();
     [Parameter] public List<ContributorOption> Contributors { get; set; } = new();
-    [Parameter] public List<string> AvailableRoles { get; set; } = new();
+    [Parameter] public List<ContributorRoleDto> AvailableRoles { get; set; } = new();
 
-    private Task<IEnumerable<string>> SearchRoles(string value, HashSet<string> selectedRoles, CancellationToken token)
+    private Task<IEnumerable<ContributorRoleDto>> SearchRoles(string value, List<ContributorRoleDto> selectedRoles,CancellationToken token)
     {
-        IEnumerable<string> result = AvailableRoles
-            .Where(role => !selectedRoles.Contains(role));
+        IEnumerable<ContributorRoleDto> result = AvailableRoles
+            .Where(role => !selectedRoles.Any(selected => selected.Id == role.Id));
 
         if (!string.IsNullOrWhiteSpace(value))
         {
             result = result.Where(role =>
-                role.Contains(value, StringComparison.OrdinalIgnoreCase));
+                role.Name.Contains(value, StringComparison.OrdinalIgnoreCase));
         }
 
         return Task.FromResult(result);
     }
 
-    private void AddRole(int index, string? role)
+    private void AddRole(int index, ContributorRoleDto? role)
     {
-        if (string.IsNullOrWhiteSpace(role))
+        if (role is null)
             return;
 
-        Rows[index].Roles.Add(role);
+        var alreadyAdded = Rows[index].Roles.Any(r => r.Id == role.Id);
+
+        if (!alreadyAdded)
+            Rows[index].Roles.Add(role);
     }
 
-    private void RemoveRole(int index, string role)
+    private void RemoveRole(int index, ContributorRoleDto role)
     {
-        Rows[index].Roles.Remove(role);
+        var existingRole = Rows[index].Roles.FirstOrDefault(r => r.Id == role.Id);
+
+        if (existingRole is not null)
+            Rows[index].Roles.Remove(existingRole);
     }
 
     private Task<IEnumerable<ContributorOption>> SearchContributors(string value, CancellationToken token)
@@ -174,12 +180,19 @@
     {
         public Guid? ContributorId { get; set; }
         public ContributorOption? Contributor { get; set; }
-        public HashSet<string> Roles { get; set; } = new();
+        public List<ContributorRoleDto> Roles { get; set; } = new();
     }
+
 
     public class ContributorOption
     {
         public Guid Id { get; set; }
         public string DisplayName { get; set; } = "";
+    }
+
+    public class ContributorRoleDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
     }
 }

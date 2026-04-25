@@ -1,24 +1,26 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicCatalog.Features.ContributorRole.GetAll
 {
-    public class GetContributorRoleHandler : IRequestHandler<GetContributorRolesQuery, List<ContributorRoleDTO>>
+    public class GetContributorRolesHandler : IRequestHandler<GetContributorRolesQuery, List<ContributorRoleDTO>>
     {
         private readonly IContributorRoleRepository _repository;
 
-        public GetContributorRoleHandler(IContributorRoleRepository repository)
+        public GetContributorRolesHandler(IContributorRoleRepository repository)
         {
             _repository = repository;
         }
 
-        public Task<List<ContributorRoleDTO>> Handle(GetContributorRolesQuery request, CancellationToken cancellationToken)
+        public async Task<List<ContributorRoleDTO>> Handle(GetContributorRolesQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var contributorRoles = await _repository.GetAllAsync();
+
+            return contributorRoles.Select(cr => new ContributorRoleDTO
+                {
+                    Id = cr.Id,
+                    Name = cr.Name
+                }).ToList();
+
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicCatalog.Features.ContributorRole;
 
 namespace Gateway.Controllers
 {
@@ -18,7 +18,7 @@ namespace Gateway.Controllers
         [HttpGet]
         public async Task<IActionResult> GetContributorRoles(CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new GetContributorRolesQuery(), cancellationToken);
+            var result = await _mediator.Send(new MusicCatalog.Features.ContributorRole.GetAll.GetContributorRolesQuery(), cancellationToken);
             return Ok(result);
         }
     }

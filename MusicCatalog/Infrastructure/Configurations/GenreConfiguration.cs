@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MusicCatalog.Domain.Entities;
+
 namespace MusicCatalog.Infrastructure.Configurations 
 { 
     public class GenreConfiguration : IEntityTypeConfiguration<Genre> 

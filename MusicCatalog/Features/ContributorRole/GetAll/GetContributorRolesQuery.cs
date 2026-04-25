@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using MusicCatalog.Features.ContributorRole;
 
 namespace MusicCatalog.Features.ContributorRole.GetAll
 {
