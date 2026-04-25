@@ -1,0 +1,185 @@
+﻿@using MudBlazor
+
+<MudPaper Class="pa-4" Elevation="5">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+        <div>
+            <MudText Typo="Typo.h6">@Title</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                @Description
+            </MudText>
+        </div>
+
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Warning"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="AddRow">
+            Add contributor
+        </MudButton>
+    </MudStack>
+
+    @if (!Rows.Any())
+    {
+        <MudAlert Severity="Severity.Info" Dense="true">
+            No contributors added yet.
+        </MudAlert>
+    }
+    else
+    {
+        <MudStack Spacing="2">
+            @foreach (var row in Rows.Select((value, index) => new { value, index }))
+            {
+                <MudPaper Outlined="true" Class="pa-3 contribution-row">
+                    <MudGrid Spacing="2" AlignItems="AlignItems.Center">
+
+                        <MudItem xs="12" sm="4">
+                            <MudAutocomplete T="ContributorOption"
+                                             Label="Contributor"
+                                             Variant="Variant.Outlined"
+                                             Value="row.value.Contributor"
+                                             ValueChanged="@(value => OnContributorChanged(row.index, value))"
+                                             SearchFunc="SearchContributors"
+                                             ToStringFunc="@(c => c?.DisplayName ?? string.Empty)"
+                                             Clearable="true"
+                                             Dense="true"
+                                             FullWidth="true" />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="7">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                Roles
+                            </MudText>
+
+                            @if (row.value.Roles.Any())
+                            {
+                                <MudStack Row="true" Spacing="1" Class="mt-1 mb-1" Style="flex-wrap: wrap;">
+                                    @foreach (var role in row.value.Roles)
+                                    {
+                                        <MudChip T="string"
+                                                 Size="Size.Small"
+                                                 Color="Color.Warning"
+                                                 Variant="Variant.Filled"
+                                                 Closeable="true"
+                                                 OnClose="@(() => RemoveRole(row.index, role))">
+                                            @role
+                                        </MudChip>
+                                    }
+                                </MudStack>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mb-1">
+                                    No roles added
+                                </MudText>
+                            }
+
+                            <MudAutocomplete T="string"
+                                             Placeholder="Add role..."
+                                             Variant="Variant.Text"
+                                             Dense="true"
+                                             FullWidth="false"
+                                             Style="max-width: 260px;"
+                                             SearchFunc="@(async (value, token) => await SearchRoles(value, row.value.Roles, token))"
+                                             ValueChanged="@(role => AddRole(row.index, role))"
+                                             ToStringFunc="@(r => r ?? string.Empty)"
+                                             Clearable="true" />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="1" Class="d-flex justify-end">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           OnClick="@(() => RemoveRow(row.index))" />
+                        </MudItem>
+
+                    </MudGrid>
+                </MudPaper>
+            }
+        </MudStack>
+    }
+
+    <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-3">
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Warning"
+                   StartIcon="@Icons.Material.Filled.PersonAdd"
+                   Href="/create-contributor">
+            Create new contributor
+        </MudButton>
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Contributors";
+    [Parameter] public string Description { get; set; } = "Add contributors and roles.";
+    [Parameter] public List<ContributionRow> Rows { get; set; } = new();
+    [Parameter] public List<ContributorOption> Contributors { get; set; } = new();
+    [Parameter] public List<string> AvailableRoles { get; set; } = new();
+
+    private Task<IEnumerable<string>> SearchRoles(string value, HashSet<string> selectedRoles, CancellationToken token)
+    {
+        IEnumerable<string> result = AvailableRoles
+            .Where(role => !selectedRoles.Contains(role));
+
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            result = result.Where(role =>
+                role.Contains(value, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return Task.FromResult(result);
+    }
+
+    private void AddRole(int index, string? role)
+    {
+        if (string.IsNullOrWhiteSpace(role))
+            return;
+
+        Rows[index].Roles.Add(role);
+    }
+
+    private void RemoveRole(int index, string role)
+    {
+        Rows[index].Roles.Remove(role);
+    }
+
+    private Task<IEnumerable<ContributorOption>> SearchContributors(string value, CancellationToken token)
+    {
+        IEnumerable<ContributorOption> result = string.IsNullOrWhiteSpace(value)
+            ? Contributors
+            : Contributors.Where(c =>
+                c.DisplayName.Contains(value, StringComparison.OrdinalIgnoreCase));
+
+        return Task.FromResult(result);
+    }
+
+    private void AddRow()
+    {
+        Rows.Add(new ContributionRow());
+    }
+
+    private void RemoveRow(int index)
+    {
+        if (index >= 0 && index < Rows.Count)
+            Rows.RemoveAt(index);
+    }
+
+    private void OnContributorChanged(int index, ContributorOption? contributor)
+    {
+        Rows[index].Contributor = contributor;
+        Rows[index].ContributorId = contributor?.Id;
+    }
+
+  
+
+    public class ContributionRow
+    {
+        public Guid? ContributorId { get; set; }
+        public ContributorOption? Contributor { get; set; }
+        public HashSet<string> Roles { get; set; } = new();
+    }
+
+    public class ContributorOption
+    {
+        public Guid Id { get; set; }
+        public string DisplayName { get; set; } = "";
+    }
+}

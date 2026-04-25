@@ -1,0 +1,8 @@
+﻿.contribution-row {
+    background: #fafafa;
+    border-radius: 10px;
+}
+
+    .contribution-row:hover {
+        background: #f7f7f7;
+    }

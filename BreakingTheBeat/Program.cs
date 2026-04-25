@@ -10,6 +10,7 @@ using MusicCatalog.Features.Track;
 using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Features.Contributor.Create;
 using MusicCatalog.Features.Contributor;
+using MusicCatalog.Features.ContributorRole;
 
 namespace Gateway
 {
@@ -30,6 +31,7 @@ namespace Gateway
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
             builder.Services.AddScoped<IContributorRepository, ContributorRepository>();
+            builder.Services.AddScoped<IContributorRoleRepository, ContributionRoleRepository>();
 
             //4. services
 
