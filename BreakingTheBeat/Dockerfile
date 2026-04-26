@@ -12,10 +12,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["BreakingTheBeat/BreakingTheBeat/Gateway.csproj", "BreakingTheBeat/"]
-COPY ["BreakingTheBeat/PodcastCatalog/PodcastCatalog.csproj", "BreakingTheBeat/PodcastCatalog/"]"]
-COPY ["BreakingTheBeat/MusicCatalog/MusicCatalog.csproj", "BreakingTheBeat/MusicCatalog/"]
-COPY ["BreakingTheBeat/SharedKernel/SharedKernel.csproj", "BreakingTheBeat/SharedKernel/"]
+COPY ["BreakingTheBeat/Gateway.csproj", "BreakingTheBeat/"]
+COPY ["PodcastCatalog/PodcastCatalog.csproj", "BreakingTheBeat/PodcastCatalog/"]
+COPY ["MusicCatalog/MusicCatalog.csproj", "BreakingTheBeat/MusicCatalog/"]
+COPY ["SharedKernel/SharedKernel.csproj", "BreakingTheBeat/SharedKernel/"]
 RUN dotnet restore "./BreakingTheBeat/Gateway.csproj"
 COPY . .
 WORKDIR "/src/BreakingTheBeat"
