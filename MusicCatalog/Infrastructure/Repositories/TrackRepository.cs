@@ -50,6 +50,10 @@ namespace MusicCatalog.Infrastructure.Repositories
                 .Include(t => t.Genre)
                 .Include(t => t.MetadataLanguage)
                 .Include(t => t.AudioLanguage)
+                .Include(t => t.Contributions)
+                    .ThenInclude(c => c.Contributor)
+                .Include(t => t.Contributions)
+                    .ThenInclude(c => c.Role)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 

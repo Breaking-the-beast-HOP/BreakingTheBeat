@@ -1,6 +1,8 @@
 ﻿using Gateway.Contracts;
+using Gateway.Contracts.Gateway.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using MusicCatalog.Domain.Entities;
 using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Features.Track.Delete;
 using MusicCatalog.Features.Track.Get;
@@ -57,9 +59,34 @@ namespace Gateway.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<TrackDetailsResponse>> Get(Guid id, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new GetTrackByIdQuery(id), cancellationToken);
+            var track = await _mediator.Send(new GetTrackByIdQuery(id), cancellationToken);
+            var response = new TrackDetailsResponse
+            {
+                Id = track.Id,
+                Title = track.Title,
+                Version = track.Version,
+                ISRC = track.ISRC,
+                DurationSeconds = (int)track.Duration.TotalSeconds,
 
-            return Ok(result);
+                GenreName = track.GenreName,
+                MetadataLanguageName = track.MetadataLanguageName,
+                AudioLanguageName = track.AudioLanguageName,
+
+                Contributions = track.Contributions
+        .Select(c => new ContributionResponse
+        {
+            ContributorId = c.ContributorId,
+            ContributorName = c.ContributorName,
+            Roles = c.Roles.Select(r => new ContributionRoleResponse
+            {
+                Id = r.Id,
+                Name = r.Name
+            }).ToList()
+        })
+        .ToList()
+            };
+
+            return Ok(response);
         }
 
         [HttpPut("{id:guid}")]

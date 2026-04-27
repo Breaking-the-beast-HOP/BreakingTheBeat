@@ -93,7 +93,7 @@
                     <MudPaper Class="pa-4" Elevation="5">
                         <MudText Typo="Typo.h6" Class="mb-3">Contributors</MudText>
 
-                        @if (_track.Contributors is null || !_track.Contributors.Any())
+                        @if (_track.Contributions is null || !_track.Contributions.Any())
                         {
                             <MudAlert Severity="Severity.Info" Dense="true">
                                 No contributors registered.
@@ -101,20 +101,54 @@
                         }
                         else
                         {
-                            <MudTable Items="_track.Contributors" Dense="true" Hover="true" Elevation="0">
-                                <HeaderContent>
-                                    <MudTh>Name</MudTh>
-                                    <MudTh>Role</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd DataLabel="Name">@context.Name</MudTd>
-                                    <MudTd DataLabel="Role">
-                                        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">
-                                            @context.Role
-                                        </MudChip>
-                                    </MudTd>
-                                </RowTemplate>
-                            </MudTable>
+                            <MudStack Spacing="2">
+                                @foreach (var contribution in _track.Contributions.OrderByDescending(IsMainArtist))
+                                {
+                                    var isMainArtist = IsMainArtist(contribution);
+
+                                    <MudPaper Outlined="true" Class="pa-3">
+                                        <MudStack Row="true"
+                                                  Justify="Justify.SpaceBetween"
+                                                  AlignItems="AlignItems.Center"
+                                                  Style="gap: 16px;">
+
+                                            <MudStack Spacing="1">
+                                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Person"
+                                                             Size="Size.Small"
+                                                             Color="@(isMainArtist ? Color.Warning : Color.Default)" />
+
+                                                    <MudText Typo="Typo.subtitle1">
+                                                        @contribution.ContributorName
+                                                    </MudText>
+
+                                                    @if (isMainArtist)
+                                                    {
+                                                        <MudChip T="string"
+                                                                 Size="Size.Small"
+                                                                 Color="Color.Warning"
+                                                                 Variant="Variant.Filled">
+                                                            Main artist
+                                                        </MudChip>
+                                                    }
+                                                </MudStack>
+
+                                                <MudStack Row="true" Spacing="1" Style="flex-wrap: wrap;">
+                                                    @foreach (var role in contribution.Roles)
+                                                    {
+                                                        <MudChip T="string"
+                                                                 Size="Size.Small"
+                                                                 Color="@(IsPerformingArtistRole(role) ? Color.Warning : Color.Default)"
+                                                                 Variant="@(IsPerformingArtistRole(role) ? Variant.Filled : Variant.Outlined)">
+                                                            @role.Name
+                                                        </MudChip>
+                                                    }
+                                                </MudStack>
+                                            </MudStack>
+                                        </MudStack>
+                                    </MudPaper>
+                                }
+                            </MudStack>
                         }
                     </MudPaper>
 
@@ -274,6 +308,19 @@
         }
     }
 
+    private bool IsMainArtist(ContributionDto contribution)
+    {
+        return contribution.Roles.Any(IsPerformingArtistRole);
+    }
+
+    private bool IsPerformingArtistRole(ContributionRoleDto role)
+    {
+        return role.Name.Equals("Main Artist", StringComparison.OrdinalIgnoreCase)
+            || role.Name.Equals("Primary Artist", StringComparison.OrdinalIgnoreCase)
+            || role.Name.Equals("Performing Artist", StringComparison.OrdinalIgnoreCase)
+            || role.Name.Equals("Artist", StringComparison.OrdinalIgnoreCase);
+    }
+
     public class TrackDetailsDto
     {
         public Guid Id { get; set; }
@@ -295,17 +342,24 @@
         public DateTime? CreatedAt { get; set; }
         public DateTime? LastUpdatedAt { get; set; }
 
-        public List<ContributorDto> Contributors { get; set; } = new();
+        public List<ContributionDto> Contributions { get; set; } = new();
         public List<ReleaseDto> Releases { get; set; } = new();
-
-
     }
 
-    public class ContributorDto
+    public class ContributionDto
     {
-        public string? Name { get; set; }
-        public string? Role { get; set; }
+        public Guid ContributorId { get; set; }
+        public string ContributorName { get; set; } = "";
+        public List<ContributionRoleDto> Roles { get; set; } = new();
     }
+
+    public class ContributionRoleDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+    }
+
+  
 
     public class ReleaseDto
     {
