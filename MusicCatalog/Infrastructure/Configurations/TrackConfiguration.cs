@@ -33,31 +33,43 @@ namespace MusicCatalog.Infrastructure.Configurations
                     .FromSeconds(v))
                 .IsRequired(); 
 
+            //Genre
             entity.Property(x => x.GenreId)
-                .IsRequired(); 
-
-            entity.Property(x => x.MetadataLanguageId)
-                .IsRequired();
-
-            entity.Property(x => x.AudioLanguageId)
                 .IsRequired();
 
             entity.HasOne(x => x.Genre)
-                .WithMany()
-                .HasForeignKey(x => x.GenreId)
-                .OnDelete(DeleteBehavior.Restrict); 
+               .WithMany()
+               .HasForeignKey(x => x.GenreId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            //MetaLanguage
+            entity.Property(x => x.MetadataLanguageId)
+                .IsRequired();
 
             entity.HasOne(x => x.MetadataLanguage)
                 .WithMany()
                 .HasForeignKey(x => x.MetadataLanguageId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //AudioLanguage
+            entity.Property(x => x.AudioLanguageId)
+                .IsRequired();
 
             entity.HasOne(x => x.AudioLanguage)
                 .WithMany()
                 .HasForeignKey(x => x.AudioLanguageId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
-            entity.Ignore(x => x.Contributions);
+
+            //Contributions
+            entity.HasMany(x => x.Contributions)
+                .WithOne(x => x.Track)
+                .HasForeignKey(x => x.TrackId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Navigation(x => x.Contributions)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+
         } 
     } 
 }

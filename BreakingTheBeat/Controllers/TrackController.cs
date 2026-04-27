@@ -24,7 +24,24 @@ namespace Gateway.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTrack([FromBody] TrackRequest request, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new CreateTrackCommand(request.Title, request.Version, request.ISRC, request.GenreId, request.AudioLanguageId, request.MetadataLanguageId), cancellationToken);
+
+            var contributions = request.Contributions
+                .Select(c => new CreateContributionCommand(
+                    c.ContributorId,
+                    c.RoleIds))
+                .ToList();
+
+            var command = new CreateTrackCommand(
+                request.Title,
+                request.Version,
+                request.ISRC,
+                request.GenreId,
+                request.AudioLanguageId,
+                request.MetadataLanguageId,
+                contributions);
+
+            var result = await _mediator.Send(command, cancellationToken);
+
             return Ok(result);
 
         }

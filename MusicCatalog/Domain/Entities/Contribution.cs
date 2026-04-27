@@ -1,29 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MusicCatalog.Domain.Entities
+﻿namespace MusicCatalog.Domain.Entities
 {
     public class Contribution
     {
-        public Contributor Contributor { get; set; }
-        public ContributorRole Role { get; set; }
-        public Track? Track { get; set; }
-        public Release? Release { get; set; }
+        public Guid Id { get; private set; }
 
-        public Contribution(Contributor contributor, ContributorRole role, Track track)
+        public Guid ContributorId { get; private set; }
+        public Contributor Contributor { get; private set; }
+
+        public Guid ContributorRoleId { get; private set; }
+        public ContributorRole Role { get; private set; }
+
+        public Guid? TrackId { get; private set; }
+        public Track? Track { get; private set; }
+
+        public Guid? ReleaseId { get; private set; }
+        public Release? Release { get; private set; }
+
+        private Contribution() { }
+
+        private Contribution(Guid contributorId, Guid contributorRoleId, Guid? trackId, Guid? releaseId)
         {
-            Contributor = contributor;
-            Role = role;
-            Track = track;
+            Id = Guid.NewGuid();
+
+            ContributorId = contributorId;
+            ContributorRoleId = contributorRoleId;
+            TrackId = trackId;
+            ReleaseId = releaseId;
         }
-        public Contribution(Contributor contributor, ContributorRole role, Release release)
+
+        public static Contribution ForTrack(Guid trackId, Guid contributorId, Guid roleId)
         {
-            Contributor = contributor;
-            Role = role;
-            Release = release;
+            return new Contribution(contributorId, roleId, trackId, null);
+        }
+
+        public static Contribution ForRelease(Guid releaseId, Guid contributorId, Guid roleId)
+        {
+            return new Contribution(contributorId, roleId, null, releaseId);
         }
     }
 }

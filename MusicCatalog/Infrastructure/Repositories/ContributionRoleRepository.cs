@@ -20,7 +20,7 @@ namespace MusicCatalog.Infrastructure.Repositories
 
         public async Task<List<ContributorRole>> GetAllAsync()  
         {
-            return await _context.ContributoRoles.ToListAsync();
+            return await _context.ContributorRoles.ToListAsync();
         }
 
         public Task<ContributorRole?> GetByIdAsync(Guid id)
