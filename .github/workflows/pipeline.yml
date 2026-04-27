@@ -41,6 +41,7 @@ jobs:
     docker-build-push:
       name: Docker Build and Push
       needs: linting
+      if: github.ref == 'refs/heads/main'
       runs-on: ubuntu-latest
       permissions:
         contents: read
@@ -75,6 +76,7 @@ jobs:
     deploy-to-server:
       name: Deploy to server
       needs: docker-build-push
+      if: github.ref == 'refs/heads/main'
       runs-on: ubuntu-latest
       steps:
         - name: Checkout code
