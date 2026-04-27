@@ -14,6 +14,10 @@
             public string? MetadataLanguageName { get; set; }
             public string? AudioLanguageName { get; set; }
 
+            public Guid? GenreId { get; set; }
+            public Guid? MetadataLanguageId { get; set; }
+            public Guid? AudioLanguageId { get; set; }
+
             public bool HasAudio { get; set; }
             public string? Codec { get; set; }
             public string? BitDepth { get; set; }

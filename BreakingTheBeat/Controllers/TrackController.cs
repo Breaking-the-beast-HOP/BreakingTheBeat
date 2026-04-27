@@ -69,8 +69,11 @@ namespace Gateway.Controllers
                 DurationSeconds = (int)track.Duration.TotalSeconds,
 
                 GenreName = track.GenreName,
+                GenreId = track.GenreId,
                 MetadataLanguageName = track.MetadataLanguageName,
+                MetadataLanguageId = track.MetadataLanguageId,
                 AudioLanguageName = track.AudioLanguageName,
+                AudioLanguageId = track.AudioLanguageId,
 
                 Contributions = track.Contributions
         .Select(c => new ContributionResponse
