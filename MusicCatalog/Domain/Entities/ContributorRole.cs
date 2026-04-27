@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicCatalog.Domain
+namespace MusicCatalog.Domain.Entities
 {
-    public class Contributor
+    public class ContributorRole
     {
         public int Id { get; set; }
         public string Name { get; set; }
+
     }
 }
