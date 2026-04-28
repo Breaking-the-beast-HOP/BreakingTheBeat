@@ -4,6 +4,11 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
+@using FrontendThrowAway.Models.Tracks
+@using FrontendThrowAway.Models.Common
+
+@namespace FrontendThrowAway.Pages
+
 <PageTitle>Edit Track</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
@@ -88,18 +93,19 @@
                                     <MudAutocomplete T="GenreDto"
                                                      Label="Genre"
                                                      Variant="Variant.Outlined"
-                                                     Value="_selectedGenre"
-                                                     ValueChanged="OnGenreChanged"
+                                                     @bind-Value="_selectedGenre"
                                                      SearchFunc="SearchGenres"
                                                      ToStringFunc="@(g => g?.Name ?? string.Empty)"
                                                      Clearable="true"
-                                                     ResetValueOnEmptyText="true"
-                                                     CoerceText="false"
+                                                     ResetValueOnEmptyText="false"
+                                                     CoerceText="true"
                                                      Dense="true"
                                                      FullWidth="true"
                                                      MaxItems="8"
                                                      Disabled="_isLoading" />
                                 </MudItem>
+
+                          
 
                                 <MudItem xs="12" sm="6">
                                     <MudAutocomplete T="LanguageDto"
@@ -182,200 +188,3 @@
         }
     </MudStack>
 </MudContainer>
-
-@code {
-    [Parameter]
-    public Guid Id { get; set; }
-
-    private TrackModel _model = new();
-
-    private List<LanguageDto> _languages = new();
-    private List<GenreDto> _genres = new();
-
-    private GenreDto? _selectedGenre;
-    private LanguageDto? _selectedMetadataLanguage;
-    private LanguageDto? _selectedAudioLanguage;
-
-    private bool _isLoading = true;
-    private bool _isSaving = false;
-    private string? _errorMessage;
-    private string? _successMessage;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/Language") ?? new();
-            _genres = await Http.GetFromJsonAsync<List<GenreDto>>("api/Genre") ?? new();
-
-            var track = await Http.GetFromJsonAsync<TrackEditDto>($"api/track/{Id}");
-
-            if (track is null)
-            {
-                _errorMessage = "Track not found.";
-                return;
-            }
-
-            _model = new TrackModel
-                {
-                    Title = track.Title,
-                    Version = track.Version,
-                    ISRC = track.ISRC,
-                    GenreId = track.GenreId,
-                    MetadataLanguageId = track.MetadataLanguageId,
-                    AudioLanguageId = track.AudioLanguageId
-                };
-
-            _selectedGenre = _genres.FirstOrDefault(g => g.Id == track.GenreId);
-            _selectedMetadataLanguage = _languages.FirstOrDefault(l => l.Id == track.MetadataLanguageId);
-            _selectedAudioLanguage = _languages.FirstOrDefault(l => l.Id == track.AudioLanguageId);
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Could not load track: {ex.Message}";
-        }
-        finally
-        {
-            _isLoading = false;
-        }
-    }
-
-    private Task<IEnumerable<GenreDto>> SearchGenres(string value, CancellationToken token)
-    {
-        IEnumerable<GenreDto> result;
-
-        if (string.IsNullOrWhiteSpace(value))
-            result = _genres;
-        else
-            result = _genres.Where(g => g.Name.Contains(value, StringComparison.OrdinalIgnoreCase));
-
-        return Task.FromResult(result);
-    }
-
-    private Task<IEnumerable<LanguageDto>> SearchLanguages(string value, CancellationToken token)
-    {
-        IEnumerable<LanguageDto> result;
-
-        if (string.IsNullOrWhiteSpace(value))
-            result = _languages;
-        else
-            result = _languages.Where(l =>
-                l.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                l.ISO.Contains(value, StringComparison.OrdinalIgnoreCase));
-
-        return Task.FromResult(result);
-    }
-
-    private Task OnGenreChanged(GenreDto? genre)
-    {
-        _selectedGenre = genre;
-        _model.GenreId = genre?.Id;
-        return Task.CompletedTask;
-    }
-
-    private Task OnMetadataLanguageChanged(LanguageDto? language)
-    {
-        _selectedMetadataLanguage = language;
-        _model.MetadataLanguageId = language?.Id;
-        return Task.CompletedTask;
-    }
-
-    private Task OnAudioLanguageChanged(LanguageDto? language)
-    {
-        _selectedAudioLanguage = language;
-        _model.AudioLanguageId = language?.Id;
-        return Task.CompletedTask;
-    }
-
-    private async Task UpdateTrack()
-    {
-        _errorMessage = null;
-        _successMessage = null;
-
-        if (string.IsNullOrWhiteSpace(_model.Title))
-        {
-            _errorMessage = "Title is required.";
-            return;
-        }
-
-        if (_model.GenreId is null || _model.GenreId == Guid.Empty)
-        {
-            _errorMessage = "Genre is required.";
-            return;
-        }
-
-        if (_model.MetadataLanguageId is null || _model.MetadataLanguageId == Guid.Empty)
-        {
-            _errorMessage = "Metadata language is required.";
-            return;
-        }
-
-        if (_model.AudioLanguageId is null || _model.AudioLanguageId == Guid.Empty)
-        {
-            _errorMessage = "Audio language is required.";
-            return;
-        }
-
-        try
-        {
-            _isSaving = true;
-
-            var response = await Http.PutAsJsonAsync($"api/track/{Id}", _model);
-
-            if (response.IsSuccessStatusCode)
-            {
-                _successMessage = "Track updated successfully.";
-                Navigation.NavigateTo($"/tracks/{Id}");
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                _errorMessage = string.IsNullOrWhiteSpace(error)
-                    ? "Failed to update track."
-                    : error;
-            }
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"An error occurred while saving: {ex.Message}";
-        }
-        finally
-        {
-            _isSaving = false;
-        }
-    }
-
-    public class TrackModel
-    {
-        public string? Title { get; set; }
-        public string? Version { get; set; }
-        public string? ISRC { get; set; }
-        public Guid? GenreId { get; set; }
-        public Guid? MetadataLanguageId { get; set; }
-        public Guid? AudioLanguageId { get; set; }
-    }
-
-    public class TrackEditDto
-    {
-        public Guid Id { get; set; }
-        public string? Title { get; set; }
-        public string? Version { get; set; }
-        public string? ISRC { get; set; }
-        public Guid? GenreId { get; set; }
-        public Guid? MetadataLanguageId { get; set; }
-        public Guid? AudioLanguageId { get; set; }
-    }
-
-    public class LanguageDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = "";
-        public string ISO { get; set; } = "";
-    }
-
-    public class GenreDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = "";
-    }
-}

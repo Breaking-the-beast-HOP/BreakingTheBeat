@@ -8,5 +8,7 @@
         public Guid GenreId { get; set; }
         public Guid AudioLanguageId { get; set; }
         public Guid MetadataLanguageId { get; set; }
+        
+        public List<ContributionRequest> Contributions { get; set; } = new();
     }
 }

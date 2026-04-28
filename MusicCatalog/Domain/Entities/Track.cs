@@ -83,6 +83,18 @@
                 AudioLanguageId = audioLanguageId.Value;
             }
         }
+
+        public void AddContribution(Guid contributorId, Guid roleId)
+        {
+            if (_contributions.Any(c =>
+                c.ContributorId == contributorId &&
+                c.ContributorRoleId == roleId))
+            {
+                return;
+            }
+
+            _contributions.Add(Contribution.ForTrack(Id, contributorId, roleId));
+        }
     }
 }
 

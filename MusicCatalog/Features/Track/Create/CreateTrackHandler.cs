@@ -22,6 +22,14 @@ namespace MusicCatalog.Features.Track.Create
                   request.AudioLanguageId,
                   request.MetadataLanguageId);
 
+            foreach (var contribution in request.Contributions)
+            {
+                foreach (var roleId in contribution.RoleIds)
+                {
+                    track.AddContribution(contribution.ContributorId, roleId);
+                }
+            }
+
             await _repository.AddAsync(track);
 
             return track.Id;

@@ -1,15 +1,16 @@
-using MediatR;
-using MusicCatalog.Features.Language.GetLanguages;
-using MusicCatalog.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Features.Language.Interfaces;
-using MusicCatalog.Infrastructure.Repositories;
+using MusicCatalog.Features.Contributor;
+using MusicCatalog.Features.Contributor.Create;
+using MusicCatalog.Features.ContributorRole;
+using MusicCatalog.Features.ContributorRole.GetAll;
 using MusicCatalog.Features.Genre;
 using MusicCatalog.Features.Genre.Interfaces;
+using MusicCatalog.Features.Language.GetLanguages;
+using MusicCatalog.Features.Language.Interfaces;
 using MusicCatalog.Features.Track;
 using MusicCatalog.Features.Track.Create;
-using MusicCatalog.Features.Contributor.Create;
-using MusicCatalog.Features.Contributor;
+using MusicCatalog.Infrastructure;
+using MusicCatalog.Infrastructure.Repositories;
 
 namespace Gateway
 {
@@ -30,20 +31,20 @@ namespace Gateway
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
             builder.Services.AddScoped<IContributorRepository, ContributorRepository>();
+            builder.Services.AddScoped<IContributorRoleRepository, ContributionRoleRepository>();
 
             //4. services
 
 
             //5. Command/query handlers are registered by MediatR
             builder.Services.AddMediatR(cfg =>
-               cfg.RegisterServicesFromAssembly(typeof(GetLanguagesQuery).Assembly));
-            builder.Services.AddMediatR(cfg =>
-             cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly));
-            builder.Services.AddMediatR(cfg =>
-             cfg.RegisterServicesFromAssembly(typeof(CreateTrackCommand).Assembly));
-
-            builder.Services.AddMediatR(cfg =>
-          cfg.RegisterServicesFromAssembly(typeof(CreateContributorCommand).Assembly));
+            {
+                cfg.RegisterServicesFromAssembly(typeof(GetLanguagesQuery).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(CreateTrackCommand).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(CreateContributorCommand).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetContributorRolesQuery).Assembly);
+            });
 
             //6. Controllers
             builder.Services.AddControllers();
