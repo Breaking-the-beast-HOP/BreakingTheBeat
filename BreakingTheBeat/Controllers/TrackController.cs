@@ -94,8 +94,15 @@ namespace Gateway.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateTrack(Guid id, [FromBody] UpdateTrackRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateTrack( Guid id,[FromBody] UpdateTrackRequest request,CancellationToken cancellationToken)
         {
+            var contributions = request.Contributions
+                .SelectMany(c => c.RoleIds.Select(roleId =>
+                    new UpdateContributionCommand(
+                        c.ContributorId,
+                        roleId)))
+                .ToList();
+
             var result = await _mediator.Send(
                 new UpdateTrackCommand(
                     id,
@@ -103,8 +110,9 @@ namespace Gateway.Controllers
                     request.Version,
                     request.ISRC,
                     request.GenreId,
+                    request.MetadataLanguageId,
                     request.AudioLanguageId,
-                    request.MetadataLanguageId),
+                    contributions),
                 cancellationToken);
 
             if (!result)

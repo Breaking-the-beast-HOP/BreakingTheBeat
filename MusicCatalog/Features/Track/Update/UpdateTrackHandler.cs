@@ -28,6 +28,12 @@ namespace MusicCatalog.Features.Track.Update
                 request.AudioLanguageId
             );
 
+            track.UpdateContributions(
+                request.Contributions
+                    .Select(c => (c.ContributorId, c.ContributorRoleId))
+                    .ToList()
+            );
+
             await _repository.UpdateAsync(track);
 
             return true;

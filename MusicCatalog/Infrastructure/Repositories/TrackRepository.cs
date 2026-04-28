@@ -37,7 +37,9 @@ namespace MusicCatalog.Infrastructure.Repositories
 
         public async Task<List<Track>> GetAllAsync()
         {
+
             return await _context.Tracks
+                .AsNoTracking()
                 .Include(t => t.Genre)
                 .Include(t => t.MetadataLanguage)
                 .Include(t => t.AudioLanguage)
