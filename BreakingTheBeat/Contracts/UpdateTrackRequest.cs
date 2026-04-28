@@ -1,5 +1,5 @@
 ﻿namespace Gateway.Contracts
-{ 
+{
     public class UpdateTrackRequest
     {
         public string? Title { get; set; }
@@ -9,5 +9,5 @@
         public Guid? MetadataLanguageId { get; set; }
         public Guid? AudioLanguageId { get; set; }
     }
-    
+
 }

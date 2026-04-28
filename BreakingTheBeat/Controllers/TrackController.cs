@@ -2,7 +2,7 @@
 using Gateway.Contracts.Gateway.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Domain.Entities;
+using MusicCatalog.Features.Contributor.Create;
 using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Features.Track.Delete;
 using MusicCatalog.Features.Track.Get;
@@ -76,6 +76,7 @@ namespace Gateway.Controllers
                 AudioLanguageId = track.AudioLanguageId,
 
                 Contributions = track.Contributions
+
         .Select(c => new ContributionResponse
         {
             ContributorId = c.ContributorId,

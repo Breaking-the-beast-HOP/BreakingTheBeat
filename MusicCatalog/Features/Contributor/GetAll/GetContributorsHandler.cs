@@ -3,7 +3,7 @@ using MusicCatalog.Features.Language.Interfaces;
 
 namespace MusicCatalog.Features.Contributor.Get
 {
-    public class GetContributorsHandler: IRequestHandler<GetContributorsQuery, List<ContributorDTO>>
+    public class GetContributorsHandler : IRequestHandler<GetContributorsQuery, List<ContributorDTO>>
     {
         private readonly IContributorRepository _repository;
         public GetContributorsHandler(IContributorRepository repository)

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MusicCatalog.Domain.Entities
 {
-    
+
     public class Contributor
     {
         public Guid Id { get; private set; }
@@ -73,5 +73,5 @@ namespace MusicCatalog.Domain.Entities
             ISNI = normalizedIsni;
         }
     }
-    
+
 }

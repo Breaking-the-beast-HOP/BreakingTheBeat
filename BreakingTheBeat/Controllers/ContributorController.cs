@@ -25,7 +25,7 @@ namespace Gateway.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateContributor([FromBody] ContributorRequest request, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new CreateContributorCommand(request.LegalName, request.DisplayName, request.IPI,request.ISNI), cancellationToken);
+            var result = await _mediator.Send(new CreateContributorCommand(request.LegalName, request.DisplayName, request.IPI, request.ISNI), cancellationToken);
             return Ok(result);
 
         }
