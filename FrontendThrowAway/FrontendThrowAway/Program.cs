@@ -10,6 +10,8 @@ namespace FrontendThrowAway
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var apiBaseUrl = builder.Configuration["API_BASE_URL"] ?? "https://localhost:7194/";
+
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents()
@@ -19,7 +21,7 @@ namespace FrontendThrowAway
 
             builder.Services.AddScoped(sp => new HttpClient
             {
-                BaseAddress = new Uri("https://localhost:7194/")
+                BaseAddress = new Uri(apiBaseUrl)
             });
 
             var app = builder.Build();
