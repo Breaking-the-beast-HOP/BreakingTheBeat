@@ -1,0 +1,6 @@
+﻿.dropzone {
+    min-height: 220px;
+    border: 2px dashed rgba(0, 0, 0, 0.18);
+    background: rgba(255, 152, 0, 0.04);
+    border-radius: 12px;
+}

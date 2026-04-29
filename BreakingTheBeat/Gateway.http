@@ -1,0 +1,10 @@
+﻿@Gateway_HostAddress = https://localhost:7194
+
+PUT {{Gateway_HostAddress}}/api/podcasts/podcast/{id:guid}
+Content-Type: application/json
+
+{
+  //PodcastUpdateRequest
+}
+
+###

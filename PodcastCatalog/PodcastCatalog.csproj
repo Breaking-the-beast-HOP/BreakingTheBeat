@@ -6,4 +6,25 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Features\Languages\AddLanguageToPodcast\**" />
+    <Compile Remove="Features\Languages\RemoveLanguageFromPodcast\**" />
+    <EmbeddedResource Remove="Features\Languages\AddLanguageToPodcast\**" />
+    <EmbeddedResource Remove="Features\Languages\RemoveLanguageFromPodcast\**" />
+    <None Remove="Features\Languages\AddLanguageToPodcast\**" />
+    <None Remove="Features\Languages\RemoveLanguageFromPodcast\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.15" />
+	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
+  </ItemGroup>
+
 </Project>
