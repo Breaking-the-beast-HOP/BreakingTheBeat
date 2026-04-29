@@ -26,5 +26,10 @@ namespace MusicCatalog.Features.Track
         // Audio language
         public Guid AudioLanguageId { get; set; }
         public string AudioLanguageName { get; set; } = default!;
+
+        // Contributions
+        public List<TrackContributionRowDTO> Contributions { get; set; } = new();
+
+
     }
 }

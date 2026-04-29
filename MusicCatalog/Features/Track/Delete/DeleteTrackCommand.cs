@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediatR;
 
 namespace MusicCatalog.Features.Track.Delete
 {
-    internal class DeleteTrackCommand
-    {
-    }
+    public record DeleteTrackCommand(Guid Id) : IRequest<bool>;
 }

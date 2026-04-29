@@ -1,5 +1,6 @@
 ﻿using PodcastCatalog.Domain.Entities;
 using SharedKernel;
+using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Infrastructure.Repositories
 {
@@ -10,7 +11,7 @@ namespace PodcastCatalog.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(Language entity)
+        public Task<bool> DeleteAsync(Guid Id)
         {
             throw new NotImplementedException();
         }
@@ -25,7 +26,7 @@ namespace PodcastCatalog.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(Language entity)
+        public Task<bool> UpdateAsync(Language entity)
         {
             throw new NotImplementedException();
         }

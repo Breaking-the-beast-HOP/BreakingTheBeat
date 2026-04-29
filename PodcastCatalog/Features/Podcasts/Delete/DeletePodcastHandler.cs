@@ -32,7 +32,7 @@ namespace PodcastCatalog.Features.Podcasts.Delete
             {
                 throw new KeyNotFoundException($"Podcast with ID {request.Id} not found.");
             }
-            await _podcastRepository.DeleteAsync(podcast);
+            await _podcastRepository.DeleteAsync(request.Id);
             return Unit.Value;
         }
     }

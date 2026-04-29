@@ -1,0 +1,185 @@
+﻿@page "/contributors"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Contributor Catalog</PageTitle>
+
+<MudStack Spacing="3">
+
+    <!-- Header -->
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h4">Contributor Catalog</MudText>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/create-contributor">
+            Create Contributor
+        </MudButton>
+    </MudStack>
+
+    <!-- Search -->
+    <MudTextField @bind-Value="_searchString"
+                  Placeholder="Search name..."
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Variant="Variant.Outlined"
+                  Immediate="true" />
+
+    <!-- Content -->
+    @if (isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">
+            @errorMessage
+        </MudAlert>
+    }
+    else if (_contributors == null || !_contributors.Any())
+    {
+        <MudAlert Severity="Severity.Info">
+            No contributors found.
+        </MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4">
+
+            <MudTable Items="FilteredContributors"
+                      T="ContributorDto"
+                      Hover="true"
+                      Dense="true"
+                      Elevation="0">
+
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Legal name</MudTh>
+                    <MudTh>IPI</MudTh>
+                    <MudTh>ISNI</MudTh>
+                    <MudTh Style="width:150px;">Actions</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <!-- Name (klikbar) -->
+                    <MudTd DataLabel="Name">
+                        <MudLink Href="@($"/contributors/{context.Id}")">
+                            <MudText Typo="Typo.subtitle2">
+                                @context.DisplayName
+                            </MudText>
+                        </MudLink>
+                    </MudTd>
+
+                    <MudTd DataLabel="Legal name">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            @(context.LegalName ?? "-")
+                        </MudText>
+                    </MudTd>
+
+                    <MudTd DataLabel="IPI">
+                        <MudText Typo="Typo.body2">
+                            @(context.IPI ?? "-")
+                        </MudText>
+                    </MudTd>
+
+                    <MudTd DataLabel="ISNI">
+                        <MudText Typo="Typo.body2">
+                            @(context.ISNI ?? "-")
+                        </MudText>
+                    </MudTd>
+
+                    <!-- Actions -->
+                    <MudTd DataLabel="Actions">
+                        <MudStack Row="true" Spacing="1">
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Warning"
+                                           Size="Size.Small"
+                                           OnClick="@(() => EditContributor(context.Id))" />
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           OnClick="@(() => DeleteContributor(context.Id))" />
+
+                        </MudStack>
+                    </MudTd>
+
+                </RowTemplate>
+
+            </MudTable>
+        </MudPaper>
+    }
+
+</MudStack>
+
+@code {
+    private List<ContributorDto> _contributors = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+    private string _searchString = string.Empty;
+
+    private IEnumerable<ContributorDto> FilteredContributors =>
+        _contributors.Where(c =>
+            string.IsNullOrWhiteSpace(_searchString) ||
+            (c.DisplayName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (c.LegalName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _contributors = await Http.GetFromJsonAsync<List<ContributorDto>>("api/contributor")
+                           ?? new();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Could not fetch contributors: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void EditContributor(Guid id)
+    {
+        Navigation.NavigateTo($"/contributors/{id}/edit");
+    }
+
+    private async Task DeleteContributor(Guid id)
+    {
+        var confirm = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this contributor?");
+        if (!confirm) return;
+
+        try
+        {
+            var response = await Http.DeleteAsync($"api/contributor/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                _contributors = _contributors.Where(c => c.Id != id).ToList();
+            }
+            else
+            {
+                errorMessage = "Failed to delete contributor.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    public class ContributorDto
+    {
+        public Guid Id { get; set; }
+        public string? DisplayName { get; set; }
+        public string? LegalName { get; set; }
+        public string? IPI { get; set; }
+        public string? ISNI { get; set; }
+    }
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+}

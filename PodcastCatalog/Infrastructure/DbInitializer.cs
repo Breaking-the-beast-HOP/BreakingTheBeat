@@ -27,7 +27,7 @@ namespace PodcastCatalog.Infrastructure
             {
                 context.Languages.AddRange(languages);
                 context.SaveChanges();
-            }   
+            }
 
             var categories = new Category[]
             {
@@ -41,7 +41,7 @@ namespace PodcastCatalog.Infrastructure
             {
                 context.Categories.AddRange(categories);
                 context.SaveChanges();
-            }    
+            }
 
             var podcasts = new Podcast[]
             {

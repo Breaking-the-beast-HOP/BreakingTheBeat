@@ -1,11 +1,4 @@
 ﻿using MediatR;
-using MusicCatalog.Features.Genre.Interfaces;
-using MusicCatalog.Features.Genre;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicCatalog.Features.Track.GetById
 {
@@ -28,13 +21,35 @@ namespace MusicCatalog.Features.Track.GetById
                 Title = track.Title,
                 Version = track.Version,
                 ISRC = track.ISRC,
+
                 GenreId = track.GenreId,
                 GenreName = track.Genre.Name,
+
                 MetadataLanguageId = track.MetadataLanguageId,
                 MetadataLanguageName = track.MetadataLanguage.Name,
+
                 AudioLanguageId = track.AudioLanguageId,
-                AudioLanguageName = track.AudioLanguage.Name
+                AudioLanguageName = track.AudioLanguage.Name,
+
+                Contributions = track.Contributions
+                    .GroupBy(c => new
+                    {
+                        c.ContributorId,
+                        c.Contributor.DisplayName
+                    })
+                    .Select(g => new TrackContributionRowDTO
+                    {
+                        ContributorId = g.Key.ContributorId,
+                        ContributorName = g.Key.DisplayName,
+                        Roles = g.Select(c => new TrackContributionRoleDTO
+                        {
+                            Id = c.ContributorRoleId,
+                            Name = c.Role.Name
+                        }).ToList()
+                    })
+                    .ToList()
             };
+
             return trackDTO;
         }
     }

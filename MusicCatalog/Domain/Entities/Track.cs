@@ -48,6 +48,53 @@
                 Duration = TimeSpan.Zero
             };
         }
+
+        public void UpdateDetails(string? title, string? version, string? isrc, Guid? genreId, Guid? metadataLanguageId, Guid? audioLanguageId)
+        {
+            if (!string.IsNullOrWhiteSpace(title))
+                Title = title;
+
+            Version = version;
+
+            if (!string.IsNullOrWhiteSpace(isrc))
+                ISRC = isrc;
+
+            if (genreId.HasValue)
+            {
+                if (genreId.Value == Guid.Empty)
+                    throw new ArgumentException("GenreId is required.");
+
+                GenreId = genreId.Value;
+            }
+
+            if (metadataLanguageId.HasValue)
+            {
+                if (metadataLanguageId.Value == Guid.Empty)
+                    throw new ArgumentException("MetadataLanguageId is required.");
+
+                MetadataLanguageId = metadataLanguageId.Value;
+            }
+
+            if (audioLanguageId.HasValue)
+            {
+                if (audioLanguageId.Value == Guid.Empty)
+                    throw new ArgumentException("AudioLanguageId is required.");
+
+                AudioLanguageId = audioLanguageId.Value;
+            }
+        }
+
+        public void AddContribution(Guid contributorId, Guid roleId)
+        {
+            if (_contributions.Any(c =>
+                c.ContributorId == contributorId &&
+                c.ContributorRoleId == roleId))
+            {
+                return;
+            }
+
+            _contributions.Add(Contribution.ForTrack(Id, contributorId, roleId));
+        }
     }
 }
 

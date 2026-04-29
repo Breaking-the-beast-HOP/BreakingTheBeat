@@ -1,5 +1,9 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using MusicCatalog.Features.Contributor;
+using MusicCatalog.Features.Contributor.Create;
+using MusicCatalog.Features.ContributorRole;
+using MusicCatalog.Features.ContributorRole.GetAll;
 using MusicCatalog.Features.Genre;
 using MusicCatalog.Features.Genre.Interfaces;
 using MusicCatalog.Features.Language.GetLanguages;
@@ -8,6 +12,7 @@ using MusicCatalog.Features.Track;
 using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Infrastructure;
 using MusicCatalog.Infrastructure.Repositories;
+
 using PodcastCatalog.Domain.Entities;
 using PodcastCatalog.Features.Podcasts.Create;
 using PodcastCatalog.Features.Podcasts.Get;
@@ -15,7 +20,7 @@ using PodcastCatalog.Features.Podcasts.GetAll;
 using PodcastCatalog.Features.Podcasts.Update;
 using PodcastCatalog.Infrastructure;
 using PodcastCatalog.Infrastructure.Data;
-using PodcastCatalog.Shared.Infrastructure.Repositories;
+
 using SharedKernel;
 
 namespace Gateway
@@ -28,62 +33,67 @@ namespace Gateway
 
             // 1. Connection strings
             var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatDb");
-            var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatDb") ?? throw new InvalidOperationException("Connection string 'PodcastCatalog' not found.");
+            var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatDb")
+                ?? throw new InvalidOperationException("Connection string 'PodcastCatalog' not found.");
 
             // 2. DbContext
-            Console.WriteLine($"Music Catalog Connection String: {musicCatalogConnectionString}");
-            builder.Services.AddDbContext<MusicCatalogDbContext>(options => options.UseNpgsql(musicCatalogConnectionString));
-            Console.WriteLine($"Podcast Catalog Connection String: {podcastCatalogConnectionString}");
-            builder.Services.AddDbContext<PodcastCatalogDbContext>(options => options.UseNpgsql(podcastCatalogConnectionString));
+            builder.Services.AddDbContext<MusicCatalogDbContext>(options =>
+                options.UseNpgsql(musicCatalogConnectionString));
+
+            builder.Services.AddDbContext<PodcastCatalogDbContext>(options =>
+                options.UseNpgsql(podcastCatalogConnectionString));
 
             // 3.1 Repositories (music)
             builder.Services.AddScoped<ILanguageRepository, MusicCatalog.Infrastructure.Repositories.LanguageRepository>();
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
+            builder.Services.AddScoped<IContributorRepository, ContributorRepository>();
+            builder.Services.AddScoped<IContributorRoleRepository, ContributionRoleRepository>();
 
-            // 3.2. Repositories (podcast)
+            // 3.2 Repositories (podcast)
             builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
 
-            //4.1. Music services
-
-            // 4.2. Podcast services
+            // 4. Validators (Podcast)
             builder.Services.AddValidatorsFromAssemblyContaining<CreatePodcastValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdatePodcastValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetPodcastValidator>();
 
-            //5.1. Command/query handlers are registered by MediatR
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetLanguagesQuery).Assembly));
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly));
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateTrackCommand).Assembly));
+            // 5. MediatR (EN gang!)
+            builder.Services.AddMediatR(cfg =>
+            {
+                // Music
+                cfg.RegisterServicesFromAssembly(typeof(GetLanguagesQuery).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(CreateTrackCommand).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(CreateContributorCommand).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetContributorRolesQuery).Assembly);
 
-            // 5.2. Podcast command/query handlers are registered by MediatR
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreatePodcastHandler).Assembly));
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdatePodcastHandler).Assembly));
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetPodcastHandler).Assembly));
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllPodcastsHandler).Assembly));
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetPodcastHandler).Assembly));
+                // Podcast
+                cfg.RegisterServicesFromAssembly(typeof(CreatePodcastHandler).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(UpdatePodcastHandler).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetPodcastHandler).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetAllPodcastsHandler).Assembly);
+            });
 
-         
-            //6. Controllers
+            // 6. Controllers
             builder.Services.AddControllers();
 
-            //7. Swagger/OpenAPI
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            // 7. Swagger/OpenAPI
             builder.Services.AddOpenApi();
-
-            //8. CORS
-
 
             var app = builder.Build();
 
-            // Seed the database with initial data
+            // Seed database
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+
                 try
                 {
                     var context = services.GetRequiredService<PodcastCatalogDbContext>();
+
+                    context.Database.Migrate(); // ?? vigtigt!
                     DbInitializer.Initialize(context);
                 }
                 catch (Exception ex)
@@ -93,17 +103,14 @@ namespace Gateway
                 }
             }
 
-            // Configure the HTTP request pipeline.
+            // Pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();

@@ -1,0 +1,190 @@
+﻿@page "/tracks/edit/{Id:guid}"
+@rendermode InteractiveServer
+@using MudBlazor
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@using FrontendThrowAway.Models.Tracks
+@using FrontendThrowAway.Models.Common
+
+@namespace FrontendThrowAway.Pages
+
+<PageTitle>Edit Track</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
+
+    <MudStack Spacing="4">
+
+        <MudPaper Class="pa-4">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h4">Edit Track</MudText>
+
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               Href="/tracks">
+                        Cancel
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               OnClick="UpdateTrack"
+                               Disabled="_isSaving || _isLoading">
+                        @(_isSaving ? "Saving..." : "Save changes")
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <MudAlert Severity="Severity.Error">
+                @_errorMessage
+            </MudAlert>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(_successMessage))
+        {
+            <MudAlert Severity="Severity.Success">
+                @_successMessage
+            </MudAlert>
+        }
+
+        @if (_isLoading)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else
+        {
+            <MudGrid Spacing="3">
+
+                <MudItem xs="12" md="7">
+                    <MudStack Spacing="3">
+
+                        <MudPaper Class="pa-4" Elevation="5">
+                            <MudText Typo="Typo.h6" Class="mb-3">Track Info</MudText>
+
+                            <MudGrid Spacing="2">
+
+                                <MudItem xs="12">
+                                    <MudTextField Label="Title"
+                                                  @bind-Value="_model.Title"
+                                                  Variant="Variant.Outlined"
+                                                  Required="true"
+                                                  FullWidth="true" />
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField Label="Version"
+                                                  @bind-Value="_model.Version"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true" />
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField Label="ISRC"
+                                                  @bind-Value="_model.ISRC"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true" />
+                                </MudItem>
+
+                                <MudItem xs="12">
+                                    <MudAutocomplete T="GenreDto"
+                                                     Label="Genre"
+                                                     Variant="Variant.Outlined"
+                                                     @bind-Value="_selectedGenre"
+                                                     SearchFunc="SearchGenres"
+                                                     ToStringFunc="@(g => g?.Name ?? string.Empty)"
+                                                     Clearable="true"
+                                                     ResetValueOnEmptyText="false"
+                                                     CoerceText="true"
+                                                     Dense="true"
+                                                     FullWidth="true"
+                                                     MaxItems="8"
+                                                     Disabled="_isLoading" />
+                                </MudItem>
+
+                          
+
+                                <MudItem xs="12" sm="6">
+                                    <MudAutocomplete T="LanguageDto"
+                                                     Label="Metadata language"
+                                                     Variant="Variant.Outlined"
+                                                     Value="_selectedMetadataLanguage"
+                                                     ValueChanged="OnMetadataLanguageChanged"
+                                                     SearchFunc="SearchLanguages"
+                                                     ToStringFunc="@(l => l?.Name ?? string.Empty)"
+                                                     Clearable="true"
+                                                     ResetValueOnEmptyText="true"
+                                                     CoerceText="false"
+                                                     Dense="true"
+                                                     FullWidth="true"
+                                                     MaxItems="8"
+                                                     Disabled="_isLoading" />
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6">
+                                    <MudAutocomplete T="LanguageDto"
+                                                     Label="Audio language"
+                                                     Variant="Variant.Outlined"
+                                                     Value="_selectedAudioLanguage"
+                                                     ValueChanged="OnAudioLanguageChanged"
+                                                     SearchFunc="SearchLanguages"
+                                                     ToStringFunc="@(l => l?.Name ?? string.Empty)"
+                                                     Clearable="true"
+                                                     ResetValueOnEmptyText="true"
+                                                     CoerceText="false"
+                                                     Dense="true"
+                                                     FullWidth="true"
+                                                     MaxItems="8"
+                                                     Disabled="_isLoading" />
+                                </MudItem>
+
+                            </MudGrid>
+                        </MudPaper>
+
+                        <MudPaper Class="pa-4" Elevation="5">
+                            <MudText Typo="Typo.h6" Class="mb-3">Contributors</MudText>
+                            <MudAlert Severity="Severity.Info" Dense="true">
+                                Editing contributors can be added later.
+                            </MudAlert>
+                        </MudPaper>
+
+                    </MudStack>
+                </MudItem>
+
+                <MudItem xs="12" md="5">
+                    <MudStack Spacing="3">
+
+                        <MudPaper Class="pa-4" Elevation="5">
+                            <MudText Typo="Typo.h6" Class="mb-3">Audio</MudText>
+
+                            <MudStack Spacing="3">
+
+                                <MudPaper Class="dropzone pa-6" Outlined="true">
+                                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
+                                        <MudIcon Icon="@Icons.Material.Filled.AudioFile"
+                                                 Size="Size.Large"
+                                                 Color="Color.Warning" />
+                                        <MudText Typo="Typo.subtitle1">Audio asset</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                            Audio editing will be added later
+                                        </MudText>
+                                    </MudStack>
+                                </MudPaper>
+
+                                <MudAlert Severity="Severity.Info" Dense="true">
+                                    Audio details are read-only for now.
+                                </MudAlert>
+
+                            </MudStack>
+                        </MudPaper>
+
+                    </MudStack>
+                </MudItem>
+
+            </MudGrid>
+        }
+    </MudStack>
+</MudContainer>
