@@ -31,7 +31,9 @@ namespace Gateway
             var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatDb") ?? throw new InvalidOperationException("Connection string 'PodcastCatalog' not found.");
 
             // 2. DbContext
+            Console.WriteLine($"Music Catalog Connection String: {musicCatalogConnectionString}");
             builder.Services.AddDbContext<MusicCatalogDbContext>(options => options.UseNpgsql(musicCatalogConnectionString));
+            Console.WriteLine($"Podcast Catalog Connection String: {podcastCatalogConnectionString}");
             builder.Services.AddDbContext<PodcastCatalogDbContext>(options => options.UseNpgsql(podcastCatalogConnectionString));
 
             // 3.1 Repositories (music)

@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Gateway.Contracts.Podcast;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PodcastCatalog.Features.Podcasts.Create;
@@ -21,28 +22,45 @@ namespace Gateway.Controllers.Podcast
         }
         // POST: api/podcasts/podcast
         [HttpPost]
-        public async Task<ActionResult<PodcastDTO>> CreatePodcast([FromBody] CreatePodcastCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreatePodcast(
+    [FromBody] NewPodcastRequest request,
+    CancellationToken cancellationToken)
         {
+            var command = new CreatePodcastCommand(
+                request.Title,
+                request.Description,
+                request.CategoryId,
+                request.LanguageId
+            );
+
             var result = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetPodcast), new { id = result.Id }, result);
+
+            return Ok(result);
         }
 
         // PUT: api/podcasts/podcast/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<PodcastDTO>> UpdatePodcast(
+        public async Task<IActionResult> UpdatePodcast(
             Guid id,
-            [FromBody] UpdatePodcastCommand command,
+            [FromBody] PodcastUpdateRequest request,
             CancellationToken cancellationToken)
         {
-            var updatedCommand = command with { Id = id };
-            var result = await _mediator.Send(updatedCommand, cancellationToken);
-            return Ok(result);
+            await _mediator.Send(
+                new UpdatePodcastCommand(
+                    Id: id,
+                    Title: request.Title,
+                    Description: request.Description,
+                    CategoryId: request.CategoryId,
+                    LanguageId: request.LanguageId),
+                cancellationToken);
+
+            return NoContent();
         }
+
 
         // GET: api/podcasts/podcast/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<PodcastDTO>> GetPodcast(
-            Guid id,
+        public async Task<ActionResult<PodcastDetailsResponse>> GetPodcast(Guid id,
             CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetPodcastQuery(id), cancellationToken);
@@ -50,7 +68,7 @@ namespace Gateway.Controllers.Podcast
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<PodcastDTO>>> GetAllPodcasts(
+        public async Task<ActionResult<List<PodcastResponse>>> GetAllPodcasts(
             CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetAllPodcastsQuery(), cancellationToken);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PodcastCatalog.Features.Podcasts.Update
 {
-    public record UpdatePodcastCommand(Guid Id, string Title, string Description) : IRequest<PodcastDTO>
+    public record UpdatePodcastCommand(Guid Id, string Title, string Description, Guid CategoryId, Guid LanguageId) : IRequest<PodcastDTO>
     {
     }
 }

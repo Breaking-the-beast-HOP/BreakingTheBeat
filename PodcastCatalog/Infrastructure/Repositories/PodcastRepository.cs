@@ -30,6 +30,7 @@ namespace PodcastCatalog.Shared.Infrastructure.Repositories
                 .Include(p => p.Seasons)
                 .Include(p => p.Category)
                 .Include(p => p.Hosts)
+                .Include(p => p.Language)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -40,6 +41,7 @@ namespace PodcastCatalog.Shared.Infrastructure.Repositories
                 .Include(p => p.Seasons)
                 .Include(p => p.Category)
                 .Include(p => p.Hosts)
+                .Include(p => p.Language)
                 .ToListAsync();
         }
 

@@ -12,7 +12,7 @@ using PodcastCatalog.Infrastructure.Data;
 namespace PodcastCatalog.Migrations
 {
     [DbContext(typeof(PodcastCatalogDbContext))]
-    [Migration("20260423104959_InitialCreate")]
+    [Migration("20260429173239_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -40,7 +40,7 @@ namespace PodcastCatalog.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Category", (string)null);
                 });
 
             modelBuilder.Entity("PodcastCatalog.Domain.Entities.Contribution", b =>
@@ -52,6 +52,9 @@ namespace PodcastCatalog.Migrations
                     b.Property<Guid>("ContributorId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ContributorRoleId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("EpisodeId")
                         .HasColumnType("uuid");
 
@@ -61,20 +64,17 @@ namespace PodcastCatalog.Migrations
                     b.Property<Guid?>("PodcastId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ContributorId");
+
+                    b.HasIndex("ContributorRoleId");
 
                     b.HasIndex("EpisodeId");
 
                     b.HasIndex("PodcastId");
 
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("Contributions");
+                    b.ToTable("Contribution", (string)null);
                 });
 
             modelBuilder.Entity("PodcastCatalog.Domain.Entities.Contributor", b =>
@@ -92,7 +92,7 @@ namespace PodcastCatalog.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Contributors");
+                    b.ToTable("Contributor", (string)null);
                 });
 
             modelBuilder.Entity("PodcastCatalog.Domain.Entities.ContributorRole", b =>
@@ -110,7 +110,7 @@ namespace PodcastCatalog.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ContributorRoles");
+                    b.ToTable("ContributorRole", (string)null);
                 });
 
             modelBuilder.Entity("PodcastCatalog.Domain.Entities.Episode", b =>
@@ -144,7 +144,7 @@ namespace PodcastCatalog.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("Episodes");
+                    b.ToTable("Episode", (string)null);
                 });
 
             modelBuilder.Entity("PodcastCatalog.Domain.Entities.Language", b =>
@@ -163,7 +163,7 @@ namespace PodcastCatalog.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Languages");
+                    b.ToTable("Language", (string)null);
                 });
 
             modelBuilder.Entity("PodcastCatalog.Domain.Entities.Podcast", b =>
@@ -191,7 +191,7 @@ namespace PodcastCatalog.Migrations
 
                     b.HasIndex("LanguageId");
 
-                    b.ToTable("Podcasts");
+                    b.ToTable("Podcast", (string)null);
                 });
 
             modelBuilder.Entity("PodcastCatalog.Domain.Entities.Season", b =>
@@ -214,7 +214,7 @@ namespace PodcastCatalog.Migrations
 
                     b.HasIndex("PodcastId");
 
-                    b.ToTable("Seasons");
+                    b.ToTable("Season", (string)null);
                 });
 
             modelBuilder.Entity("PodcastCatalog.Domain.Entities.Tag", b =>
@@ -229,7 +229,7 @@ namespace PodcastCatalog.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tag", (string)null);
                 });
 
             modelBuilder.Entity("PodcastCatalog.Domain.Entities.Contribution", b =>
@@ -240,21 +240,21 @@ namespace PodcastCatalog.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("PodcastCatalog.Domain.Entities.ContributorRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("ContributorRoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("PodcastCatalog.Domain.Entities.Episode", "Episode")
                         .WithMany("Contributions")
                         .HasForeignKey("EpisodeId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("PodcastCatalog.Domain.Entities.Podcast", "Podcast")
                         .WithMany("Hosts")
                         .HasForeignKey("PodcastId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("PodcastCatalog.Domain.Entities.ContributorRole", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Contributor");
 
@@ -270,13 +270,13 @@ namespace PodcastCatalog.Migrations
                     b.HasOne("PodcastCatalog.Domain.Entities.Season", "Season")
                         .WithMany("Episodes")
                         .HasForeignKey("SeasonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PodcastCatalog.Domain.Entities.Tag", "EpisodeTag")
                         .WithMany("Episodes")
                         .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("EpisodeTag");
@@ -289,13 +289,13 @@ namespace PodcastCatalog.Migrations
                     b.HasOne("PodcastCatalog.Domain.Entities.Category", "Category")
                         .WithMany("Podcasts")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("PodcastCatalog.Domain.Entities.Language", "Language")
                         .WithMany()
                         .HasForeignKey("LanguageId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -308,7 +308,7 @@ namespace PodcastCatalog.Migrations
                     b.HasOne("PodcastCatalog.Domain.Entities.Podcast", "Podcast")
                         .WithMany("Seasons")
                         .HasForeignKey("PodcastId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Podcast");

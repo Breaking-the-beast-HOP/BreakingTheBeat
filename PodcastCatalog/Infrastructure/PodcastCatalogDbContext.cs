@@ -37,13 +37,13 @@ namespace PodcastCatalog.Infrastructure.Data
                 entity.HasOne(p => p.Category)
                     .WithMany(c => c.Podcasts)
                     .HasForeignKey(p => p.CategoryId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.NoAction);
 
                 // Relation til Language
                 entity.HasOne(p => p.Language)
                     .WithMany()
                     .HasForeignKey(p => p.LanguageId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             // Konfiguration af Season
@@ -58,7 +58,7 @@ namespace PodcastCatalog.Infrastructure.Data
                 entity.HasOne(s => s.Podcast)
                     .WithMany(p => p.Seasons)
                     .HasForeignKey(s => s.PodcastId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Konfiguration af Episode
@@ -75,7 +75,7 @@ namespace PodcastCatalog.Infrastructure.Data
                 entity.HasOne(e => e.Season)
                     .WithMany(s => s.Episodes)
                     .HasForeignKey(e => e.SeasonId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Konfiguration af Contribution
@@ -94,21 +94,21 @@ namespace PodcastCatalog.Infrastructure.Data
                 entity.HasOne(c => c.Podcast)
                     .WithMany(p => p.Hosts)
                     .HasForeignKey(c => c.PodcastId)
-                    .OnDelete(DeleteBehavior.Cascade)
+                    .OnDelete(DeleteBehavior.NoAction)
                     .IsRequired(false);
 
                 // Relation til Episode (nullable)
                 entity.HasOne(c => c.Episode)
                     .WithMany(e => e.Contributions)
                     .HasForeignKey(c => c.EpisodeId)
-                    .OnDelete(DeleteBehavior.Cascade)
+                    .OnDelete(DeleteBehavior.NoAction)
                     .IsRequired(false);
 
                 // Relation til ContributorRole
                 entity.HasOne(c => c.Role)
                     .WithMany()
                     .HasForeignKey(c => c.ContributorRoleId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             // Konfiguration af Contributor
@@ -159,7 +159,7 @@ namespace PodcastCatalog.Infrastructure.Data
                 .HasOne(e => e.EpisodeTag)
                 .WithMany(t => t.Episodes)
                 .HasForeignKey(e => e.TagId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 

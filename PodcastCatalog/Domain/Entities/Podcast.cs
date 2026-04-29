@@ -19,10 +19,12 @@
         public Guid CategoryId { get; private set; }
         public Category Category { get; private set; }
 
-        public Podcast(string title, string description) : this(Guid.NewGuid(), title, description) { }
-        public Podcast(Guid id, string title, string description)
+        public Podcast(string title, string description) : this(Guid.NewGuid(), title, description, Guid.Parse("11111111-1111-1111-1111-111111111111"), Guid.Parse("11111111-1111-1111-1111-111111111111")) { }
+        public Podcast(Guid id, string title, string description, Guid categoryId, Guid languageId)
         {
             Id = id;
+            CategoryId = categoryId;
+            LanguageId = languageId;
             Update(title, description);
         }
 

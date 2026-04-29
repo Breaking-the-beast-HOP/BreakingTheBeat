@@ -31,7 +31,10 @@ public class CreatePodcastHandler : IRequestHandler<CreatePodcastCommand, Podcas
         var podcast = new Podcast(
             id: Guid.NewGuid(),
             title: request.Title,
-            description: request.Description);
+            description: request.Description,
+            categoryId: request.CategoryId,
+            languageId: request.LanguageId
+);
 
         await _podcastRepository.AddAsync(podcast);
 

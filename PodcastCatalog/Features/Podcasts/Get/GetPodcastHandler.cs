@@ -42,7 +42,11 @@ namespace PodcastCatalog.Features.Podcasts.Get
             {
                 Id = podcast.Id,
                 Title = podcast.Title,
-                Description = podcast.Description
+                Description = podcast.Description,
+                LanguageId = podcast.LanguageId,
+                LanguageName = podcast.Language.Name,
+                CategoryId = podcast.CategoryId,
+                CategoryName = podcast.Category.Name
             };
         }
     }

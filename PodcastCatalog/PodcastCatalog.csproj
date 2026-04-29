@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\Languages\AddLanguageToPodcast\**" />
+    <Compile Remove="Features\Languages\RemoveLanguageFromPodcast\**" />
+    <EmbeddedResource Remove="Features\Languages\AddLanguageToPodcast\**" />
+    <EmbeddedResource Remove="Features\Languages\RemoveLanguageFromPodcast\**" />
+    <None Remove="Features\Languages\AddLanguageToPodcast\**" />
+    <None Remove="Features\Languages\RemoveLanguageFromPodcast\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
@@ -16,11 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\Languages\AddLanguageToPodcast\" />
-    <Folder Include="Features\Languages\RemoveLanguageFromPodcast\" />
   </ItemGroup>
 
 </Project>

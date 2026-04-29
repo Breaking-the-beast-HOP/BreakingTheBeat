@@ -12,7 +12,7 @@ namespace PodcastCatalog.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Categories",
+                name: "Category",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -21,11 +21,11 @@ namespace PodcastCatalog.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.PrimaryKey("PK_Category", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ContributorRoles",
+                name: "Contributor",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -34,11 +34,11 @@ namespace PodcastCatalog.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ContributorRoles", x => x.Id);
+                    table.PrimaryKey("PK_Contributor", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Contributors",
+                name: "ContributorRole",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -47,11 +47,11 @@ namespace PodcastCatalog.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Contributors", x => x.Id);
+                    table.PrimaryKey("PK_ContributorRole", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Languages",
+                name: "Language",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -60,11 +60,11 @@ namespace PodcastCatalog.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Languages", x => x.Id);
+                    table.PrimaryKey("PK_Language", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tags",
+                name: "Tag",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -72,11 +72,11 @@ namespace PodcastCatalog.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tags", x => x.Id);
+                    table.PrimaryKey("PK_Tag", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Podcasts",
+                name: "Podcast",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -87,23 +87,21 @@ namespace PodcastCatalog.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Podcasts", x => x.Id);
+                    table.PrimaryKey("PK_Podcast", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Podcasts_Categories_CategoryId",
+                        name: "FK_Podcast_Category_CategoryId",
                         column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalTable: "Category",
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Podcasts_Languages_LanguageId",
+                        name: "FK_Podcast_Language_LanguageId",
                         column: x => x.LanguageId,
-                        principalTable: "Languages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalTable: "Language",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Seasons",
+                name: "Season",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -113,17 +111,17 @@ namespace PodcastCatalog.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Seasons", x => x.Id);
+                    table.PrimaryKey("PK_Season", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Seasons_Podcasts_PodcastId",
+                        name: "FK_Season_Podcast_PodcastId",
                         column: x => x.PodcastId,
-                        principalTable: "Podcasts",
+                        principalTable: "Podcast",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Episodes",
+                name: "Episode",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -136,104 +134,100 @@ namespace PodcastCatalog.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Episodes", x => x.Id);
+                    table.PrimaryKey("PK_Episode", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Episodes_Seasons_SeasonId",
+                        name: "FK_Episode_Season_SeasonId",
                         column: x => x.SeasonId,
-                        principalTable: "Seasons",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Episodes_Tags_TagId",
-                        column: x => x.TagId,
-                        principalTable: "Tags",
+                        principalTable: "Season",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Episode_Tag_TagId",
+                        column: x => x.TagId,
+                        principalTable: "Tag",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Contributions",
+                name: "Contribution",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ContributorId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ContributorRoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     PodcastId = table.Column<Guid>(type: "uuid", nullable: true),
                     EpisodeId = table.Column<Guid>(type: "uuid", nullable: true),
                     HasRights = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Contributions", x => x.Id);
+                    table.PrimaryKey("PK_Contribution", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Contributions_ContributorRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "ContributorRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        name: "FK_Contribution_ContributorRole_ContributorRoleId",
+                        column: x => x.ContributorRoleId,
+                        principalTable: "ContributorRole",
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Contributions_Contributors_ContributorId",
+                        name: "FK_Contribution_Contributor_ContributorId",
                         column: x => x.ContributorId,
-                        principalTable: "Contributors",
+                        principalTable: "Contributor",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Contributions_Episodes_EpisodeId",
+                        name: "FK_Contribution_Episode_EpisodeId",
                         column: x => x.EpisodeId,
-                        principalTable: "Episodes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "Episode",
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Contributions_Podcasts_PodcastId",
+                        name: "FK_Contribution_Podcast_PodcastId",
                         column: x => x.PodcastId,
-                        principalTable: "Podcasts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "Podcast",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Contributions_ContributorId",
-                table: "Contributions",
+                name: "IX_Contribution_ContributorId",
+                table: "Contribution",
                 column: "ContributorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Contributions_EpisodeId",
-                table: "Contributions",
+                name: "IX_Contribution_ContributorRoleId",
+                table: "Contribution",
+                column: "ContributorRoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Contribution_EpisodeId",
+                table: "Contribution",
                 column: "EpisodeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Contributions_PodcastId",
-                table: "Contributions",
+                name: "IX_Contribution_PodcastId",
+                table: "Contribution",
                 column: "PodcastId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Contributions_RoleId",
-                table: "Contributions",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Episodes_SeasonId",
-                table: "Episodes",
+                name: "IX_Episode_SeasonId",
+                table: "Episode",
                 column: "SeasonId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Episodes_TagId",
-                table: "Episodes",
+                name: "IX_Episode_TagId",
+                table: "Episode",
                 column: "TagId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Podcasts_CategoryId",
-                table: "Podcasts",
+                name: "IX_Podcast_CategoryId",
+                table: "Podcast",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Podcasts_LanguageId",
-                table: "Podcasts",
+                name: "IX_Podcast_LanguageId",
+                table: "Podcast",
                 column: "LanguageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Seasons_PodcastId",
-                table: "Seasons",
+                name: "IX_Season_PodcastId",
+                table: "Season",
                 column: "PodcastId");
         }
 
@@ -241,31 +235,31 @@ namespace PodcastCatalog.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Contributions");
+                name: "Contribution");
 
             migrationBuilder.DropTable(
-                name: "ContributorRoles");
+                name: "ContributorRole");
 
             migrationBuilder.DropTable(
-                name: "Contributors");
+                name: "Contributor");
 
             migrationBuilder.DropTable(
-                name: "Episodes");
+                name: "Episode");
 
             migrationBuilder.DropTable(
-                name: "Seasons");
+                name: "Season");
 
             migrationBuilder.DropTable(
-                name: "Tags");
+                name: "Tag");
 
             migrationBuilder.DropTable(
-                name: "Podcasts");
+                name: "Podcast");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "Category");
 
             migrationBuilder.DropTable(
-                name: "Languages");
+                name: "Language");
         }
     }
 }
