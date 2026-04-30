@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MusicCatalog.Domain.Entities;
 using MusicCatalog.Features.Track;
-using SharedKernel.Interfaces.Base;
-using System.Threading;
 
 namespace MusicCatalog.Infrastructure.Repositories
 {

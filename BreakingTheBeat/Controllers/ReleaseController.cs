@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Release.Create;
 using MusicCatalog.Features.Release.GetAll;
+using MusicCatalog.Features.Release.GetById;
 
 namespace Gateway.Controllers
 {
@@ -87,6 +88,17 @@ namespace Gateway.Controllers
             }).ToList();
 
             return Ok(response);
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<ReleaseDetailsResponse>> GetReleaseById( Guid id,CancellationToken cancellationToken)
+        {
+            var release = await _mediator.Send(new GetReleaseByIdQuery(id),cancellationToken);
+
+            if (release is null)
+                return NotFound();
+
+            return Ok(release);
         }
 
     }
