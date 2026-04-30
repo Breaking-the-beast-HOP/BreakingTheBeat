@@ -1,5 +1,5 @@
 ﻿namespace Gateway.Contracts
-{ 
+{
     public class UpdateTrackRequest
     {
         public string? Title { get; set; }
@@ -11,5 +11,5 @@
 
         public List<UpdateContributionRequest> Contributions { get; set; } = new();
     }
-    
+
 }

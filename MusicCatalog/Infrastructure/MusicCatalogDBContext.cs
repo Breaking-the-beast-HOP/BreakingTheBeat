@@ -16,11 +16,11 @@ namespace MusicCatalog.Infrastructure
         public DbSet<Contribution> Contributions => Set<Contribution>();
         public DbSet<Release> Releases => Set<Release>();
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) 
-        { 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(MusicCatalogDbContext).Assembly); 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(MusicCatalogDbContext).Assembly);
 
-            base.OnModelCreating(modelBuilder); 
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

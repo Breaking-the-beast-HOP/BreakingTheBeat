@@ -4,7 +4,7 @@ using MusicCatalog.Domain.Entities;
 
 namespace MusicCatalog.Infrastructure.Configurations
 {
-    public class ContributorRoleConfiguration: IEntityTypeConfiguration<ContributorRole>
+    public class ContributorRoleConfiguration : IEntityTypeConfiguration<ContributorRole>
     {
         public void Configure(EntityTypeBuilder<ContributorRole> entity)
         {
@@ -18,7 +18,7 @@ namespace MusicCatalog.Infrastructure.Configurations
             entity.Property(x => x.Name)
                 .HasMaxLength(100)
                 .IsRequired();
-        } 
+        }
     }
 }
- 
+

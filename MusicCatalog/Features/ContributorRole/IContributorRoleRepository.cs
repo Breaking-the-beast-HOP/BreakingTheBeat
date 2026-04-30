@@ -2,7 +2,7 @@
 
 namespace MusicCatalog.Features.ContributorRole
 {
-    public interface IContributorRoleRepository:IReadRepository<MusicCatalog.Domain.Entities.ContributorRole>
+    public interface IContributorRoleRepository : IReadRepository<MusicCatalog.Domain.Entities.ContributorRole>
     {
     }
 }

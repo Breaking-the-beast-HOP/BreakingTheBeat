@@ -2,7 +2,7 @@
 
 namespace MusicCatalog.Features.Contributor
 {
-    public interface IContributorRepository: ICrudRepository<Domain.Entities.Contributor>
+    public interface IContributorRepository : ICrudRepository<Domain.Entities.Contributor>
     {
     }
 }

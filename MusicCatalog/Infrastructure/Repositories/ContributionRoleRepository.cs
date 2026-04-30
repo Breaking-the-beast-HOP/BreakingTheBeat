@@ -18,7 +18,7 @@ namespace MusicCatalog.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<ContributorRole>> GetAllAsync()  
+        public async Task<List<ContributorRole>> GetAllAsync()
         {
             return await _context.ContributorRoles.ToListAsync();
         }

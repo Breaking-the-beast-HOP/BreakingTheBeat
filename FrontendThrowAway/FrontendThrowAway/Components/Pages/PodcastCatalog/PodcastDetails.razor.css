@@ -1,0 +1,11 @@
+﻿.detail-box {
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 10px;
+    background: white;
+    min-height: 72px;
+}
+
+.description-box {
+    min-height: 120px;
+}
