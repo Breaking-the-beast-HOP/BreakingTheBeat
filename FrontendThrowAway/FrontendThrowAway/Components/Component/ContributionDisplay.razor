@@ -1,0 +1,101 @@
+﻿@using MudBlazor
+
+<MudPaper Class="pa-4" Elevation="5">
+    <MudText Typo="Typo.h6" Class="mb-3">@Title</MudText>
+
+    @if (Contributions is null || !Contributions.Any())
+    {
+        <MudAlert Severity="Severity.Info" Dense="true">
+            @EmptyText
+        </MudAlert>
+    }
+    else
+    {
+        <MudStack Spacing="2">
+            @foreach (var contribution in Contributions.OrderByDescending(IsMainArtist))
+            {
+                var isMainArtist = IsMainArtist(contribution);
+
+                <MudPaper Outlined="true" Class="pa-3">
+                    <MudStack Row="true"
+                              Justify="Justify.SpaceBetween"
+                              AlignItems="AlignItems.Center"
+                              Style="gap: 16px;">
+
+                        <MudStack Spacing="1">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Person"
+                                         Size="Size.Small"
+                                         Color="@(isMainArtist ? Color.Warning : Color.Default)" />
+
+                                <MudText Typo="Typo.subtitle1">
+                                    @contribution.ContributorName
+                                </MudText>
+
+                                @if (isMainArtist)
+                                {
+                                    <MudChip T="string"
+                                             Size="Size.Small"
+                                             Color="Color.Warning"
+                                             Variant="Variant.Filled">
+                                        Main artist
+                                    </MudChip>
+                                }
+                            </MudStack>
+
+                            <MudStack Row="true" Spacing="1" Style="flex-wrap: wrap;">
+                                @foreach (var role in contribution.Roles)
+                                {
+                                    <MudChip T="string"
+                                             Size="Size.Small"
+                                             Color="@(IsPerformingArtistRole(role) ? Color.Warning : Color.Default)"
+                                             Variant="@(IsPerformingArtistRole(role) ? Variant.Filled : Variant.Outlined)">
+                                        @role.Name
+                                    </MudChip>
+                                }
+                            </MudStack>
+                        </MudStack>
+
+                    </MudStack>
+                </MudPaper>
+            }
+        </MudStack>
+    }
+</MudPaper>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Contributors";
+
+    [Parameter]
+    public string EmptyText { get; set; } = "No contributors registered.";
+
+    [Parameter]
+    public List<ContributionListItem> Contributions { get; set; } = new();
+
+    private bool IsMainArtist(ContributionListItem contribution)
+    {
+        return contribution.Roles.Any(IsPerformingArtistRole);
+    }
+
+    private bool IsPerformingArtistRole(ContributionListRole role)
+    {
+        return role.Name.Equals("Main Artist", StringComparison.OrdinalIgnoreCase)
+            || role.Name.Equals("Primary Artist", StringComparison.OrdinalIgnoreCase)
+            || role.Name.Equals("Performing Artist", StringComparison.OrdinalIgnoreCase)
+            || role.Name.Equals("Artist", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public class ContributionListItem
+    {
+        public Guid ContributorId { get; set; }
+        public string ContributorName { get; set; } = "";
+        public List<ContributionListRole> Roles { get; set; } = new();
+    }
+
+    public class ContributionListRole
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+    }
+}
