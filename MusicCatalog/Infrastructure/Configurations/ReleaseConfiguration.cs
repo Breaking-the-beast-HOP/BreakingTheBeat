@@ -4,45 +4,58 @@ using MusicCatalog.Domain.Entities;
 
 namespace MusicCatalog.Infrastructure.Configurations
 {
-
-
     public class ReleaseConfiguration : IEntityTypeConfiguration<Release>
     {
         public void Configure(EntityTypeBuilder<Release> builder)
         {
+            builder.ToTable("Release");
+
             builder.HasKey(r => r.Id);
 
+            builder.Property(r => r.Id)
+                .ValueGeneratedNever();
+
             builder.Property(r => r.Title)
+                .HasColumnName("Title")
                 .IsRequired()
                 .HasMaxLength(200);
 
             builder.Property(r => r.Version)
+                .HasColumnName("Version")
                 .HasMaxLength(100);
 
             builder.Property(r => r.EAN)
+                .HasColumnName("EAN")
                 .HasMaxLength(50);
 
-            builder.Property(r => r.ReleaseDate);
+            builder.Property(r => r.ReleaseDate)
+                .HasColumnName("ReleaseDate")
+                .HasColumnType("timestamp without time zone");
 
             builder.HasOne(r => r.Genre)
                 .WithMany()
-                .HasForeignKey(r => r.GenreId);
+                .HasForeignKey(r => r.GenreId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(l => l.LanguageId)
+                .HasColumnName("MetadataLanguageId")
+                .IsRequired();
 
             builder.HasOne(r => r.Language)
                 .WithMany()
-                .HasForeignKey(r => r.LanguageId);
+                .HasForeignKey(r => r.LanguageId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // 🔥 Volumes (owned-ish style)
-            builder.HasMany(typeof(ReleaseVolume), "_volumes")
-                .WithOne(nameof(ReleaseVolume.Release))
-                .HasForeignKey(nameof(ReleaseVolume.ReleaseId))
+            builder.Navigation(r => r.Volumes)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.HasMany(r => r.Volumes)
+                .WithOne(v => v.Release)
+                .HasForeignKey(v => v.ReleaseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 🔥 Contributions
-            builder.HasMany(typeof(Contribution), "_contributions")
-                .WithOne(nameof(Contribution.Release))
-                .HasForeignKey(nameof(Contribution.ReleaseId))
-                .OnDelete(DeleteBehavior.Cascade);
+            builder.Navigation(r => r.Contributions)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
         }
     }
 }

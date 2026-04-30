@@ -10,12 +10,18 @@ namespace MusicCatalog.Infrastructure.Configurations
         {
             builder.HasKey(v => v.Id);
 
+            builder.Property(v => v.Id)
+                .ValueGeneratedNever();
+
             builder.Property(v => v.VolumeNumber)
                 .IsRequired();
 
-            builder.HasMany(typeof(ReleaseTrack), "_tracks")
-                .WithOne(nameof(ReleaseTrack.ReleaseVolume))
-                .HasForeignKey(nameof(ReleaseTrack.ReleaseVolumeId))
+            builder.Navigation(v => v.Tracks)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.HasMany(v => v.Tracks)
+                .WithOne(rt => rt.ReleaseVolume)
+                .HasForeignKey(rt => rt.ReleaseVolumeId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -1,6 +1,6 @@
 ﻿namespace MusicCatalog.Domain.Entities
 {
-    public class ReleaseTrack
+    public class VolumeTrack
     {
         public Guid Id { get; private set; }
 
@@ -12,9 +12,9 @@
 
         public int TrackNumber { get; private set; }
 
-        private ReleaseTrack() { }
+        private VolumeTrack() { }
 
-        internal static ReleaseTrack Create( Guid releaseVolumeId,Guid trackId, int trackNumber)
+        internal static VolumeTrack Create( Guid releaseVolumeId,Guid trackId, int trackNumber)
         {
             if (releaseVolumeId == Guid.Empty)
                 throw new ArgumentException("ReleaseVolumeId is required.");
@@ -25,7 +25,7 @@
             if (trackNumber <= 0)
                 throw new ArgumentException("Track number must be greater than zero.");
 
-            return new ReleaseTrack
+            return new VolumeTrack
             {
                 Id = Guid.NewGuid(),
                 ReleaseVolumeId = releaseVolumeId,

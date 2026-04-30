@@ -9,8 +9,8 @@
 
         public int VolumeNumber { get; private set; }
 
-        private readonly List<ReleaseTrack> _tracks = new();
-        public IReadOnlyCollection<ReleaseTrack> Tracks => _tracks.AsReadOnly();
+        private readonly List<VolumeTrack> _tracks = new();
+        public IReadOnlyCollection<VolumeTrack> Tracks => _tracks.AsReadOnly();
 
         private ReleaseVolume() { }
 
@@ -44,7 +44,7 @@
             if (_tracks.Any(t => t.TrackId == trackId))
                 throw new InvalidOperationException("Track already exists in this volume.");
 
-            _tracks.Add(ReleaseTrack.Create(Id, trackId, trackNumber));
+            _tracks.Add(VolumeTrack.Create(Id, trackId, trackNumber));
         }
     }
 }

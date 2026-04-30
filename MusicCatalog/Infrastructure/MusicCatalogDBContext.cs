@@ -14,6 +14,7 @@ namespace MusicCatalog.Infrastructure
         public DbSet<Contributor> Contributors => Set<Contributor>();
         public DbSet<ContributorRole> ContributorRoles => Set<ContributorRole>();
         public DbSet<Contribution> Contributions => Set<Contribution>();
+        public DbSet<Release> Releases => Set<Release>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
         { 
