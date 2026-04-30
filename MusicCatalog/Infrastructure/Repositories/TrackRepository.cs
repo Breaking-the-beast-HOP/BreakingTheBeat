@@ -72,6 +72,6 @@ namespace MusicCatalog.Infrastructure.Repositories
             return true;
         }
 
-        
+
     }
 }

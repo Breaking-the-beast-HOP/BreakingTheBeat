@@ -15,11 +15,11 @@ namespace MusicCatalog.Infrastructure
         public DbSet<ContributorRole> ContributorRoles => Set<ContributorRole>();
         public DbSet<Contribution> Contributions => Set<Contribution>();
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) 
-        { 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(MusicCatalogDbContext).Assembly); 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(MusicCatalogDbContext).Assembly);
 
-            base.OnModelCreating(modelBuilder); 
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

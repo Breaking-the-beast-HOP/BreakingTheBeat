@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Language.GetLanguages;
 
-namespace Gateway.Controllers
+namespace Gateway.Controllers.Music
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -23,6 +23,7 @@ namespace FrontendThrowAway
             {
                 BaseAddress = new Uri(apiBaseUrl)
             });
+            Console.WriteLine($"API Base URL: {apiBaseUrl}");
 
             var app = builder.Build();
 

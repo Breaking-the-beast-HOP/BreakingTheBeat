@@ -16,10 +16,10 @@ namespace MusicCatalog.Features.ContributorRole.GetAll
             var contributorRoles = await _repository.GetAllAsync();
 
             return contributorRoles.Select(cr => new ContributorRoleDTO
-                {
-                    Id = cr.Id,
-                    Name = cr.Name
-                }).ToList();
+            {
+                Id = cr.Id,
+                Name = cr.Name
+            }).ToList();
 
         }
     }

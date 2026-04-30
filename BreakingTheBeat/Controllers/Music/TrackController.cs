@@ -9,7 +9,7 @@ using MusicCatalog.Features.Track.Get;
 using MusicCatalog.Features.Track.GetById;
 using MusicCatalog.Features.Track.Update;
 
-namespace Gateway.Controllers
+namespace Gateway.Controllers.Music
 {
     [Route("api/[controller]")]
     [ApiController]
