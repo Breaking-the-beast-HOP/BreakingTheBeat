@@ -1,11 +1,18 @@
-﻿using PodcastCatalog.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using PodcastCatalog.Domain.Entities;
 using SharedKernel;
-using SharedKernel.Interfaces.Base;
+using PodcastCatalog.Infrastructure.Data;
 
 namespace PodcastCatalog.Infrastructure.Repositories
 {
     public class LanguageRepository : ICrudRepository<Language>
     {
+        private readonly PodcastCatalogDbContext DbContext;
+        public LanguageRepository(PodcastCatalogDbContext dbContext)
+        {
+            DbContext = dbContext;
+        }
+
         public Task<Language> AddAsync(Language entity)
         {
             throw new NotImplementedException();
@@ -16,9 +23,11 @@ namespace PodcastCatalog.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<List<Language>> GetAllAsync()
+        public async Task<List<Language>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await DbContext.Languages
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public Task<Language?> GetByIdAsync(Guid id)
