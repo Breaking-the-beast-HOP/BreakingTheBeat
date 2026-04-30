@@ -1,4 +1,4 @@
-﻿namespace Gateway.Contracts
+﻿namespace Gateway.Contracts.Music.ContributionRole
 {
 
     public class ContributionRoleResponse
@@ -7,5 +7,5 @@
         public string Name { get; set; } = "";
     }
 
-    
+
 }

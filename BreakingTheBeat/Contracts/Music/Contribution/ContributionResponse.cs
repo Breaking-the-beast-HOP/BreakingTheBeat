@@ -1,4 +1,6 @@
-﻿namespace Gateway.Contracts
+﻿using Gateway.Contracts.Music.ContributionRole;
+
+namespace Gateway.Contracts.Music.Contribution
 {
     public class ContributionResponse
     {

@@ -1,4 +1,4 @@
-﻿namespace Gateway.Contracts
+﻿namespace Gateway.Contracts.Music.Release
 {
     public class CreateReleaseRequest
     {
@@ -13,5 +13,5 @@
         public List<CreateReleaseVolumeRequest> Volumes { get; set; } = new();
         public List<CreateReleaseContributionRequest> Contributions { get; set; } = new();
     }
-    
+
 }

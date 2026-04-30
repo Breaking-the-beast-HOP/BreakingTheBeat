@@ -1,4 +1,6 @@
-﻿namespace Gateway.Contracts
+﻿using Gateway.Contracts.Music.Contribution;
+
+namespace Gateway.Contracts.Music.Track
 {
     public class UpdateTrackRequest
     {

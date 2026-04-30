@@ -1,4 +1,4 @@
-﻿using Gateway.Contracts;
+﻿using Gateway.Contracts.Music.Contributor;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

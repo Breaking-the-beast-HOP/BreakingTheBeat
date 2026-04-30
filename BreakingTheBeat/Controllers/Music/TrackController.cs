@@ -1,4 +1,6 @@
-﻿using Gateway.Contracts;
+﻿using Gateway.Contracts.Music.Contribution;
+using Gateway.Contracts.Music.ContributionRole;
+using Gateway.Contracts.Music.Track;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Track.Create;
@@ -6,6 +8,7 @@ using MusicCatalog.Features.Track.Delete;
 using MusicCatalog.Features.Track.Get;
 using MusicCatalog.Features.Track.GetById;
 using MusicCatalog.Features.Track.Update;
+
 
 namespace Gateway.Controllers.Music
 {
@@ -75,11 +78,11 @@ namespace Gateway.Controllers.Music
 
                 Contributions = track.Contributions
 
-        .Select(c => new Contracts.ContributionResponse
+        .Select(c => new ContributionResponse
         {
             ContributorId = c.ContributorId,
             ContributorName = c.ContributorName,
-            Roles = c.Roles.Select(r => new Contracts.ContributionRoleResponse
+            Roles = c.Roles.Select(r => new ContributionRoleResponse
             {
                 Id = r.Id,
                 Name = r.Name
