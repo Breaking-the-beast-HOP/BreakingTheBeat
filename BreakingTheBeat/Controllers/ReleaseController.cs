@@ -1,15 +1,13 @@
 ﻿using Gateway.Contracts;
 using MediatR;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Features.Release;
 using MusicCatalog.Features.Release.Create;
+using MusicCatalog.Features.Release.GetAll;
 
 namespace Gateway.Controllers
 {
-  
-        [Route("api/[controller]")]
+
+    [Route("api/[controller]")]
         [ApiController]
         public class ReleaseController : ControllerBase
         {
@@ -70,5 +68,26 @@ namespace Gateway.Controllers
                 return Ok(result);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<List<ReleaseResponse>>> GetAllReleases(CancellationToken cancellationToken)
+        {
+            var releases = await _mediator.Send(
+                new GetAllReleasesQuery(),
+                cancellationToken);
+
+            var response = releases.Select(r => new ReleaseResponse
+            {
+                Id = r.Id,
+                Title = r.Title,
+                Version = r.Version,
+                EAN = r.EAN,
+                ReleaseDate = r.ReleaseDate,
+                GenreName = r.GenreName,
+                LanguageName = r.LanguageName
+            }).ToList();
+
+            return Ok(response);
         }
+
     }
+ }

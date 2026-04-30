@@ -27,9 +27,14 @@ namespace MusicCatalog.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<List<Release>> GetAllAsync()
+        public async Task<List<Release>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.Releases
+                   .Include(r => r.Genre)
+                   .Include(r => r.Language)
+                   .OrderBy(r => r.Title)
+                   .AsNoTracking()
+                   .ToListAsync();
         }
 
         public Task<Release?> GetByIdAsync(Guid id)
