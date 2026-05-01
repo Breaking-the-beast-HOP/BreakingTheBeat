@@ -42,6 +42,7 @@ namespace PodcastCatalog.Features.Podcasts.Update
 
             // Opdater podcasten
             existingPodcast.Update(request.Title, request.Description);
+            existingPodcast.ChangeLanguage(request.LanguageId);
             await _podcastRepository.UpdateAsync(existingPodcast);
 
             // Returner den opdaterede podcast
@@ -50,6 +51,7 @@ namespace PodcastCatalog.Features.Podcasts.Update
                 Id = existingPodcast.Id,
                 Title = existingPodcast.Title,
                 Description = existingPodcast.Description
+
             };
         }
     }

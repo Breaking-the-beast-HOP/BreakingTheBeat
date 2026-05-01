@@ -26,7 +26,7 @@ namespace PodcastCatalog.Features.Languages.GetAll
                     {
                         Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                         Name = "Placeholder",
-                        IsoCode = "xx"
+                        ISO = "xx"
                     }
                 };
             }
@@ -35,7 +35,7 @@ namespace PodcastCatalog.Features.Languages.GetAll
             {
                 Id = language.Id,
                 Name = language.Name,
-                IsoCode = language.ISO
+                ISO = language.ISO
             }).ToList();
             return languageDTOs;
 

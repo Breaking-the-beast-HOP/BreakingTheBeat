@@ -42,7 +42,9 @@ public class CreatePodcastHandler : IRequestHandler<CreatePodcastCommand, Podcas
         {
             Id = podcast.Id,
             Title = podcast.Title,
-            Description = podcast.Description
+            Description = podcast.Description,
+            CategoryId = podcast.CategoryId,
+            LanguageId = podcast.LanguageId
         };
     }
 }

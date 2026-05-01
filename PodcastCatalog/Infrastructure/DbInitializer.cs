@@ -49,9 +49,9 @@ namespace PodcastCatalog.Infrastructure
                 new Podcast("Learn with Us", "Educational content for everyone")
             };
             podcasts[0].AddCategory(categories[0]);
-            podcasts[0].AddLanguage(languages[0]);
+            podcasts[0].ChangeLanguage(languages[0].Id);
             podcasts[1].AddCategory(categories[1]);
-            podcasts[1].AddLanguage(languages[1]);
+            podcasts[1].ChangeLanguage(languages[1].Id);
 
             if (!context.Podcasts.Any())
             {

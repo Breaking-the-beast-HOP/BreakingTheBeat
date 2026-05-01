@@ -74,6 +74,7 @@ namespace Gateway
                 cfg.RegisterServicesFromAssembly(typeof(UpdatePodcastHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetPodcastHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetAllPodcastsHandler).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetLanguagesQuery).Assembly);
             });
 
             // 6. Controllers
