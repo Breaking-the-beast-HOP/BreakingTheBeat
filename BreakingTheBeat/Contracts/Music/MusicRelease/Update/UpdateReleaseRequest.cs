@@ -1,6 +1,4 @@
-﻿using Gateway.Contracts.Music.Contribution;
-
-namespace Gateway.Contracts.Music.MusicRelease.Update
+﻿namespace Gateway.Contracts.Music.MusicRelease.Update
 {
     public class UpdateReleaseRequest
     {
@@ -11,8 +9,25 @@ namespace Gateway.Contracts.Music.MusicRelease.Update
         public Guid? GenreId { get; set; }
         public Guid? LanguageId { get; set; }
 
+        public List<UpdateReleaseContributionRequest> Contributions { get; set; } = new();
+        public List<UpdateReleaseVolumeRequest> Volumes { get; set; } = new();
+    }
 
-        public List<UpdateContributionRequest> Contributions { get; set; } = new();
-        public List<UpdateVolumeRequest> Volumes { get; set; } = new();
+    public class UpdateReleaseVolumeRequest
+    {
+        public int VolumeNumber { get; set; }
+        public List<UpdateReleaseTrackRequest> Tracks { get; set; } = new();
+    }
+
+    public class UpdateReleaseTrackRequest
+    {
+        public Guid TrackId { get; set; }
+        public int TrackNumber { get; set; }
+    }
+
+    public class UpdateReleaseContributionRequest
+    {
+        public Guid ContributorId { get; set; }
+        public List<Guid> RoleIds { get; set; } = new();
     }
 }

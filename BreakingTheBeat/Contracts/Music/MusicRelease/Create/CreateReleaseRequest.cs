@@ -14,4 +14,21 @@
         public List<CreateReleaseContributionRequest> Contributions { get; set; } = new();
     }
 
+    public class CreateReleaseVolumeRequest
+    {
+        public int VolumeNumber { get; set; }
+        public List<CreateReleaseTrackRequest> Tracks { get; set; } = new();
+    }
+
+    public class CreateReleaseTrackRequest
+    {
+        public int TrackNumber { get; set; }
+        public Guid TrackId { get; set; }
+    }
+
+    public class CreateReleaseContributionRequest
+    {
+        public Guid ContributorId { get; set; }
+        public List<Guid> RoleIds { get; set; } = new();
+    }
 }

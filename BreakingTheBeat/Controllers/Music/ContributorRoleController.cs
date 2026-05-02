@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.ContributorRole;
 
-namespace Gateway.Controllers
+namespace Gateway.Controllers.Music
 {
     [Route("api/[controller]")]
     [ApiController]

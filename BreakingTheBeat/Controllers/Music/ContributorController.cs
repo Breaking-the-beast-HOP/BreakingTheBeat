@@ -7,7 +7,7 @@ using MusicCatalog.Features.Contributor.Get;
 using MusicCatalog.Features.Genre;
 using MusicCatalog.Features.Track.Create;
 
-namespace Gateway.Controllers
+namespace Gateway.Controllers.Music
 {
     [Route("api/[controller]")]
     [ApiController]
