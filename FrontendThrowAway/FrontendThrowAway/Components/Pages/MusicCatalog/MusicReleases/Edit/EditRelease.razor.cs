@@ -1,4 +1,6 @@
-﻿using FrontendThrowAway.Components.Component;
+﻿using FrontendThrowAway.Components.Shared;
+using FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Models;
+using FrontendThrowAway.Components.Pages.MusicCatalog.SharedModels;
 using Microsoft.AspNetCore.Components;
 
 namespace FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Edit;
@@ -186,7 +188,7 @@ public partial class EditRelease
 
                 _model.Contributions = _contributions
                     .Where(c => c.ContributorId.HasValue && c.Roles.Any())
-                    .Select(c => new CreateContributionRequest
+                    .Select(c => new ContributionRequest
                     {
                         ContributorId = c.ContributorId!.Value,
                         RoleIds = c.Roles.Select(r => r.Id).ToList()

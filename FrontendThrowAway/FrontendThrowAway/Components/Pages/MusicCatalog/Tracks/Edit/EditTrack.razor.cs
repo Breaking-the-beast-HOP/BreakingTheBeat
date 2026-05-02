@@ -1,4 +1,4 @@
-﻿using FrontendThrowAway.Components.Component;
+﻿using FrontendThrowAway.Components.Shared;
 using FrontendThrowAway.Models.Common;
 using FrontendThrowAway.Models.Tracks.EditTrack;
 using Microsoft.AspNetCore.Components;
