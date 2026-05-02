@@ -1,9 +1,14 @@
-﻿using Gateway.Contracts.Music.Release;
+﻿using Gateway.Contracts.Music.MusicRelease;
+using Gateway.Contracts.Music.MusicRelease.Create;
+using Gateway.Contracts.Music.MusicRelease.Get;
+using Gateway.Contracts.Music.MusicRelease.Update;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Release.Create;
 using MusicCatalog.Features.Release.GetAll;
 using MusicCatalog.Features.Release.GetById;
+using MusicCatalog.Features.Release.Update;
+using System.Linq;
 
 namespace Gateway.Controllers.Music
 {
@@ -101,5 +106,61 @@ namespace Gateway.Controllers.Music
             return Ok(release);
         }
 
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateRelease(Guid id, [FromBody] UpdateReleaseRequest request,CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(request.Title))
+                return BadRequest("Title is required.");
+
+            if (request.GenreId is null || request.GenreId == Guid.Empty)
+                return BadRequest("Genre is required.");
+
+            if (request.LanguageId is null || request.LanguageId == Guid.Empty)
+                return BadRequest("Language is required.");
+
+            if (request.Volumes is null || !request.Volumes.Any())
+                return BadRequest("At least one volume is required.");
+
+            if (request.Volumes.Any(v => v.Tracks is null || !v.Tracks.Any()))
+                return BadRequest("Each volume must contain at least one track.");
+
+            if (request.Volumes.SelectMany(v => v.Tracks).Any(t => t.TrackId == Guid.Empty))
+                return BadRequest("All track rows must have a selected track.");
+
+            var volumes = request.Volumes
+                .Select(v => new UpdateVolumeCommand(
+                    v.VolumeNumber,
+                   v.Tracks.Select(t => new UpdateTrackCommand(
+                            t.TrackId,
+                     t.TrackNumber
+                    )).ToList()
+                ))
+                .ToList();
+
+            var contributions = request.Contributions
+               .SelectMany(c => c.RoleIds.Select(roleId =>
+                   new UpdateContributionCommand(
+                       c.ContributorId,
+                       roleId)))
+               .ToList();
+
+            var result = await _mediator.Send(
+                new UpdateReleaseCommand(
+                    id,
+                    request.Title,
+                    request.Version,
+                    request.EAN,
+                    request.ReleaseDate,
+                    request.GenreId,
+                    request.LanguageId,
+                    volumes,
+                    contributions),
+                cancellationToken);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
     }
 }

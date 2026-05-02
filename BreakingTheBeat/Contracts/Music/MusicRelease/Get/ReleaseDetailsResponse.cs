@@ -1,6 +1,6 @@
 ﻿using Gateway.Contracts.Music.Contribution;
 
-namespace Gateway.Contracts.Music.Release
+namespace Gateway.Contracts.Music.MusicRelease.Get
 {
     public class ReleaseDetailsResponse
     {
@@ -10,7 +10,10 @@ namespace Gateway.Contracts.Music.Release
         public string? EAN { get; set; }
         public DateTime? ReleaseDate { get; set; }
 
+        public Guid? GenreId { get; set; }
         public string? GenreName { get; set; }
+
+        public Guid? LanguageId { get; set; }
         public string? LanguageName { get; set; }
 
         public bool HasCover { get; set; }

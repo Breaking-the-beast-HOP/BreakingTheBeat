@@ -8,7 +8,9 @@
             public string? EAN { get; set; }
             public DateTime? ReleaseDate { get; set; }
 
+          
             public string? GenreName { get; set; }
+           
             public string? LanguageName { get; set; }
     }
 }

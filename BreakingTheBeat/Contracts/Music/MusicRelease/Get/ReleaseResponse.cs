@@ -1,4 +1,4 @@
-﻿namespace Gateway.Contracts.Music.Release
+﻿namespace Gateway.Contracts.Music.MusicRelease.Get
 {
 
     public class ReleaseResponse

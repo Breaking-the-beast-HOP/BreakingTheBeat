@@ -26,7 +26,10 @@ namespace MusicCatalog.Features.Release.GetById
                 EAN = release.EAN,
                 ReleaseDate = release.ReleaseDate,
 
+                GenreId = release.GenreId,
                 GenreName = release.Genre?.Name,
+
+                LanguageId = release.LanguageId,
                 LanguageName = release.Language?.Name,
 
                 HasCover = false,
