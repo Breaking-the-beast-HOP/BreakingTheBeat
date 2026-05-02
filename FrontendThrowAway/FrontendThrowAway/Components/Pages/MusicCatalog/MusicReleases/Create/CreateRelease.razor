@@ -1,5 +1,6 @@
 ﻿@page "/create-release"
 @rendermode InteractiveServer
+@using FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Components
 @using FrontendThrowAway.Components.Shared;
 @using FrontendThrowAway.Components.Layout
 @using FrontendThrowAway.Components.Pages.MusicCatalog.SharedModels
@@ -53,73 +54,14 @@
                 <MudStack Spacing="3">
 
                     <!-- Release Info -->
-                    <MudPaper Class="pa-4" Elevation="5">
-                        <MudText Typo="Typo.h6" Class="mb-3">Release Info</MudText>
-
-                        <MudGrid Spacing="2">
-                            <MudItem xs="12">
-                                <MudTextField Label="Title"
-                                              @bind-Value="_model.Title"
-                                              Variant="Variant.Outlined"
-                                              Required="@true"
-                                              FullWidth="@true" />
-                            </MudItem>
-
-                            <MudItem xs="12" sm="6">
-                                <MudTextField Label="Version"
-                                              @bind-Value="_model.Version"
-                                              Variant="Variant.Outlined"
-                                              FullWidth="@true" />
-                            </MudItem>
-
-                            <MudItem xs="12" sm="6">
-                                <MudTextField Label="EAN"
-                                              @bind-Value="_model.EAN"
-                                              Variant="Variant.Outlined"
-                                              FullWidth="@true" />
-                            </MudItem>
-
-                            <MudItem xs="12" sm="6">
-                                <MudDatePicker Label="Release date"
-                                               @bind-Date="_model.ReleaseDate"
-                                               Variant="Variant.Outlined" />
-                            </MudItem>
-
-                            <MudItem xs="12" sm="6">
-                                <MudAutocomplete T="GenreDto"
-                                                 Label="Genre"
-                                                 Variant="Variant.Outlined"
-                                                 Value="_selectedGenre"
-                                                 ValueChanged="OnGenreChanged"
-                                                 SearchFunc="SearchGenres"
-                                                 ToStringFunc="@(g => g?.Name ?? string.Empty)"
-                                                 Clearable="@true"
-                                                 ResetValueOnEmptyText="@true"
-                                                 CoerceText="@false"
-                                                 Dense="@true"
-                                                 FullWidth="@true"
-                                                 MaxItems="8"
-                                                 Disabled="@_isLoadingLookups" />
-                            </MudItem>
-
-                            <MudItem xs="12">
-                                <MudAutocomplete T="LanguageDto"
-                                                 Label="Metadata language"
-                                                 Variant="Variant.Outlined"
-                                                 Value="_selectedLanguage"
-                                                 ValueChanged="OnLanguageChanged"
-                                                 SearchFunc="SearchLanguages"
-                                                 ToStringFunc="@(l => l?.Name ?? string.Empty)"
-                                                 Clearable="@true"
-                                                 ResetValueOnEmptyText="@true"
-                                                 CoerceText="@false"
-                                                 Dense="@true"
-                                                 FullWidth="@true"
-                                                 MaxItems="8"
-                                                 Disabled="@_isLoadingLookups" />
-                            </MudItem>
-                        </MudGrid>
-                    </MudPaper>
+                      <ReleaseInfoForm Model="_model"
+                     SelectedGenre="_selectedGenre"
+                     SelectedGenreChanged="OnGenreChanged"
+                     SelectedLanguage="_selectedLanguage"
+                     SelectedLanguageChanged="OnLanguageChanged"
+                     SearchGenres="SearchGenres"
+                     SearchLanguages="SearchLanguages"
+                     IsLoadingLookups="_isLoadingLookups" />
 
                     <!-- Contributors -->
                     <ContributionEditor Title="Release contributors"
