@@ -69,6 +69,7 @@
                          SearchLanguages="SearchLanguages"
                          IsLoadingLookups="_isLoadingLookups" />
 
+                        <!-- Contributors -->
                         <ContributionEditor Title="Release contributors"
                                             Description="Add release-level contributors and their roles."
                                             Rows="_contributions"
@@ -125,107 +126,18 @@
             <MudGrid Spacing="3">
 
                 <MudItem xs="12" md="7">
-                    <MudPaper Class="pa-4" Elevation="5">
-                        <MudText Typo="Typo.h6" Class="mb-3">Volumes</MudText>
-
-                        @foreach (var volume in _model.Volumes)
-                        {
-                            <MudPaper Class="mb-4" Outlined="@true">
-
-                                <MudStack Row="@true"
-                                          Justify="Justify.SpaceBetween"
-                                          AlignItems="AlignItems.Center"
-                                          Class="pa-3">
-
-                                    <MudText Typo="Typo.h6">
-                                        Volume @volume.VolumeNumber
-                                    </MudText>
-
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                                   Color="Color.Default"
-                                                   Disabled="@(_model.Volumes.Count == 1)"
-                                                   OnClick="@(() => RemoveVolume(volume))" />
-                                </MudStack>
-
-                                <MudDivider />
-
-                                @foreach (var track in volume.Tracks)
-                                {
-                                    <MudStack Row="@true"
-                                              AlignItems="AlignItems.Center"
-                                              Spacing="2"
-                                              Class="pa-3 volume-track-row">
-
-                                        <MudText Typo="Typo.body2" Class="track-number">
-                                            @track.TrackNumber
-                                        </MudText>
-
-                                        <MudStack Spacing="0" Class="flex-grow-1">
-                                            <MudAutocomplete T="TrackDto"
-                                                             Label="Track"
-                                                             Variant="Variant.Text"
-                                                             Value="track.SelectedTrack"
-                                                             ValueChanged="@(selected => OnTrackChanged(track, selected))"
-                                                             SearchFunc="SearchTracks"
-                                                             ToStringFunc="@(t => t?.Title ?? string.Empty)"
-                                                             Clearable="@true"
-                                                             ResetValueOnEmptyText="@true"
-                                                             CoerceText="@false"
-                                                             Dense="@true"
-                                                             MaxItems="8" />
-
-                                            @if (track.SelectedTrack is not null)
-                                            {
-                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                                    @DisplayTrackSubtitle(track.SelectedTrack)
-                                                </MudText>
-                                            }
-                                        </MudStack>
-
-                                        <MudText Typo="Typo.body2" Class="duration-text">
-                                            @FormatDuration(track.SelectedTrack?.DurationSeconds)
-                                        </MudText>
-
-                                        <MudIconButton Icon="@Icons.Material.Filled.Visibility"
-                                                       Color="Color.Warning"
-                                                       Size="Size.Small"
-                                                       Disabled="@(track.TrackId is null)"
-                                                       OnClick="@(() => PreviewTrack(track.TrackId))" />
-
-                                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                                       Color="Color.Error"
-                                                       Size="Size.Small"
-                                                       Disabled="@(volume.Tracks.Count == 1)"
-                                                       OnClick="@(() => RemoveTrack(volume, track))" />
-
-                                    </MudStack>
-
-                                    <MudDivider />
-                                }
-
-                                <MudStack Row="@true"
-                                          Justify="Justify.FlexEnd"
-                                          Class="pa-3">
-                                    <MudButton Variant="Variant.Text"
-                                               Color="Color.Warning"
-                                               StartIcon="@Icons.Material.Filled.Add"
-                                               OnClick="@(() => AddTrack(volume))">
-                                        Add track
-                                    </MudButton>
-                                </MudStack>
-
-                            </MudPaper>
-                        }
-
-                        <MudStack Row="@true" Justify="Justify.FlexEnd">
-                            <MudButton Variant="Variant.Text"
-                                       Color="Color.Warning"
-                                       StartIcon="@Icons.Material.Filled.Add"
-                                       OnClick="AddVolume">
-                                Add volume
-                            </MudButton>
-                        </MudStack>
-                    </MudPaper>
+                    <!-- Volumes -->
+                    <ReleaseVolumeEditor Model="_model"
+                                         IsLoadingLookups="_isLoadingLookups"
+                                         SearchTracks="SearchTracks"
+                                         AddTrackRequested="AddTrack"
+                                         AddVolumeRequested="AddVolume"
+                                         RemoveVolumeRequested="RemoveVolume"
+                                         RemoveTrackRequested="@(args => RemoveTrack(args.Volume, args.Track))"
+                                         TrackChanged="@(args => OnTrackChanged(args.Row, args.Track))"
+                                         PreviewTrackRequested="PreviewTrack"
+                                         FormatDuration="FormatDuration"
+                                         DisplayTrackSubtitle="DisplayTrackSubtitle" />
                 </MudItem>
 
                 <MudItem xs="12" md="5">
