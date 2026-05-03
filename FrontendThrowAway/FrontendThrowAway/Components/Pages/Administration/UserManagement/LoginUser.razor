@@ -1,0 +1,66 @@
+﻿@page "/users/login"
+@rendermode InteractiveServer
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<PageTitle>Login</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="pa-6">
+
+    <MudPaper Class="pa-6">
+
+        <MudStack Spacing="3">
+
+            <MudText Typo="Typo.h5">Login</MudText>
+
+            <MudTextField T="string"
+                          Label="Email"
+                          @bind-Value="_model.Email" />
+
+            <MudTextField T="string"
+                          Label="Password"
+                          InputType="InputType.Password"
+                          @bind-Value="_model.Password" />
+
+            <MudButton Variant="Variant.Filled"
+                       OnClick="Login">
+                Login
+            </MudButton>
+
+            @if (_result != null)
+            {
+                <MudAlert Severity="@(_result == true ? Severity.Success : Severity.Error)">
+                    @(_result == true ? "JA ✔ Login lykkedes" : "NEJ ❌ Login fejlede")
+                </MudAlert>
+            }
+
+        </MudStack>
+
+    </MudPaper>
+
+</MudContainer>
+
+@code {
+    private LoginUserRequest _model = new();
+    private bool? _result;
+
+    private async Task Login()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/login", _model);
+
+            _result = response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            _result = false;
+        }
+    }
+
+    private class LoginUserRequest
+    {
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+    }
+}

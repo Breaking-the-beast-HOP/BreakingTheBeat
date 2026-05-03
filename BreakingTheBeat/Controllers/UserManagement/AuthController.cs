@@ -1,6 +1,7 @@
 ﻿using Gateway.Contracts.UserManagement;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using UserManagement.Features.User.Login;
 using UserManagement.Features.User.Register;
 
 namespace Gateway.Controllers.UserManagement;
@@ -33,5 +34,18 @@ public class AuthController : ControllerBase
             return BadRequest(result.Errors);
 
         return Ok(result.UserId);
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login( [FromBody] LoginUserRequest request,CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new LoginUserCommand(request.Email, request.Password),
+            cancellationToken);
+
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return Ok(result.Token);
     }
 }
