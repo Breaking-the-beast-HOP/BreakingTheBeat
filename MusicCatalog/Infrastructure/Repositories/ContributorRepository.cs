@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MusicCatalog.Domain.Entities;
 using MusicCatalog.Features.Contributor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicCatalog.Infrastructure.Repositories
 {
@@ -35,9 +30,22 @@ namespace MusicCatalog.Infrastructure.Repositories
             return await _context.Contributors.ToListAsync();
         }
 
-        public Task<Contributor?> GetByIdAsync(Guid id)
+        public async Task<Contributor?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _context.Contributors
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<List<Contribution>> GetContributionsByContributorIdAsync(Guid contributorId)
+        {
+            return await _context.Contributions
+                .AsNoTracking()
+                .Include(c => c.Role)
+                .Include(c => c.Track)
+                .Include(c => c.Release)
+                .Where(c => c.ContributorId == contributorId)
+                .ToListAsync();
         }
 
         public Task<bool> UpdateAsync(Contributor entity)

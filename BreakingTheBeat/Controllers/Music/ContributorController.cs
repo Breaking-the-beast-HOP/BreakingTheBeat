@@ -1,11 +1,9 @@
 ﻿using Gateway.Contracts.Music.Contributor;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Contributor.Create;
 using MusicCatalog.Features.Contributor.Get;
-using MusicCatalog.Features.Genre;
-using MusicCatalog.Features.Track.Create;
+using MusicCatalog.Features.Contributor.GetById;
 
 namespace Gateway.Controllers.Music
 {
@@ -36,5 +34,42 @@ namespace Gateway.Controllers.Music
             var result = await _mediator.Send(new GetContributorsQuery(), cancellationToken);
             return Ok(result);
         }
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<ContributorDetailsResponse>> Get( Guid id,CancellationToken cancellationToken)
+        {
+            var contributor = await _mediator.Send(new GetContributorByIdQuery(id), cancellationToken);
+
+            var response = new ContributorDetailsResponse
+            {
+                Id = contributor.Id,
+                DisplayName = contributor.DisplayName,
+                LegalName = contributor.LegalName,
+                IPI = contributor.IPI,
+                ISNI = contributor.ISNI,
+
+                TrackContributions = contributor.TrackContributions
+                    .Select(c => new ContributorTrackContributionResponse
+                    {
+                        TrackId = c.TrackId,
+                        TrackTitle = c.TrackTitle,
+                        ISRC = c.ISRC,
+                        RoleName = c.RoleName
+                    })
+                    .ToList(),
+
+                ReleaseContributions = contributor.ReleaseContributions
+                    .Select(c => new ContributorReleaseContributionResponse
+                    {
+                        ReleaseId = c.ReleaseId,
+                        ReleaseTitle = c.ReleaseTitle,
+                        EAN = c.EAN,
+                        RoleName = c.RoleName
+                    })
+                    .ToList()
+            };
+
+            return Ok(response);
+        }
     }
 }
+

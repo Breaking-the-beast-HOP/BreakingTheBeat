@@ -1,133 +1,224 @@
 ﻿@page "/contributors/{Id:guid}"
 @rendermode InteractiveServer
+@using FrontendThrowAway.Components.Layout
 @using MudBlazor
-@using FrontendThrowAway.Components.Pages.MusicCatalog.Contributors.Details
+@using FrontendThrowAway.Components.Shared
 @inject HttpClient Http
 
 <PageTitle>Contributor Details</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="pa-6">
+<MudStack Spacing="3">
 
-    <MudStack Spacing="4">
+    <!-- Header -->
+    <MudPaper Class="pa-4" Elevation="5">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <div>
+                <MudText Typo="Typo.h4">
+                    @(_contributor?.DisplayName ?? "Contributor")
+                </MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Contributor details
+                </MudText>
+            </div>
 
-        <!-- Header -->
-        <MudPaper Class="pa-4">
-            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                <MudText Typo="Typo.h4">Contributor Details</MudText>
+            <MudStack Row="true" Spacing="2">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Default"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Href="/contributors">
+                    Back
+                </MudButton>
 
-                <MudStack Row="true" Spacing="2">
-                    <MudButton Variant="Variant.Text"
-                               Color="Color.Default"
-                               Href="/contributors">
-                        Back
-                    </MudButton>
-
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Warning"
-                               StartIcon="@Icons.Material.Filled.Edit"
-                               Disabled="true">
-                        Edit
-                    </MudButton>
-                </MudStack>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Warning"
+                           StartIcon="@Icons.Material.Filled.Edit"
+                           Disabled="true">
+                    Edit
+                </MudButton>
             </MudStack>
-        </MudPaper>
+        </MudStack>
+    </MudPaper>
 
-        @if (_isLoading)
-        {
-            <MudProgressCircular Indeterminate="true" Color="Color.Warning" />
-        }
-        else if (!string.IsNullOrWhiteSpace(_errorMessage))
-        {
-            <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
-        }
-        else if (_contributor is not null)
-        {
-            <!-- Contributor Info -->
-            <MudPaper Class="pa-4" Elevation="5">
-                <MudText Typo="Typo.h6" Class="mb-3">Contributor Info</MudText>
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Warning" />
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
+    }
+    else if (_contributor is null)
+    {
+        <MudAlert Severity="Severity.Warning">Contributor not found.</MudAlert>
+    }
+    else
+    {
+        <MudGrid Spacing="3">
 
-                <MudGrid>
-                    <MudItem xs="12" md="6">
+            <!-- LEFT -->
+            <MudItem xs="12" md="5">
+                <MudStack Spacing="3">
+
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Contributor Info</MudText>
+
                         <MudStack Spacing="1">
-                            <DetailRow Label="Display name / Artist name"
+                            <DetailRow Label="Display name"
                                        Value="@_contributor.DisplayName" />
 
                             <DetailRow Label="Legal name"
                                        Value="@(string.IsNullOrWhiteSpace(_contributor.LegalName) ? "-" : _contributor.LegalName)" />
-                        </MudStack>
-                    </MudItem>
 
-                    <MudItem xs="12" md="6">
-                        <MudStack Spacing="1">
                             <DetailRow Label="IPI"
                                        Value="@(string.IsNullOrWhiteSpace(_contributor.IPI) ? "-" : _contributor.IPI)" />
 
                             <DetailRow Label="ISNI"
                                        Value="@(string.IsNullOrWhiteSpace(_contributor.ISNI) ? "-" : _contributor.ISNI)" />
                         </MudStack>
-                    </MudItem>
-                </MudGrid>
-            </MudPaper>
+                    </MudPaper>
 
-            <!-- Contributes On -->
-            <MudPaper Class="pa-4" Elevation="5">
-                <MudText Typo="Typo.h6" Class="mb-3">Contributes On</MudText>
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Summary</MudText>
 
-                <MudTabs Rounded="true" Color="Color.Warning">
+                        <MudStack Spacing="1">
+                            <DetailRow Label="Track contributions"
+                                       Value="@_contributor.TrackContributions.Count.ToString()" />
 
-                    <MudTabPanel Text="Tracks">
-                        @if (!_contributor.TrackContributions.Any())
-                        {
-                            <MudText Color="Color.Secondary">No track contributions found.</MudText>
-                        }
-                        else
-                        {
-                            <MudTable Items="_contributor.TrackContributions" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>Title</MudTh>
-                                    <MudTh>Role</MudTh>
-                                    <MudTh>ISRC</MudTh>
-                                </HeaderContent>
+                            <DetailRow Label="Release contributions"
+                                       Value="@_contributor.ReleaseContributions.Count.ToString()" />
 
-                                <RowTemplate>
-                                    <MudTd>@context.Title</MudTd>
-                                    <MudTd>@context.RoleName</MudTd>
-                                    <MudTd>@(string.IsNullOrWhiteSpace(context.ISRC) ? "-" : context.ISRC)</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        }
-                    </MudTabPanel>
+                            <DetailRow Label="Total contributions"
+                                       Value="@TotalContributions.ToString()" />
+                        </MudStack>
+                    </MudPaper>
 
-                    <MudTabPanel Text="Releases">
-                        @if (!_contributor.ReleaseContributions.Any())
-                        {
-                            <MudText Color="Color.Secondary">No release contributions found.</MudText>
-                        }
-                        else
-                        {
-                            <MudTable Items="_contributor.ReleaseContributions" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>Title</MudTh>
-                                    <MudTh>Role</MudTh>
-                                    <MudTh>EAN</MudTh>
-                                </HeaderContent>
+                </MudStack>
+            </MudItem>
 
-                                <RowTemplate>
-                                    <MudTd>@context.Title</MudTd>
-                                    <MudTd>@context.RoleName</MudTd>
-                                    <MudTd>@(string.IsNullOrWhiteSpace(context.EAN) ? "-" : context.EAN)</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        }
-                    </MudTabPanel>
+            <!-- RIGHT -->
+            <MudItem xs="12" md="7">
+                <MudPaper Class="pa-4" Elevation="5">
 
-                </MudTabs>
-            </MudPaper>
-        }
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
+                        <MudText Typo="Typo.h6">Direct Contributions</MudText>
 
-    </MudStack>
+                        <MudChip T="string" Color="Color.Warning" Variant="Variant.Outlined" Size="Size.Small">
+                            @TotalContributions contribution(s)
+                        </MudChip>
+                    </MudStack>
 
-</MudContainer>
+                    <MudTabs Rounded="true" Color="Color.Warning">
+
+                        <MudTabPanel Text="@($"Tracks ({_contributor.TrackContributions.Count})")">
+                            @if (!_contributor.TrackContributions.Any())
+                            {
+                                <MudAlert Severity="Severity.Info" Dense="true">
+                                    No direct track contributions found.
+                                </MudAlert>
+                            }
+                            else
+                            {
+                                <MudTable Items="_contributor.TrackContributions"
+                                          Dense="true"
+                                          Hover="true"
+                                          Elevation="0">
+                                    <HeaderContent>
+                                        <MudTh>Track</MudTh>
+                                        <MudTh>Role</MudTh>
+                                        <MudTh>ISRC</MudTh>
+                                        <MudTh></MudTh>
+                                    </HeaderContent>
+
+                                    <RowTemplate>
+                                        <MudTd>
+                                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                @context.TrackTitle
+                                            </MudText>
+                                        </MudTd>
+
+                                        <MudTd>
+                                            <MudChip T="string"
+                                                     Size="Size.Small"
+                                                     Color="Color.Warning"
+                                                     Variant="Variant.Outlined">
+                                                @context.RoleName
+                                            </MudChip>
+                                        </MudTd>
+
+                                        <MudTd>
+                                            @(string.IsNullOrWhiteSpace(context.ISRC) ? "-" : context.ISRC)
+                                        </MudTd>
+
+                                        <MudTd Align="Align.Right">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                                           Color="Color.Warning"
+                                                           Size="Size.Small"
+                                                           Href="@($"/tracks/{context.TrackId}")" />
+                                        </MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            }
+                        </MudTabPanel>
+
+                        <MudTabPanel Text="@($"Releases ({_contributor.ReleaseContributions.Count})")">
+                            @if (!_contributor.ReleaseContributions.Any())
+                            {
+                                <MudAlert Severity="Severity.Info" Dense="true">
+                                    No direct release contributions found.
+                                </MudAlert>
+                            }
+                            else
+                            {
+                                <MudTable Items="_contributor.ReleaseContributions"
+                                          Dense="true"
+                                          Hover="true"
+                                          Elevation="0">
+                                    <HeaderContent>
+                                        <MudTh>Release</MudTh>
+                                        <MudTh>Role</MudTh>
+                                        <MudTh>EAN</MudTh>
+                                        <MudTh></MudTh>
+                                    </HeaderContent>
+
+                                    <RowTemplate>
+                                        <MudTd>
+                                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                @context.ReleaseTitle
+                                            </MudText>
+                                        </MudTd>
+
+                                        <MudTd>
+                                            <MudChip T="string"
+                                                     Size="Size.Small"
+                                                     Color="Color.Warning"
+                                                     Variant="Variant.Outlined">
+                                                @context.RoleName
+                                            </MudChip>
+                                        </MudTd>
+
+                                        <MudTd>
+                                            @(string.IsNullOrWhiteSpace(context.EAN) ? "-" : context.EAN)
+                                        </MudTd>
+
+                                        <MudTd Align="Align.Right">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                                           Color="Color.Warning"
+                                                           Size="Size.Small"
+                                                           Href="@($"/releases/{context.ReleaseId}")" />
+                                        </MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            }
+                        </MudTabPanel>
+
+                    </MudTabs>
+                </MudPaper>
+            </MudItem>
+
+        </MudGrid>
+    }
+
+</MudStack>
 
 @code {
     [Parameter]
@@ -136,6 +227,10 @@
     private bool _isLoading = true;
     private string? _errorMessage;
     private ContributorDetailsResponse? _contributor;
+
+    private int TotalContributions =>
+        (_contributor?.TrackContributions.Count ?? 0)
+        + (_contributor?.ReleaseContributions.Count ?? 0);
 
     protected override async Task OnInitializedAsync()
     {
@@ -158,4 +253,6 @@
             _isLoading = false;
         }
     }
+
+  
 }

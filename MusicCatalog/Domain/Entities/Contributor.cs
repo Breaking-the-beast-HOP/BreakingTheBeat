@@ -17,6 +17,7 @@ namespace MusicCatalog.Domain.Entities
         public string? IPI { get; private set; }
         public string? ISNI { get; private set; }
 
+       
         private Contributor() { } // EF
 
         public static Contributor Create(string legalName, string? displayName = null, string? ipi = null, string? isni = null)

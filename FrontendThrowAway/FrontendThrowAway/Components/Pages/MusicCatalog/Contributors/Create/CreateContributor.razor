@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @using MudBlazor
 
-
 <PageTitle>Create Contributor</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="pa-6">
@@ -16,7 +15,8 @@
                 <MudStack Row="true" Spacing="2">
                     <MudButton Variant="Variant.Text"
                                Color="Color.Default"
-                               Href="/contributors">
+                               Href="/contributors"
+                               Disabled="_isSaving">
                         Cancel
                     </MudButton>
 
@@ -33,19 +33,15 @@
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
         {
-            <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
-        }
-
-        @if (!string.IsNullOrWhiteSpace(_successMessage))
-        {
-            <MudAlert Severity="Severity.Success">@_successMessage</MudAlert>
+            <MudAlert Severity="Severity.Error">
+                @_errorMessage
+            </MudAlert>
         }
 
         <MudPaper Class="pa-4" Elevation="5">
             <MudText Typo="Typo.h6" Class="mb-3">Contributor Info</MudText>
 
             <MudGrid Spacing="2">
-
                 <MudItem xs="12">
                     <MudTextField Label="Display name / Artist name"
                                   @bind-Value="_model.DisplayName"
@@ -74,10 +70,40 @@
                                   Variant="Variant.Outlined"
                                   FullWidth="true" />
                 </MudItem>
-
             </MudGrid>
         </MudPaper>
 
     </MudStack>
 
 </MudContainer>
+
+<MudDialog @bind-Visible="_showSuccessDialog">
+    <TitleContent>
+        Contributor created
+    </TitleContent>
+
+    <DialogContent>
+        <MudText>
+            The contributor was created successfully. What would you like to do now?
+        </MudText>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text"
+                   OnClick="GoToContributors">
+            Go to contributors
+        </MudButton>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Warning"
+                   OnClick="CreateAnother">
+            Create another
+        </MudButton>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   OnClick="GoToCreatedContributor">
+            View contributor
+        </MudButton>
+    </DialogActions>
+</MudDialog>

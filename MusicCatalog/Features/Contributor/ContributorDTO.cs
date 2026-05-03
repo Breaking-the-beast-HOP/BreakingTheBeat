@@ -10,4 +10,5 @@
         public string? IPI { get; set; }
         public string? ISNI { get; set; }
     }
+
 }

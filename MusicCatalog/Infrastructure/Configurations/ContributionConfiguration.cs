@@ -13,12 +13,14 @@ namespace MusicCatalog.Infrastructure.Configurations
             entity.HasKey(x => x.Id);
 
             entity.Property(x => x.Id)
+                .HasColumnName("Id")
                 .ValueGeneratedNever();
 
             // =========================
             // CONTRIBUTOR RELATION
             // =========================
             entity.Property(x => x.ContributorId)
+                .HasColumnName("ContributorId")
                 .IsRequired();
 
             entity.HasOne(x => x.Contributor)
@@ -26,11 +28,11 @@ namespace MusicCatalog.Infrastructure.Configurations
                 .HasForeignKey(x => x.ContributorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
             // =========================
             // CONTRIBUTOR ROLE RELATION
             // =========================
             entity.Property(x => x.ContributorRoleId)
+                .HasColumnName("ContributorRoleId")
                 .IsRequired();
 
             entity.HasOne(x => x.Role)
@@ -38,11 +40,11 @@ namespace MusicCatalog.Infrastructure.Configurations
                 .HasForeignKey(x => x.ContributorRoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
             // =========================
             // TRACK RELATION
             // =========================
             entity.Property(x => x.TrackId)
+                .HasColumnName("TrackId")
                 .IsRequired(false);
 
             entity.HasOne(x => x.Track)
@@ -57,11 +59,11 @@ namespace MusicCatalog.Infrastructure.Configurations
                 x.ContributorRoleId
             }).IsUnique();
 
-
             // =========================
             // RELEASE RELATION
             // =========================
             entity.Property(x => x.ReleaseId)
+                .HasColumnName("ReleaseId")
                 .IsRequired(false);
 
             entity.HasOne(x => x.Release)
