@@ -1,0 +1,153 @@
+﻿@page "/users/register"
+@rendermode InteractiveServer
+@using MudBlazor
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Opret bruger</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="pa-6">
+
+    <MudPaper Class="pa-6" Elevation="5">
+
+        <MudStack Spacing="4">
+
+            <!-- Header -->
+            <MudStack Spacing="1">
+                <MudText Typo="Typo.h4">Opret bruger</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Opret en ny bruger til systemet.
+                </MudText>
+            </MudStack>
+
+            <!-- Form -->
+            <MudForm @ref="_form">
+
+                <MudStack Spacing="3">
+
+                    <MudTextField T="string"
+                                  Label="Email"
+                                  @bind-Value="_model.Email"
+                                  Required="true"
+                                  RequiredError="Email er påkrævet"
+                                  InputType="InputType.Email"
+                                  Variant="Variant.Outlined" />
+
+                    <MudTextField T="string"
+                                  Label="Adgangskode"
+                                  @bind-Value="_model.Password"
+                                  Required="true"
+                                  RequiredError="Adgangskode er påkrævet"
+                                  InputType="InputType.Password"
+                                  Variant="Variant.Outlined" />
+
+                    <MudTextField T="string"
+                                  Label="Gentag adgangskode"
+                                  @bind-Value="_confirmPassword"
+                                  Required="true"
+                                  RequiredError="Gentag adgangskode er påkrævet"
+                                  InputType="InputType.Password"
+                                  Variant="Variant.Outlined" />
+
+                </MudStack>
+
+            </MudForm>
+
+            <!-- Errors -->
+            @if (_errorMessages.Any())
+            {
+                <MudAlert Severity="Severity.Error">
+                    <MudStack Spacing="1">
+                        @foreach (var error in _errorMessages)
+                        {
+                            <MudText Typo="Typo.body2">@error</MudText>
+                        }
+                    </MudStack>
+                </MudAlert>
+            }
+
+            <!-- Actions -->
+            <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="2">
+
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Default"
+                           Href="/">
+                    Cancel
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Warning"
+                           OnClick="CreateUser"
+                           Disabled="_isSaving">
+                    @(_isSaving ? "Opretter..." : "Opret bruger")
+                </MudButton>
+
+            </MudStack>
+
+        </MudStack>
+
+    </MudPaper>
+
+</MudContainer>
+
+@code {
+    private MudForm? _form;
+    private bool _isSaving;
+    private string? _confirmPassword;
+
+    private List<string> _errorMessages = new();
+
+    private RegisterUserRequest _model = new();
+
+    private async Task CreateUser()
+    {
+        _errorMessages.Clear();
+
+        await _form!.Validate();
+
+        if (!_form.IsValid)
+            return;
+
+        if (_model.Password != _confirmPassword)
+        {
+            _errorMessages.Add("Adgangskoderne matcher ikke.");
+            return;
+        }
+
+        _isSaving = true;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/register", _model);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errors = await response.Content.ReadFromJsonAsync<List<string>>();
+
+                _errorMessages = errors ?? new List<string>
+                {
+                    "Brugeren kunne ikke oprettes."
+                };
+
+                return;
+            }
+
+            Navigation.NavigateTo("/");
+        }
+        catch
+        {
+            _errorMessages.Add("Der skete en fejl under oprettelse af brugeren.");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private class RegisterUserRequest
+    {
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+    }
+}

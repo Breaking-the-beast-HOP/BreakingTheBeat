@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MusicCatalog\MusicCatalog.csproj" />
     <ProjectReference Include="..\PodcastCatalog\PodcastCatalog.csproj" />
+    <ProjectReference Include="..\UserManagement\UserManagement.csproj" />
   </ItemGroup>
 
 </Project>

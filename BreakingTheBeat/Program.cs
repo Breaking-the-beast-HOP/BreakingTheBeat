@@ -1,5 +1,7 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using MusicCatalog.Features.Contributor;
 using MusicCatalog.Features.Contributor.Create;
 using MusicCatalog.Features.ContributorRole;
@@ -25,6 +27,10 @@ using PodcastCatalog.Infrastructure.Data;
 
 using SharedKernel;
 
+using UserManagement.Domain.Entities;
+using UserManagement.Features.User.Register;
+using UserManagement.Infrastructure.Persistence;
+
 namespace Gateway
 {
     public class Program
@@ -35,17 +41,30 @@ namespace Gateway
 
             // 1. Connection strings
             var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatDb");
-            var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatDb")
-                ?? throw new InvalidOperationException("Connection string 'PodcastCatalog' not found.");
 
-            // 2. DbContext
+            var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatDb")
+                ?? throw new InvalidOperationException("Connection string 'PodcastCatDb' not found.");
+
+            var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb")
+                ?? throw new InvalidOperationException("Connection string 'UserManagementDb' not found.");
+
+            // 2. DbContexts
             builder.Services.AddDbContext<MusicCatalogDbContext>(options =>
                 options.UseNpgsql(musicCatalogConnectionString));
 
             builder.Services.AddDbContext<PodcastCatalogDbContext>(options =>
                 options.UseNpgsql(podcastCatalogConnectionString));
 
-            // 3.1 Repositories (music)
+            builder.Services.AddDbContext<UserManagementDbContext>(options =>
+                options.UseNpgsql(userManagementConnectionString));
+
+            // 3. Identity
+            builder.Services
+                .AddIdentity<ApplicationUser, IdentityRole<Guid>>()
+                .AddEntityFrameworkStores<UserManagementDbContext>()
+                .AddDefaultTokenProviders();
+
+            // 4. Repositories (music)
             builder.Services.AddScoped<ILanguageRepository, MusicCatalog.Infrastructure.Repositories.LanguageRepository>();
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
@@ -53,16 +72,16 @@ namespace Gateway
             builder.Services.AddScoped<IContributorRoleRepository, ContributionRoleRepository>();
             builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
 
-            // 3.2 Repositories (podcast)
+            // 5. Repositories (podcast)
             builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
 
-            // 4. Validators (Podcast)
+            // 6. Validators (podcast)
             builder.Services.AddValidatorsFromAssemblyContaining<CreatePodcastValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<UpdatePodcastValidator>();
             builder.Services.AddValidatorsFromAssemblyContaining<GetPodcastValidator>();
 
-            // 5. MediatR (EN gang!)
+            // 7. MediatR
             builder.Services.AddMediatR(cfg =>
             {
                 // Music
@@ -78,27 +97,30 @@ namespace Gateway
                 cfg.RegisterServicesFromAssembly(typeof(UpdatePodcastHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetPodcastHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetAllPodcastsHandler).Assembly);
+
+                // UserManagement
+                cfg.RegisterServicesFromAssembly(typeof(RegisterUserCommand).Assembly);
             });
 
-            // 6. Controllers
+            // 8. Controllers
             builder.Services.AddControllers();
 
-            // 7. Swagger/OpenAPI
+            // 9. Swagger/OpenAPI
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
 
-            // Seed database
+            // Seed / migrate podcast database
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
 
                 try
                 {
-                    var context = services.GetRequiredService<PodcastCatalogDbContext>();
+                    var podcastContext = services.GetRequiredService<PodcastCatalogDbContext>();
 
-                    context.Database.Migrate(); // ?? vigtigt!
-                    DbInitializer.Initialize(context);
+                    podcastContext.Database.Migrate();
+                    DbInitializer.Initialize(podcastContext);
                 }
                 catch (Exception ex)
                 {
@@ -114,7 +136,10 @@ namespace Gateway
             }
 
             app.UseHttpsRedirection();
+
+            app.UseAuthentication();
             app.UseAuthorization();
+
             app.MapControllers();
 
             app.Run();
