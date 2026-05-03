@@ -1,0 +1,161 @@
+﻿@page "/contributors/{Id:guid}"
+@rendermode InteractiveServer
+@using MudBlazor
+@using FrontendThrowAway.Components.Pages.MusicCatalog.Contributors.Details
+@inject HttpClient Http
+
+<PageTitle>Contributor Details</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="pa-6">
+
+    <MudStack Spacing="4">
+
+        <!-- Header -->
+        <MudPaper Class="pa-4">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h4">Contributor Details</MudText>
+
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               Href="/contributors">
+                        Back
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               Disabled="true">
+                        Edit
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        @if (_isLoading)
+        {
+            <MudProgressCircular Indeterminate="true" Color="Color.Warning" />
+        }
+        else if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
+        }
+        else if (_contributor is not null)
+        {
+            <!-- Contributor Info -->
+            <MudPaper Class="pa-4" Elevation="5">
+                <MudText Typo="Typo.h6" Class="mb-3">Contributor Info</MudText>
+
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudStack Spacing="1">
+                            <DetailRow Label="Display name / Artist name"
+                                       Value="@_contributor.DisplayName" />
+
+                            <DetailRow Label="Legal name"
+                                       Value="@(string.IsNullOrWhiteSpace(_contributor.LegalName) ? "-" : _contributor.LegalName)" />
+                        </MudStack>
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudStack Spacing="1">
+                            <DetailRow Label="IPI"
+                                       Value="@(string.IsNullOrWhiteSpace(_contributor.IPI) ? "-" : _contributor.IPI)" />
+
+                            <DetailRow Label="ISNI"
+                                       Value="@(string.IsNullOrWhiteSpace(_contributor.ISNI) ? "-" : _contributor.ISNI)" />
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+
+            <!-- Contributes On -->
+            <MudPaper Class="pa-4" Elevation="5">
+                <MudText Typo="Typo.h6" Class="mb-3">Contributes On</MudText>
+
+                <MudTabs Rounded="true" Color="Color.Warning">
+
+                    <MudTabPanel Text="Tracks">
+                        @if (!_contributor.TrackContributions.Any())
+                        {
+                            <MudText Color="Color.Secondary">No track contributions found.</MudText>
+                        }
+                        else
+                        {
+                            <MudTable Items="_contributor.TrackContributions" Dense="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Title</MudTh>
+                                    <MudTh>Role</MudTh>
+                                    <MudTh>ISRC</MudTh>
+                                </HeaderContent>
+
+                                <RowTemplate>
+                                    <MudTd>@context.Title</MudTd>
+                                    <MudTd>@context.RoleName</MudTd>
+                                    <MudTd>@(string.IsNullOrWhiteSpace(context.ISRC) ? "-" : context.ISRC)</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        }
+                    </MudTabPanel>
+
+                    <MudTabPanel Text="Releases">
+                        @if (!_contributor.ReleaseContributions.Any())
+                        {
+                            <MudText Color="Color.Secondary">No release contributions found.</MudText>
+                        }
+                        else
+                        {
+                            <MudTable Items="_contributor.ReleaseContributions" Dense="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Title</MudTh>
+                                    <MudTh>Role</MudTh>
+                                    <MudTh>EAN</MudTh>
+                                </HeaderContent>
+
+                                <RowTemplate>
+                                    <MudTd>@context.Title</MudTd>
+                                    <MudTd>@context.RoleName</MudTd>
+                                    <MudTd>@(string.IsNullOrWhiteSpace(context.EAN) ? "-" : context.EAN)</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        }
+                    </MudTabPanel>
+
+                </MudTabs>
+            </MudPaper>
+        }
+
+    </MudStack>
+
+</MudContainer>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private bool _isLoading = true;
+    private string? _errorMessage;
+    private ContributorDetailsResponse? _contributor;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _isLoading = true;
+
+            _contributor = await Http.GetFromJsonAsync<ContributorDetailsResponse>(
+                $"api/contributor/{Id}");
+
+            if (_contributor is null)
+                _errorMessage = "Contributor could not be found.";
+        }
+        catch
+        {
+            _errorMessage = "Failed to load contributor.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

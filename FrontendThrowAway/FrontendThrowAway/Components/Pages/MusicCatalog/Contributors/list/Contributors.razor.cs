@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using FrontendThrowAway.Components.Pages.MusicCatalog.Contributors;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
+namespace FrontendThrowAway.Components.Pages.MusicCatalog.Contributors.List
 {
     public partial class Contributors
     {
@@ -11,9 +13,9 @@ using Microsoft.JSInterop;
         [Inject]
         protected NavigationManager Navigation { get; set; } = default!;
 
-        [Inject] 
+        [Inject]
         private IJSRuntime JS { get; set; } = default!;
-        
+
         private List<ContributorDto> _contributors = new();
         private bool isLoading = true;
         private string? errorMessage;
@@ -69,6 +71,8 @@ using Microsoft.JSInterop;
             {
                 errorMessage = ex.Message;
             }
-        } 
+        }
     }
 }
+   
+
