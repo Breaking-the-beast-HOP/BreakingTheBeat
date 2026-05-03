@@ -11,6 +11,9 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Create
         [Inject]
         protected HttpClient Http { get; set; } = default!;
 
+        [Inject]
+        protected NavigationManager Navigation { get; set; } = default!;
+
         private ReleaseModel _model = new();
 
         private List<LanguageDto> _languages = new();
@@ -32,7 +35,8 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Create
         private bool _isLoadingLookups = true;
         private bool _isSaving = false;
         private string? _errorMessage;
-        private string? _successMessage;
+        private bool _showSuccessDialog;
+        private Guid? _createdReleaseId;
 
         protected override async Task OnInitializedAsync()
         {
@@ -203,7 +207,6 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Create
         private async Task SaveRelease()
         {
             _errorMessage = null;
-            _successMessage = null;
 
             if (string.IsNullOrWhiteSpace(_model.Title))
             {
@@ -258,9 +261,8 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Create
 
                 if (response.IsSuccessStatusCode)
                 {
-                    _successMessage = "Release created successfully.";
-
-                    ResetForm();
+                    _createdReleaseId = await response.Content.ReadFromJsonAsync<Guid>();
+                    _showSuccessDialog = true;
                 }
                 else
                 {
@@ -318,6 +320,28 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Create
                 return track.Version;
 
             return "No ISRC";
+        }
+
+        private void GoToCreatedRelease()
+        {
+            if (_createdReleaseId is null)
+                return;
+
+            Navigation.NavigateTo($"/releases/{_createdReleaseId}");
+        }
+
+        private void GoToReleases()
+        {
+            Navigation.NavigateTo("/releases");
+        }
+
+        private void CreateAnother()
+        {
+            ResetForm();
+
+            _createdReleaseId = null;
+            _showSuccessDialog = false;
+            _errorMessage = null;
         }
 
     }

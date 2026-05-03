@@ -43,13 +43,6 @@
             </MudAlert>
         }
 
-        @if (!string.IsNullOrWhiteSpace(_successMessage))
-        {
-            <MudAlert Severity="Severity.Success">
-                @_successMessage
-            </MudAlert>
-        }
-
         <!-- Main layout -->
         <MudGrid Spacing="3">
 
@@ -216,3 +209,33 @@
     </MudStack>
 </MudContainer>
 
+<MudDialog @bind-Visible="_showSuccessDialog">
+    <TitleContent>
+        Track created
+    </TitleContent>
+
+    <DialogContent>
+        <MudText>
+            The track was created successfully. What would you like to do now?
+        </MudText>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text"
+                   OnClick="GoToTracks">
+            Go to tracks
+        </MudButton>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Warning"
+                   OnClick="CreateAnother">
+            Create another
+        </MudButton>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   OnClick="GoToCreatedTrack">
+            View track
+        </MudButton>
+    </DialogActions>
+</MudDialog>

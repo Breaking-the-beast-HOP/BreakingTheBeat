@@ -29,7 +29,8 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Create
         private bool _isLoadingLookups = true;
         private bool _isSaving = false;
         private string? _errorMessage;
-        private string? _successMessage;
+        private bool _showSuccessDialog;
+        private Guid? _createdTrackId;
 
         protected override async Task OnInitializedAsync()
         {
@@ -112,7 +113,7 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Create
         private async Task SaveTrack()
         {
             _errorMessage = null;
-            _successMessage = null;
+    
 
             if (string.IsNullOrWhiteSpace(_model.Title))
             {
@@ -155,14 +156,8 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Create
 
                 if (response.IsSuccessStatusCode)
                 {
-                    _successMessage = "Track created successfully.";
-
-                    _model = new TrackModel();
-                    _contributions.Clear();
-
-                    _selectedGenre = null;
-                    _selectedMetadataLanguage = null;
-                    _selectedAudioLanguage = null;
+                    _createdTrackId = await response.Content.ReadFromJsonAsync<Guid>();
+                    _showSuccessDialog = true;
                 }
                 else
                 {
@@ -180,6 +175,38 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Create
             {
                 _isSaving = false;
             }
+        }
+
+        private void GoToCreatedTrack()
+        {
+            if (_createdTrackId is null)
+                return;
+
+            Navigation.NavigateTo($"/tracks/{_createdTrackId}");
+        }
+
+        private void GoToTracks()
+        {
+            Navigation.NavigateTo("/tracks");
+        }
+
+        private void CreateAnother()
+        {
+            ResetForm();
+
+            _createdTrackId = null;
+            _showSuccessDialog = false;
+            _errorMessage = null;
+        }
+        private void ResetForm()
+        {
+            _model = new TrackModel();
+
+            _selectedGenre = null;
+            _selectedMetadataLanguage = null;
+            _selectedAudioLanguage = null;
+
+            _contributions.Clear();
         }
 
     }

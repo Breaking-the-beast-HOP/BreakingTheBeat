@@ -41,11 +41,6 @@
             <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
         }
 
-        @if (!string.IsNullOrWhiteSpace(_successMessage))
-        {
-            <MudAlert Severity="Severity.Success">@_successMessage</MudAlert>
-        }
-
         <!-- TOP GRID: RELEASE METADATA + COVER/BOOKLET -->
         <MudGrid Spacing="3">
 
@@ -250,5 +245,36 @@
 
     </MudStack>
 </MudContainer>
+
+<MudDialog @bind-Visible="_showSuccessDialog">
+    <TitleContent>
+        Release created
+    </TitleContent>
+
+    <DialogContent>
+        <MudText>
+            The release was created successfully. What would you like to do now?
+        </MudText>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text"
+                   OnClick="GoToReleases">
+            Go to releases
+        </MudButton>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Warning"
+                   OnClick="CreateAnother">
+            Create another
+        </MudButton>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   OnClick="GoToCreatedRelease">
+            View release
+        </MudButton>
+    </DialogActions>
+</MudDialog>
 
 
