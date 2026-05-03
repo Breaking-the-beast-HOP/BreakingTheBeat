@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace FrontendThrowAway.Components.Pages.MusicCatalog.Contributors.list
 {
     public partial class Contributors
     {
