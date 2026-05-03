@@ -55,9 +55,18 @@ namespace MusicCatalog.Infrastructure.Repositories
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public Task<bool> UpdateAsync(Release entity)
+        public async Task<bool> UpdateAsync(Release entity)
         {
-            throw new NotImplementedException();
+            var existingRelease = await _context.Releases.FirstOrDefaultAsync(t => t.Id == entity.Id);
+              
+
+            if (existingRelease is null)
+                return false;
+
+            _context.Entry(existingRelease).CurrentValues.SetValues(entity);
+
+            await _context.SaveChangesAsync();
+            return true; 
         }
     }
 }

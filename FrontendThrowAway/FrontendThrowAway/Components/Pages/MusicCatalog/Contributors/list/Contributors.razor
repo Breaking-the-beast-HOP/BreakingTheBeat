@@ -1,0 +1,114 @@
+﻿@page "/contributors"
+
+
+<PageTitle>Contributor Catalog</PageTitle>
+
+<MudStack Spacing="3">
+
+    <!-- Header -->
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h4">Contributor Catalog</MudText>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/create-contributor">
+            Create Contributor
+        </MudButton>
+    </MudStack>
+
+    <!-- Search -->
+    <MudTextField @bind-Value="_searchString"
+                  Placeholder="Search name..."
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Variant="Variant.Outlined"
+                  Immediate="true" />
+
+    <!-- Content -->
+    @if (isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">
+            @errorMessage
+        </MudAlert>
+    }
+    else if (_contributors == null || !_contributors.Any())
+    {
+        <MudAlert Severity="Severity.Info">
+            No contributors found.
+        </MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4">
+
+            <MudTable Items="FilteredContributors"
+                      T="ContributorDto"
+                      Hover="true"
+                      Dense="true"
+                      Elevation="0">
+
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Legal name</MudTh>
+                    <MudTh>IPI</MudTh>
+                    <MudTh>ISNI</MudTh>
+                    <MudTh Style="width:150px;">Actions</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <!-- Name (klikbar) -->
+                    <MudTd DataLabel="Name">
+                        <MudLink Href="@($"/contributors/{context.Id}")">
+                            <MudText Typo="Typo.subtitle2">
+                                @context.DisplayName
+                            </MudText>
+                        </MudLink>
+                    </MudTd>
+
+                    <MudTd DataLabel="Legal name">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            @(context.LegalName ?? "-")
+                        </MudText>
+                    </MudTd>
+
+                    <MudTd DataLabel="IPI">
+                        <MudText Typo="Typo.body2">
+                            @(context.IPI ?? "-")
+                        </MudText>
+                    </MudTd>
+
+                    <MudTd DataLabel="ISNI">
+                        <MudText Typo="Typo.body2">
+                            @(context.ISNI ?? "-")
+                        </MudText>
+                    </MudTd>
+
+                    <!-- Actions -->
+                    <MudTd DataLabel="Actions">
+                        <MudStack Row="true" Spacing="1">
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Warning"
+                                           Size="Size.Small"
+                                           OnClick="@(() => EditContributor(context.Id))" />
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           OnClick="@(() => DeleteContributor(context.Id))" />
+
+                        </MudStack>
+                    </MudTd>
+
+                </RowTemplate>
+
+            </MudTable>
+        </MudPaper>
+    }
+
+</MudStack>

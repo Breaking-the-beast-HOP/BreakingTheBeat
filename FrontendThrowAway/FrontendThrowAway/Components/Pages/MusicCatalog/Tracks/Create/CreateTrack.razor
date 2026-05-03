@@ -1,0 +1,218 @@
+﻿@page "/create-track"
+@rendermode InteractiveServer
+@using FrontendThrowAway.Components.Shared;
+@using FrontendThrowAway.Components.Pages.MusicCatalog.SharedModels
+@using MudBlazor
+
+
+@namespace FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Create
+
+<PageTitle>Create Track</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
+
+    <MudStack Spacing="4">
+
+        <!-- Header -->
+        <MudPaper Class="pa-4">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h4">Create Track</MudText>
+
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Variant="Variant.Text"
+                    Color="Color.Default"
+                    Href="/tracks">
+                        Cancel
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                    Color="Color.Warning"
+                    StartIcon="@Icons.Material.Filled.Save"
+                    OnClick="SaveTrack"
+                    Disabled="_isSaving || _isLoadingLookups">
+                        @(_isSaving ? "Saving..." : "Save")
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <MudAlert Severity="Severity.Error">
+                @_errorMessage
+            </MudAlert>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(_successMessage))
+        {
+            <MudAlert Severity="Severity.Success">
+                @_successMessage
+            </MudAlert>
+        }
+
+        <!-- Main layout -->
+        <MudGrid Spacing="3">
+
+            <!-- LEFT COLUMN -->
+            <MudItem xs="12" md="7">
+                <MudStack Spacing="3">
+
+                    <!-- Track info -->
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Track Info</MudText>
+
+                        <MudGrid Spacing="2">
+
+                            <MudItem xs="12">
+                                <MudTextField Label="Title"
+                                @bind-Value="_model.Title"
+                                Variant="Variant.Outlined"
+                                Required="true"
+                                FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <MudTextField Label="Version"
+                                @bind-Value="_model.Version"
+                                Variant="Variant.Outlined"
+                                FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <MudTextField Label="ISRC"
+                                @bind-Value="_model.ISRC"
+                                Variant="Variant.Outlined"
+                                FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudAutocomplete T="GenreDto"
+                                Label="Genre"
+                                Variant="Variant.Outlined"
+                                Value="_selectedGenre"
+                                ValueChanged="OnGenreChanged"
+                                SearchFunc="SearchGenres"
+                                ToStringFunc="@(g => g?.Name ?? string.Empty)"
+                                Clearable="true"
+                                ResetValueOnEmptyText="true"
+                                CoerceText="false"
+                                Dense="true"
+                                FullWidth="true"
+                                MaxItems="8"
+                                Disabled="_isLoadingLookups" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <MudAutocomplete T="LanguageDto"
+                                Label="Metadata language"
+                                Variant="Variant.Outlined"
+                                Value="_selectedMetadataLanguage"
+                                ValueChanged="OnMetadataLanguageChanged"
+                                SearchFunc="SearchLanguages"
+                                ToStringFunc="@(l => l?.Name ?? string.Empty)"
+                                Clearable="true"
+                                ResetValueOnEmptyText="true"
+                                CoerceText="false"
+                                Dense="true"
+                                FullWidth="true"
+                                MaxItems="8"
+                                Disabled="_isLoadingLookups" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <MudAutocomplete T="LanguageDto"
+                                Label="Audio language"
+                                Variant="Variant.Outlined"
+                                Value="_selectedAudioLanguage"
+                                ValueChanged="OnAudioLanguageChanged"
+                                SearchFunc="SearchLanguages"
+                                ToStringFunc="@(l => l?.Name ?? string.Empty)"
+                                Clearable="true"
+                                ResetValueOnEmptyText="true"
+                                CoerceText="false"
+                                Dense="true"
+                                FullWidth="true"
+                                MaxItems="8"
+                                Disabled="_isLoadingLookups" />
+                            </MudItem>
+
+                        </MudGrid>
+                    </MudPaper>
+
+                    <!-- Contributors -->
+                    <ContributionEditor Title="Contributors"
+                    Description="Add track-level contributors and their roles."
+                    Rows="_contributions"
+                    Contributors="_availableContributors"
+                    AvailableRoles="_contributionRoles" />
+
+                </MudStack>
+            </MudItem>
+
+            <!-- RIGHT COLUMN -->
+            <MudItem xs="12" md="5">
+                <MudStack Spacing="3">
+
+                    <!-- Audio -->
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Audio</MudText>
+
+                        <MudStack Spacing="3">
+
+                            <MudPaper Class="dropzone pa-6" Outlined="true">
+                                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
+                                    <MudIcon Icon="@Icons.Material.Filled.AudioFile"
+                                    Size="Size.Large"
+                                    Color="Color.Warning" />
+                                    <MudText Typo="Typo.subtitle1">Drop zone</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        Audio upload will be added later
+                                    </MudText>
+                                </MudStack>
+                            </MudPaper>
+
+                            <MudAlert Severity="Severity.Info" Dense="true">
+                                Audio details are filled automatically after upload and transcoding.
+                            </MudAlert>
+
+                            <MudDivider />
+
+                            <MudText Typo="Typo.subtitle2">Audio Details</MudText>
+
+                            <MudStack Spacing="1">
+                                <div class="audio-detail-row">
+                                    <MudText Typo="Typo.body2" Class="audio-detail-label">Codec</MudText>
+                                    <MudText Typo="Typo.body1" Class="audio-detail-value">Pending upload</MudText>
+                                </div>
+
+                                <div class="audio-detail-row">
+                                    <MudText Typo="Typo.body2" Class="audio-detail-label">Bit depth</MudText>
+                                    <MudText Typo="Typo.body1" Class="audio-detail-value">Pending upload</MudText>
+                                </div>
+
+                                <div class="audio-detail-row">
+                                    <MudText Typo="Typo.body2" Class="audio-detail-label">Channels</MudText>
+                                    <MudText Typo="Typo.body1" Class="audio-detail-value">Pending upload</MudText>
+                                </div>
+
+                                <div class="audio-detail-row">
+                                    <MudText Typo="Typo.body2" Class="audio-detail-label">Sample rate</MudText>
+                                    <MudText Typo="Typo.body1" Class="audio-detail-value">Pending upload</MudText>
+                                </div>
+
+                                <div class="audio-detail-row">
+                                    <MudText Typo="Typo.body2" Class="audio-detail-label">Duration</MudText>
+                                    <MudText Typo="Typo.body1" Class="audio-detail-value">Pending upload</MudText>
+                                </div>
+                            </MudStack>
+
+                        </MudStack>
+                    </MudPaper>
+
+                </MudStack>
+            </MudItem>
+
+        </MudGrid>
+    </MudStack>
+</MudContainer>
+

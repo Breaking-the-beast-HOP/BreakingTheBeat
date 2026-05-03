@@ -1,0 +1,121 @@
+﻿@page "/releases"
+@using MudBlazor
+@using FrontendThrowAway.Components.Pages.MusicCatalog.SharedModels
+@using FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases
+
+
+<PageTitle>Release Catalog</PageTitle>
+
+<MudStack Spacing="3">
+
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h4">Release Catalog</MudText>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/create-release">
+            Create Release
+        </MudButton>
+    </MudStack>
+
+    <MudTextField @bind-Value="_searchString"
+                  Placeholder="Search title or EAN..."
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Variant="Variant.Outlined"
+                  Immediate="true" />
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">
+            @_errorMessage
+        </MudAlert>
+    }
+    else if (_releases is null || !_releases.Any())
+    {
+        <MudAlert Severity="Severity.Info">
+            No releases found.
+        </MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4" Elevation="5">
+
+            <MudTable Items="FilteredReleases"
+                      T="ReleaseDto"
+                      Hover="true"
+                      Dense="true"
+                      Elevation="0"
+                      OnRowClick="@(args => OnRowClicked(args))">
+
+                <HeaderContent>
+                    <MudTh>Title</MudTh>
+                    <MudTh>Version</MudTh>
+                    <MudTh>Release year</MudTh>
+                    <MudTh>Language</MudTh>
+                    <MudTh>Primary genre</MudTh>
+                    <MudTh>EAN</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Title">
+                        <MudText Typo="Typo.subtitle2">@context.Title</MudText>
+                    </MudTd>
+
+                    <MudTd DataLabel="Version">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            @(string.IsNullOrWhiteSpace(context.Version) ? "-" : context.Version)
+                        </MudText>
+                    </MudTd>
+
+                    <MudTd DataLabel="Release year">
+                        <MudChip T="string" Color="Color.Default" Variant="Variant.Outlined" Size="Size.Small">
+                            @FormatReleaseYear(context.ReleaseDate)
+                        </MudChip>
+                    </MudTd>
+
+                    <MudTd DataLabel="Language">
+                        <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined" Size="Size.Small">
+                            @(context.LanguageName ?? "-")
+                        </MudChip>
+                    </MudTd>
+
+                    <MudTd DataLabel="Primary genre">
+                        <MudChip T="string" Color="Color.Secondary" Variant="Variant.Filled" Size="Size.Small">
+                            @(context.GenreName ?? "-")
+                        </MudChip>
+                    </MudTd>
+
+                    <MudTd DataLabel="EAN">
+                        <MudText Typo="Typo.body2">
+                            @(string.IsNullOrWhiteSpace(context.EAN) ? "-" : context.EAN)
+                        </MudText>
+                    </MudTd>
+
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Warning"
+                                       Size="Size.Small"
+                                       Title="Edit release"
+                                       OnClick="@(() => GoToEdit(context.Id))" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       Title="Delete release"
+                                       OnClick="@(async () => await DeleteRelease(context.Id))" />
+                    </MudTd>
+                </RowTemplate>
+
+            </MudTable>
+        </MudPaper>
+    }
+
+</MudStack>
+

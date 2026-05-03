@@ -1,0 +1,21 @@
+﻿<style >
+.volume-track-row {
+    min-height: 64px;
+}
+
+.volume-track-row:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.track-number {
+    width: 28px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.duration-text {
+    min-width: 60px;
+    text-align: right;
+}
+
+</style >
