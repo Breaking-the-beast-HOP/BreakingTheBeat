@@ -46,6 +46,6 @@ public class AuthController : ControllerBase
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
-        return Ok(result.Token);
+        return Ok(result);
     }
 }

@@ -1,7 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.IdentityModel.Tokens;
 using MusicCatalog.Features.Contributor;
 using MusicCatalog.Features.Contributor.Create;
 using MusicCatalog.Features.ContributorRole;
@@ -16,7 +16,6 @@ using MusicCatalog.Features.Track;
 using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Infrastructure;
 using MusicCatalog.Infrastructure.Repositories;
-
 using PodcastCatalog.Domain.Entities;
 using PodcastCatalog.Features.Podcasts.Create;
 using PodcastCatalog.Features.Podcasts.Get;
@@ -24,11 +23,11 @@ using PodcastCatalog.Features.Podcasts.GetAll;
 using PodcastCatalog.Features.Podcasts.Update;
 using PodcastCatalog.Infrastructure;
 using PodcastCatalog.Infrastructure.Data;
-
 using SharedKernel;
-
+using System.Text;
 using UserManagement.Domain.Entities;
 using UserManagement.Features.User.Register;
+using UserManagement.Infrastructure.Auth;
 using UserManagement.Infrastructure.Persistence;
 
 namespace Gateway
@@ -63,6 +62,24 @@ namespace Gateway
                 .AddIdentity<ApplicationUser, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<UserManagementDbContext>()
                 .AddDefaultTokenProviders();
+
+            builder.Services.AddScoped<JwtService>();
+
+            builder.Services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+                    };
+                });
 
             // 4. Repositories (music)
             builder.Services.AddScoped<ILanguageRepository, MusicCatalog.Infrastructure.Repositories.LanguageRepository>();

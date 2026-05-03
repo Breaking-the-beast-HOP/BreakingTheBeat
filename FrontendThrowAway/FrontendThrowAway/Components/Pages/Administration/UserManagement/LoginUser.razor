@@ -1,7 +1,10 @@
-﻿@page "/users/login"
+﻿@page "/login"
 @rendermode InteractiveServer
 @using System.Net.Http.Json
+@using FrontendThrowAway.Auth
 @inject HttpClient Http
+@inject CustomAuthStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>Login</PageTitle>
 
@@ -27,10 +30,10 @@
                 Login
             </MudButton>
 
-            @if (_result != null)
+            @if (!string.IsNullOrWhiteSpace(_error))
             {
-                <MudAlert Severity="@(_result == true ? Severity.Success : Severity.Error)">
-                    @(_result == true ? "JA ✔ Login lykkedes" : "NEJ ❌ Login fejlede")
+                <MudAlert Severity="Severity.Error">
+                    @_error
                 </MudAlert>
             }
 
@@ -42,19 +45,37 @@
 
 @code {
     private LoginUserRequest _model = new();
-    private bool? _result;
+    private string? _error;
 
     private async Task Login()
     {
+        _error = null;
+
         try
         {
             var response = await Http.PostAsJsonAsync("api/auth/login", _model);
 
-            _result = response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode)
+            {
+                _error = "Forkert email eller adgangskode.";
+                return;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<LoginUserResponse>();
+
+            if (string.IsNullOrWhiteSpace(result?.Token))
+            {
+                _error = "Login lykkedes, men API'et returnerede ikke en token.";
+                return;
+            }
+
+            AuthStateProvider.MarkUserAsAuthenticated(result.Token);
+
+            Navigation.NavigateTo("/");
         }
         catch
         {
-            _result = false;
+            _error = "Der opstod en fejl under login.";
         }
     }
 
@@ -62,5 +83,12 @@
     {
         public string? Email { get; set; }
         public string? Password { get; set; }
+    }
+
+    private class LoginUserResponse
+    {
+        public bool Succeeded { get; set; }
+        public string? Token { get; set; }
+        public List<string> Errors { get; set; } = new();
     }
 }

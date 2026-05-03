@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using UserManagement.Domain.Entities;
+using UserManagement.Infrastructure.Auth;
 
 namespace UserManagement.Features.User.Login
 {
@@ -8,11 +9,13 @@ namespace UserManagement.Features.User.Login
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly JwtService _jwtService;
 
-        public LoginUserHandler( SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+        public LoginUserHandler( SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, JwtService jwtService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _jwtService = jwtService;
         }
 
         public async Task<LoginUserResult> Handle(LoginUserCommand request, CancellationToken cancellationToken)
@@ -39,11 +42,13 @@ namespace UserManagement.Features.User.Login
                 };
             }
 
-           
+
+            var token = _jwtService.GenerateToken(user);
+
             return new LoginUserResult
             {
                 Succeeded = true,
-                Token = "TEMP_TOKEN"
+                Token = token
             };
         }
     }
