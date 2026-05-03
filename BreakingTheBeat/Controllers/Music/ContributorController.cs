@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Contributor.Create;
+using MusicCatalog.Features.Contributor.Delete;
 using MusicCatalog.Features.Contributor.Get;
 using MusicCatalog.Features.Contributor.GetById;
 
@@ -34,6 +35,7 @@ namespace Gateway.Controllers.Music
             var result = await _mediator.Send(new GetContributorsQuery(), cancellationToken);
             return Ok(result);
         }
+
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<ContributorDetailsResponse>> Get( Guid id,CancellationToken cancellationToken)
         {
@@ -69,6 +71,17 @@ namespace Gateway.Controllers.Music
             };
 
             return Ok(response);
+        }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteContributor(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new DeleteContributorCommand(id), cancellationToken);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
         }
     }
 }

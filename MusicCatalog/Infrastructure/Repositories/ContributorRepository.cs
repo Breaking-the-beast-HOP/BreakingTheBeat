@@ -20,9 +20,17 @@ namespace MusicCatalog.Infrastructure.Repositories
             return entity;
         }
 
-        public Task<bool> DeleteAsync(Guid Id)
+        public async Task<bool> DeleteAsync(Guid Id)
         {
-            throw new NotImplementedException();
+            var contributor = await _context.Contributors.FindAsync(Id);
+
+            if (contributor is null)
+                return false;
+
+            _context.Contributors.Remove(contributor);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<List<Contributor>> GetAllAsync()
