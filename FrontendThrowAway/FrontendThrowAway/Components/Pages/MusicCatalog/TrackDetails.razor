@@ -66,29 +66,39 @@
             <!-- LEFT -->
             <MudItem xs="12" md="7">
                 <MudStack Spacing="3">
-                <MudPaper Class="pa-4" Elevation="5">
-                    <MudText Typo="Typo.h6" Class="mb-3">Track Info</MudText>
-                    <MudGrid Spacing="2">
-                        <MudItem xs="12">
-                            <DetailRow Label="Title" Value="@_track.Title" />
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <DetailRow Label="Version" Value="@(string.IsNullOrWhiteSpace(_track.Version) ? "-" : _track.Version)" />
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <DetailRow Label="ISRC" Value="@_track.ISRC" />
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <DetailRow Label="Genre" Value="@(_track.GenreName ?? "-")" />
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <DetailRow Label="Metadata language" Value="@(_track.MetadataLanguageName ?? "-")" />
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <DetailRow Label="Audio language" Value="@(_track.AudioLanguageName ?? "-")" />
-                        </MudItem>
-                    </MudGrid>
-                </MudPaper>
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Track Info</MudText>
+
+                        <MudGrid>
+
+                            <!-- Venstre kolonne -->
+                            <MudItem xs="12" md="6">
+                                <MudStack Spacing="1">
+                                    <DetailRow Label="Title" Value="@_track.Title" />
+
+                                    <DetailRow Label="Version"
+                                               Value="@(string.IsNullOrWhiteSpace(_track.Version) ? "-" : _track.Version)" />
+
+                                    <DetailRow Label="ISRC" Value="@_track.ISRC" />
+                                </MudStack>
+                            </MudItem>
+
+                            <!-- Højre kolonne -->
+                            <MudItem xs="12" md="6">
+                                <MudStack Spacing="1">
+                                    <DetailRow Label="Genre"
+                                               Value="@(_track.GenreName ?? "-")" />
+
+                                    <DetailRow Label="Metadata language"
+                                               Value="@(_track.MetadataLanguageName ?? "-")" />
+
+                                    <DetailRow Label="Audio language"
+                                               Value="@(_track.AudioLanguageName ?? "-")" />
+                                </MudStack>
+                            </MudItem>
+
+                        </MudGrid>
+                    </MudPaper>
 
 
                    <FrontendThrowAway.Components.Component.ContributionDisplay Title="Contributors"

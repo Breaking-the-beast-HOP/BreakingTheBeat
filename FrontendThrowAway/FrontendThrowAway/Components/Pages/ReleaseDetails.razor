@@ -72,30 +72,35 @@
                     <MudPaper Class="pa-4" Elevation="5">
                         <MudText Typo="Typo.h6" Class="mb-3">Release Info</MudText>
 
-                        <MudGrid Spacing="2">
-                            <MudItem xs="12">
-                                <DetailRow Label="Title" Value="@_release.Title" />
+                        <MudGrid>
+
+                            <!-- Venstre kolonne -->
+                            <MudItem xs="12" md="6">
+                                <MudStack Spacing="1">
+                                    <DetailRow Label="Title" Value="@_release.Title" />
+
+                                    <DetailRow Label="Version"
+                                               Value="@(string.IsNullOrWhiteSpace(_release.Version) ? "-" : _release.Version)" />
+
+                                    <DetailRow Label="EAN"
+                                               Value="@(string.IsNullOrWhiteSpace(_release.EAN) ? "-" : _release.EAN)" />
+                                </MudStack>
                             </MudItem>
 
-                            <MudItem xs="12" sm="6">
-                                <DetailRow Label="Version" Value="@(string.IsNullOrWhiteSpace(_release.Version) ? "-" : _release.Version)" />
+                            <!-- Højre kolonne -->
+                            <MudItem xs="12" md="6">
+                                <MudStack Spacing="1">
+                                    <DetailRow Label="Release date"
+                                               Value="@FormatDateOnly(_release.ReleaseDate)" />
+
+                                    <DetailRow Label="Metadata language"
+                                               Value="@(_release.LanguageName ?? "-")" />
+
+                                    <DetailRow Label="Genre"
+                                               Value="@(_release.GenreName ?? "-")" />
+                                </MudStack>
                             </MudItem>
 
-                            <MudItem xs="12" sm="6">
-                                <DetailRow Label="EAN" Value="@(string.IsNullOrWhiteSpace(_release.EAN) ? "-" : _release.EAN)" />
-                            </MudItem>
-
-                            <MudItem xs="12" sm="6">
-                                <DetailRow Label="Release date" Value="@FormatDateOnly(_release.ReleaseDate)" />
-                            </MudItem>
-
-                            <MudItem xs="12" sm="6">
-                                <DetailRow Label="Genre" Value="@(_release.GenreName ?? "-")" />
-                            </MudItem>
-
-                            <MudItem xs="12">
-                                <DetailRow Label="Metadata language" Value="@(_release.LanguageName ?? "-")" />
-                            </MudItem>
                         </MudGrid>
                     </MudPaper>
 

@@ -1,17 +1,28 @@
 ﻿<MudStack Row="true"
-          Justify="Justify.SpaceBetween"
+          Spacing="2"
           AlignItems="AlignItems.Center"
           Class="py-1">
 
-    <MudText Typo="Typo.body2" Color="Color.Secondary">
-        @Label
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="detail-label">
+        @Label:
     </MudText>
 
-    <MudText Typo="Typo.body1">
+    <MudText Typo="Typo.body1" Class="detail-value">
         @Value
     </MudText>
 
 </MudStack>
+<style>
+    .detail-label {
+        min-width: 130px;
+        font-weight: 600;
+    }
+
+    .detail-value {
+        font-weight: 500;
+    }
+</style>
+
 
 @code {
     [Parameter]
