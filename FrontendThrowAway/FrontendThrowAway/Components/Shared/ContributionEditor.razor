@@ -101,11 +101,64 @@
         <MudButton Variant="Variant.Text"
                    Color="Color.Warning"
                    StartIcon="@Icons.Material.Filled.PersonAdd"
-                   Href="/create-contributor">
+                   OnClick="OpenCreateContributorDialog">
             Create new contributor
         </MudButton>
     </MudStack>
 </MudPaper>
+
+<MudDialog @bind-Visible="_showCreateContributorDialog">
+    <TitleContent>
+        Create contributor
+    </TitleContent>
+
+    <DialogContent>
+        <MudStack Spacing="2">
+            @if (!string.IsNullOrWhiteSpace(_createContributorError))
+            {
+                <MudAlert Severity="Severity.Error" Dense="true">
+                    @_createContributorError
+                </MudAlert>
+            }
+
+            <MudTextField Label="Display name / Artist name"
+                          @bind-Value="_newContributor.DisplayName"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          FullWidth="true" />
+
+            <MudTextField Label="Legal name"
+                          @bind-Value="_newContributor.LegalName"
+                          Variant="Variant.Outlined"
+                          FullWidth="true" />
+
+            <MudTextField Label="IPI"
+                          @bind-Value="_newContributor.IPI"
+                          Variant="Variant.Outlined"
+                          FullWidth="true" />
+
+            <MudTextField Label="ISNI"
+                          @bind-Value="_newContributor.ISNI"
+                          Variant="Variant.Outlined"
+                          FullWidth="true" />
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text"
+                   Disabled="_isCreatingContributor"
+                   OnClick="CloseCreateContributorDialog">
+            Cancel
+        </MudButton>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   Disabled="_isCreatingContributor"
+                   OnClick="CreateContributor">
+            @(_isCreatingContributor ? "Creating..." : "Create")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     [Parameter] public string Title { get; set; } = "Contributors";
@@ -113,6 +166,8 @@
     [Parameter] public List<ContributionRow> Rows { get; set; } = new();
     [Parameter] public List<ContributorOption> Contributors { get; set; } = new();
     [Parameter] public List<ContributorRoleDto> AvailableRoles { get; set; } = new();
+
+    [Inject] protected HttpClient Http { get; set; } = default!;
 
     private Task<IEnumerable<ContributorRoleDto>> SearchRoles(string value, List<ContributorRoleDto> selectedRoles,CancellationToken token)
     {
@@ -174,6 +229,91 @@
         Rows[index].ContributorId = contributor?.Id;
     }
 
+    private bool _showCreateContributorDialog;
+    private bool _isCreatingContributor;
+    private string? _createContributorError;
+
+    private CreateContributorModel _newContributor = new();
+
+    private void OpenCreateContributorDialog()
+    {
+        _newContributor = new CreateContributorModel();
+        _createContributorError = null;
+        _showCreateContributorDialog = true;
+    }
+
+    private void CloseCreateContributorDialog()
+    {
+        _showCreateContributorDialog = false;
+        _createContributorError = null;
+    }
+
+    private async Task CreateContributor()
+    {
+        _createContributorError = null;
+
+        if (string.IsNullOrWhiteSpace(_newContributor.DisplayName))
+        {
+            _createContributorError = "Display name is required.";
+            return;
+        }
+
+        try
+        {
+            _isCreatingContributor = true;
+
+            var response = await Http.PostAsJsonAsync("api/Contributor", _newContributor);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                _createContributorError = string.IsNullOrWhiteSpace(error)
+                    ? "Failed to create contributor."
+                    : error;
+
+                return;
+            }
+
+            var contributorId = await response.Content.ReadFromJsonAsync<Guid>();
+
+            var contributor = new ContributorOption
+                {
+                    Id = contributorId,
+                    DisplayName = _newContributor.DisplayName
+                };
+
+            Contributors.Add(contributor);
+
+            var emptyRow = Rows.FirstOrDefault(r => r.ContributorId is null);
+
+            if (emptyRow is not null)
+            {
+                emptyRow.ContributorId = contributor.Id;
+                emptyRow.Contributor = contributor;
+            }
+            else
+            {
+                Rows.Add(new ContributionRow
+                    {
+                        ContributorId = contributor.Id,
+                        Contributor = contributor
+                    });
+            }
+
+            _showCreateContributorDialog = false;
+            _newContributor = new CreateContributorModel();
+        }
+        catch (Exception ex)
+        {
+            _createContributorError = $"An error occurred while creating contributor: {ex.Message}";
+        }
+        finally
+        {
+            _isCreatingContributor = false;
+        }
+    }
+
     public class ContributionRow
     {
         public Guid? ContributorId { get; set; }
@@ -192,5 +332,12 @@
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
+    }
+    public class CreateContributorModel
+    {
+        public string DisplayName { get; set; } = "";
+        public string? LegalName { get; set; }
+        public string? IPI { get; set; }
+        public string? ISNI { get; set; }
     }
 }
