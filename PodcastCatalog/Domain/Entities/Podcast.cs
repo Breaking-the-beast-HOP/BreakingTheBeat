@@ -55,17 +55,10 @@
             _seasons.RemoveAll(s => s.Id == seasonId);
         }
 
-        public void AddLanguage(Language language)
+        public Podcast ChangeLanguage(Guid languageId)
         {
-            if (language == null)
-                throw new ArgumentNullException(nameof(language));
-            Language = language;
-            LanguageId = language.Id;
-        }
-        public void RemoveLanguage()
-        {
-            Language = null!;
-            LanguageId = Guid.Empty;
+            LanguageId = languageId;
+            return this;
         }
 
         public void AddCategory(Category category)

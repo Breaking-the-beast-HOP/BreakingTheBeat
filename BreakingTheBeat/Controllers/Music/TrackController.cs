@@ -95,7 +95,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateTrack( Guid id,[FromBody] UpdateTrackRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateTrack(Guid id, [FromBody] UpdateTrackRequest request, CancellationToken cancellationToken)
         {
             var contributions = request.Contributions
                 .SelectMany(c => c.RoleIds.Select(roleId =>

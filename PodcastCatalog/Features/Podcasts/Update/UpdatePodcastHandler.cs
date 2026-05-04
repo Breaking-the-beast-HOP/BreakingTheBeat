@@ -1,13 +1,13 @@
-﻿using FluentValidation;
-using MediatR;
-using PodcastCatalog.Domain.Entities;
-using SharedKernel;
-using SharedKernel.Interfaces.Base;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
+using MediatR;
+using PodcastCatalog.Domain.Entities;
+using SharedKernel;
+using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Features.Podcasts.Update
 {
@@ -42,6 +42,7 @@ namespace PodcastCatalog.Features.Podcasts.Update
 
             // Opdater podcasten
             existingPodcast.Update(request.Title, request.Description);
+            existingPodcast.ChangeLanguage(request.LanguageId);
             await _podcastRepository.UpdateAsync(existingPodcast);
 
             // Returner den opdaterede podcast
@@ -50,6 +51,7 @@ namespace PodcastCatalog.Features.Podcasts.Update
                 Id = existingPodcast.Id,
                 Title = existingPodcast.Title,
                 Description = existingPodcast.Description
+
             };
         }
     }

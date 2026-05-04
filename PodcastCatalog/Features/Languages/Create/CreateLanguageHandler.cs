@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using MediatR;
-using SharedKernel.Interfaces.Base;
 using PodcastCatalog.Domain.Entities;
 using SharedKernel;
+using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Features.Languages.Create
 {
@@ -33,7 +33,7 @@ namespace PodcastCatalog.Features.Languages.Create
             {
                 Id = language.Id,
                 Name = language.Name,
-                IsoCode = language.ISO
+                ISO = language.ISO
             };
         }
     }

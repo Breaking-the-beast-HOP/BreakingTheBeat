@@ -1,13 +1,13 @@
 ﻿// Feature/Podcasts/Get/GetPodcastHandler.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using PodcastCatalog.Domain.Entities;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PodcastCatalog.Features.Podcasts.Get
 {

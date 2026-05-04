@@ -1,5 +1,6 @@
 ﻿@page "/podcasts/{Id:guid}/edit"
 @rendermode InteractiveServer
+
 @using MudBlazor
 @inject HttpClient Http
 
@@ -97,14 +98,14 @@
                                                      ValueChanged="OnLanguageChanged"
                                                      SearchFunc="SearchLanguages"
                                                      ToStringFunc="@(l => l?.Name ?? string.Empty)"
-                                                     Clearable="true"
-                                                     ResetValueOnEmptyText="true"
-                                                     CoerceText="false"
+                                                     OpenOnFocus="true"
+                                                     MinCharacters="0"
                                                      Dense="true"
                                                      FullWidth="true"
                                                      MaxItems="8" />
-                                </MudItem>
 
+
+                                </MudItem>
                             </MudGrid>
                         </MudPaper>
 
@@ -268,17 +269,19 @@
     {
         try
         {
-            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/Language") ?? new();
+            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") ?? new();
+            Console.WriteLine($"Number of languages loaded: {_languages.Count}");
 
-            try
-            {
-                _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/PodcastCategory")
-                              ?? GetFallbackCategories();
-            }
-            catch
-            {
-                _categories = GetFallbackCategories();
-            }
+            // try
+            // {
+            //     _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/PodcastCategory")
+            //                   ?? GetFallbackCategories();
+            // }
+            // catch
+            // {
+            //     _categories = GetFallbackCategories();
+            // }
+            _categories = GetFallbackCategories();
 
             EnsurePlaceholderExists();
 
@@ -289,6 +292,7 @@
                 _errorMessage = "Podcast not found.";
                 return;
             }
+            Console.WriteLine($"[DEBUG] Podcast loaded: Id={podcast.Id}, Title={podcast.Title}, LanguageId={podcast.LanguageId}, LanguageName={podcast.LanguageName}");
 
             _model = new PodcastModel
                 {
@@ -303,13 +307,28 @@
                                     ? new PodcastCategoryDto { Id = podcast.CategoryId, Name = podcast.CategoryName }
                                     : new PodcastCategoryDto { Id = PlaceholderId, Name = "Placeholder"});
 
-            _selectedLanguage = _languages.FirstOrDefault(l => l.Id == podcast.LanguageId)
-                                ?? (!string.IsNullOrWhiteSpace(podcast.LanguageName)
-                                    ? new LanguageDto { Id = podcast.LanguageId, Name = podcast.LanguageName }
-                                    : new LanguageDto { Id = PlaceholderId, Name = "Placeholder", ISO = "xx" });
+            _selectedLanguage = _languages
+                .FirstOrDefault(l => l.Id == podcast.LanguageId);
+
+            if (_selectedLanguage == null && !string.IsNullOrWhiteSpace(podcast.LanguageName))
+            {
+                _selectedLanguage = new LanguageDto
+                {
+                    Id = podcast.LanguageId,
+                    Name = podcast.LanguageName,
+                    ISO = "xx"
+                };
+
+                _languages.Add(_selectedLanguage); // 🔥 vigtig!
+            }
+            StateHasChanged();
+
+            Console.WriteLine($"[DEBUG] Selected language: Id={_selectedLanguage?.Id}, Name={_selectedLanguage?.Name}, ISO={_selectedLanguage?.ISO}");
 
             _model.CategoryId = _selectedCategory?.Id;
             _model.LanguageId = _selectedLanguage?.Id;
+            Console.WriteLine($"[DEBUG] Model LanguageId: {_model.LanguageId}");
+
 
             _contributions = podcast.Contributions?
                 .Select(c => new ContributionRow
@@ -371,6 +390,7 @@
 
         return Task.FromResult(result);
     }
+
 
     private Task OnCategoryChanged(PodcastCategoryDto? category)
     {
