@@ -16,21 +16,34 @@ jobs:
             - name: Setup .NET Core
               uses: actions/setup-dotnet@v4
               with:
-                dotnet-version: 9.0.x
+                dotnet-version: 9.0.312
+                include-prerelease: false
 
             - name: Cache NuGet packages
               uses: actions/cache@v4
               with:
                 path: ~/.nuget/packages
-                key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+                key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props') }}
                 restore-keys: |
-                        ${{ runner.os }}-nuget-
+                  ${{ runner.os }}-nuget-
 
             - name: Restore dependencies
-              run: dotnet restore BreakingTheBeat.sln --verbosity detailed
+              run: dotnet restore BreakingTheBeat.sln --force --verbosity detailed
+            
+            - name: Clean bin and obj folders
+              run: |
+                find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} + 2>/dev/null || true
 
             - name: Restore dotnet tools
               run: dotnet tool restore
+            
+            - name: Restore workloads
+              run: dotnet workload restore
+
+            - name: Debug SDK
+              run: |
+                dotnet --info
+                dotnet workload list
 
             - name: Build solution
               run: dotnet build BreakingTheBeat.sln --configuration Release --verbosity detailed
