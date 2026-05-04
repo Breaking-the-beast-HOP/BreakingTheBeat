@@ -23,7 +23,7 @@
 
         private Release() { }
 
-        public static Release Create(string title,string? version, string? ean, DateTime? releaseDate, Guid genreId,Guid languageId)
+        public static Release Create(string title, string? version, string? ean, DateTime? releaseDate, Guid genreId, Guid languageId)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title is required.");

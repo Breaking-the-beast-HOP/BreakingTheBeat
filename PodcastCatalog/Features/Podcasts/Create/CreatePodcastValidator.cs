@@ -1,9 +1,4 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PodcastCatalog.Features.Podcasts.Create
 {
@@ -19,6 +14,12 @@ namespace PodcastCatalog.Features.Podcasts.Create
             // Valider Description
             RuleFor(x => x.Description)
                 .MaximumLength(500).WithMessage("Description must not exceed 500 characters");
+
+            RuleFor(x => x.LanguageId)
+                .NotEmpty().WithMessage("LanguageId is required");
+
+            RuleFor(x => x.CategoryId)
+                .NotEmpty().WithMessage("CategoryId is required");
         }
     }
 }

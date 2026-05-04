@@ -1,6 +1,4 @@
-﻿using PodcastCatalog.Domain.Entities;
-
-namespace Gateway.Contracts.Podcast
+﻿namespace Gateway.Contracts.Podcast
 {
     public class NewPodcastRequest
     {

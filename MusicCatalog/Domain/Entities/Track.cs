@@ -96,7 +96,7 @@
             _contributions.Add(Contribution.ForTrack(Id, contributorId, roleId));
         }
 
-        public void UpdateContributions( List<(Guid ContributorId, Guid ContributorRoleId)> contributions)
+        public void UpdateContributions(List<(Guid ContributorId, Guid ContributorRoleId)> contributions)
         {
             // Fjern contributions som ikke længere findes i requesten
             _contributions.RemoveAll(existing =>
