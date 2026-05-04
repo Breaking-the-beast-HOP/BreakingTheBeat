@@ -12,7 +12,7 @@ namespace MusicCatalog.Features.Contributor.GetById
             _repository = repository;
         }
 
-        public async Task<ContributorDetailsDTO> Handle( GetContributorByIdQuery request,CancellationToken cancellationToken)
+        public async Task<ContributorDetailsDTO> Handle(GetContributorByIdQuery request, CancellationToken cancellationToken)
         {
             var contributor = await _repository.GetByIdAsync(request.Id);
 

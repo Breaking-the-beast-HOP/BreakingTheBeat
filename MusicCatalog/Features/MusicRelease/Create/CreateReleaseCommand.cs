@@ -13,8 +13,8 @@ public record CreateReleaseCommand(
     List<CreateReleaseContributionInput> Contributions
 ) : IRequest<Guid>;
 
-public record CreateReleaseContributionInput( Guid ContributorId, List<Guid> RoleIds);
+public record CreateReleaseContributionInput(Guid ContributorId, List<Guid> RoleIds);
 
 public record CreateReleaseVolumeInput(int VolumeNumber, List<CreateReleaseTrackInput> Tracks);
 
-public record CreateReleaseTrackInput( int TrackNumber, Guid TrackId);
+public record CreateReleaseTrackInput(int TrackNumber, Guid TrackId);

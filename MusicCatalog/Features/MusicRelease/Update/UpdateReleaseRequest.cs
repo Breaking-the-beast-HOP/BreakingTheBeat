@@ -16,8 +16,8 @@ public record UpdateReleaseCommand(
 
 
 
-public record UpdateReleaseVolumeInput( int VolumeNumber,List<UpdateReleaseTrackInput> Tracks);
+public record UpdateReleaseVolumeInput(int VolumeNumber, List<UpdateReleaseTrackInput> Tracks);
 
-public record UpdateReleaseTrackInput(Guid TrackId,int TrackNumber);
+public record UpdateReleaseTrackInput(Guid TrackId, int TrackNumber);
 
-public record UpdateReleaseContributionInput( Guid ContributorId,Guid ContributorRoleId);
+public record UpdateReleaseContributionInput(Guid ContributorId, Guid ContributorRoleId);

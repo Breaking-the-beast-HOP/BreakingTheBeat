@@ -1,5 +1,5 @@
-﻿using FrontendThrowAway.Components.Shared;
-using FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Models;
+﻿using FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Models;
+using FrontendThrowAway.Components.Shared;
 using Microsoft.AspNetCore.Components;
 using static System.Net.WebRequestMethods;
 

@@ -11,7 +11,7 @@ namespace UserManagement.Features.User.Login
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtService _jwtService;
 
-        public LoginUserHandler( SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, JwtService jwtService)
+        public LoginUserHandler(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, JwtService jwtService)
         {
             _signInManager = signInManager;
             _userManager = userManager;

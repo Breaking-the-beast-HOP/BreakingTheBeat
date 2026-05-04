@@ -92,7 +92,7 @@
             }
         }
 
-   
+
 
         public void AddContribution(Guid contributorId, Guid roleId)
         {
@@ -139,7 +139,7 @@
                 languageId = languageId.Value;
             }
 
-            
+
         }
 
         public void UpdateContributions(List<(Guid ContributorId, Guid ContributorRoleId)> contributions)

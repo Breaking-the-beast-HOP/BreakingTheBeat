@@ -24,7 +24,7 @@ namespace MusicCatalog.Features.Release.Update
                 request.EAN,
                 request.GenreId,
                 request.MetadataLanguageId
-             
+
             );
 
             release.UpdateContributions(

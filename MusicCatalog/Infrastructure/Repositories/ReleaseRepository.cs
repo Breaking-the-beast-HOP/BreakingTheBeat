@@ -58,7 +58,7 @@ namespace MusicCatalog.Infrastructure.Repositories
         public async Task<bool> UpdateAsync(Release entity)
         {
             var existingRelease = await _context.Releases.FirstOrDefaultAsync(t => t.Id == entity.Id);
-              
+
 
             if (existingRelease is null)
                 return false;
@@ -66,7 +66,7 @@ namespace MusicCatalog.Infrastructure.Repositories
             _context.Entry(existingRelease).CurrentValues.SetValues(entity);
 
             await _context.SaveChangesAsync();
-            return true; 
+            return true;
         }
     }
 }

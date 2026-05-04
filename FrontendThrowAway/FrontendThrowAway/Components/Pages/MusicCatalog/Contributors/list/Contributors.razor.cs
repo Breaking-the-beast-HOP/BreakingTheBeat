@@ -74,5 +74,5 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.Contributors.List
         }
     }
 }
-   
+
 

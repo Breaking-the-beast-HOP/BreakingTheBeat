@@ -2,7 +2,7 @@
 
 namespace UserManagement.Features.User.Login
 {
-    public record LoginUserCommand( string Email, string Password ) : IRequest<LoginUserResult>;
+    public record LoginUserCommand(string Email, string Password) : IRequest<LoginUserResult>;
 
     public class LoginUserResult
     {

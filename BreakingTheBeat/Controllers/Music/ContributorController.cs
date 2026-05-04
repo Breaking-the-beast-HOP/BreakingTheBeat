@@ -37,7 +37,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<ContributorDetailsResponse>> Get( Guid id,CancellationToken cancellationToken)
+        public async Task<ActionResult<ContributorDetailsResponse>> Get(Guid id, CancellationToken cancellationToken)
         {
             var contributor = await _mediator.Send(new GetContributorByIdQuery(id), cancellationToken);
 

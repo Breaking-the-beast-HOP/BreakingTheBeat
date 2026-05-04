@@ -5,7 +5,7 @@ using UserManagement.Domain.Entities;
 
 namespace UserManagement.Infrastructure.Persistence
 {
-    public class UserManagementDbContext: IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
+    public class UserManagementDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
         public UserManagementDbContext(DbContextOptions<UserManagementDbContext> options) : base(options)
         {

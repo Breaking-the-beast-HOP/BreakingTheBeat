@@ -1,6 +1,6 @@
-﻿using FrontendThrowAway.Components.Shared;
-using FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Models;
+﻿using FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Models;
 using FrontendThrowAway.Components.Pages.MusicCatalog.SharedModels;
+using FrontendThrowAway.Components.Shared;
 using Microsoft.AspNetCore.Components;
 
 namespace FrontendThrowAway.Components.Pages.MusicCatalog.MusicReleases.Create

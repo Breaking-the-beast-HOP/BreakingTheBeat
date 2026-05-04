@@ -1,6 +1,6 @@
-﻿using FrontendThrowAway.Components.Shared;
-using FrontendThrowAway.Components.Pages.MusicCatalog.SharedModels;
+﻿using FrontendThrowAway.Components.Pages.MusicCatalog.SharedModels;
 using FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Models;
+using FrontendThrowAway.Components.Shared;
 using Microsoft.AspNetCore.Components;
 
 namespace FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Create
@@ -113,7 +113,7 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Create
         private async Task SaveTrack()
         {
             _errorMessage = null;
-    
+
 
             if (string.IsNullOrWhiteSpace(_model.Title))
             {

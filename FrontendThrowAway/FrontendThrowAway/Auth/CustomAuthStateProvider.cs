@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace FrontendThrowAway.Auth;
 

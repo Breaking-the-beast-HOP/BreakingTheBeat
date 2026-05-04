@@ -1,5 +1,5 @@
-﻿using FrontendThrowAway.Components.Shared;
-using FrontendThrowAway.Components.Pages.MusicCatalog.SharedModels;
+﻿using FrontendThrowAway.Components.Pages.MusicCatalog.SharedModels;
+using FrontendThrowAway.Components.Shared;
 using Microsoft.AspNetCore.Components;
 
 namespace FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Details
@@ -10,7 +10,7 @@ namespace FrontendThrowAway.Components.Pages.MusicCatalog.Tracks.Details
         protected HttpClient Http { get; set; } = default!;
         [Inject]
         protected NavigationManager Navigation { get; set; } = default!;
-        
+
         [Parameter]
         public Guid Id { get; set; }
 

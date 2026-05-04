@@ -106,7 +106,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateRelease(Guid id, [FromBody] UpdateReleaseRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateRelease(Guid id, [FromBody] UpdateReleaseRequest request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(request.Title))
                 return BadRequest("Title is required.");

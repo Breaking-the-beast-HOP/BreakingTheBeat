@@ -1,3 +1,4 @@
+using System.Text;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,6 @@ using PodcastCatalog.Features.Podcasts.Update;
 using PodcastCatalog.Infrastructure;
 using PodcastCatalog.Infrastructure.Data;
 using SharedKernel;
-using System.Text;
 using UserManagement.Domain.Entities;
 using UserManagement.Features.User.Register;
 using UserManagement.Infrastructure.Auth;

@@ -37,7 +37,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login( [FromBody] LoginUserRequest request,CancellationToken cancellationToken)
+    public async Task<IActionResult> Login([FromBody] LoginUserRequest request, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(
             new LoginUserCommand(request.Email, request.Password),
