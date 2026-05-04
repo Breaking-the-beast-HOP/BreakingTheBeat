@@ -1,4 +1,5 @@
 ﻿@page "/tracks/{Id:guid}"
+@using FrontendThrowAway.Components.Component
 @using FrontendThrowAway.Components.Layout
 @inject HttpClient Http
 @inject NavigationManager Navigation
@@ -90,67 +91,9 @@
                 </MudPaper>
 
 
-                    <MudPaper Class="pa-4" Elevation="5">
-                        <MudText Typo="Typo.h6" Class="mb-3">Contributors</MudText>
-
-                        @if (_track.Contributions is null || !_track.Contributions.Any())
-                        {
-                            <MudAlert Severity="Severity.Info" Dense="true">
-                                No contributors registered.
-                            </MudAlert>
-                        }
-                        else
-                        {
-                            <MudStack Spacing="2">
-                                @foreach (var contribution in _track.Contributions.OrderByDescending(IsMainArtist))
-                                {
-                                    var isMainArtist = IsMainArtist(contribution);
-
-                                    <MudPaper Outlined="true" Class="pa-3">
-                                        <MudStack Row="true"
-                                                  Justify="Justify.SpaceBetween"
-                                                  AlignItems="AlignItems.Center"
-                                                  Style="gap: 16px;">
-
-                                            <MudStack Spacing="1">
-                                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                                    <MudIcon Icon="@Icons.Material.Filled.Person"
-                                                             Size="Size.Small"
-                                                             Color="@(isMainArtist ? Color.Warning : Color.Default)" />
-
-                                                    <MudText Typo="Typo.subtitle1">
-                                                        @contribution.ContributorName
-                                                    </MudText>
-
-                                                    @if (isMainArtist)
-                                                    {
-                                                        <MudChip T="string"
-                                                                 Size="Size.Small"
-                                                                 Color="Color.Warning"
-                                                                 Variant="Variant.Filled">
-                                                            Main artist
-                                                        </MudChip>
-                                                    }
-                                                </MudStack>
-
-                                                <MudStack Row="true" Spacing="1" Style="flex-wrap: wrap;">
-                                                    @foreach (var role in contribution.Roles)
-                                                    {
-                                                        <MudChip T="string"
-                                                                 Size="Size.Small"
-                                                                 Color="@(IsPerformingArtistRole(role) ? Color.Warning : Color.Default)"
-                                                                 Variant="@(IsPerformingArtistRole(role) ? Variant.Filled : Variant.Outlined)">
-                                                            @role.Name
-                                                        </MudChip>
-                                                    }
-                                                </MudStack>
-                                            </MudStack>
-                                        </MudStack>
-                                    </MudPaper>
-                                }
-                            </MudStack>
-                        }
-                    </MudPaper>
+                   <FrontendThrowAway.Components.Component.ContributionDisplay Title="Contributors"
+                  EmptyText="No contributors registered."
+                  Contributions="_contributionItems" />
 
                     <MudPaper Class="pa-4" Elevation="5">
                         <MudText Typo="Typo.h6" Class="mb-3">System Info</MudText>
@@ -259,11 +202,29 @@
     private bool _isLoading = true;
     private string? _errorMessage;
 
+    private List<ContributionDisplay.ContributionListItem> _contributionItems = new();
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
             _track = await Http.GetFromJsonAsync<TrackDetailsDto>($"api/track/{Id}");
+
+            if (_track is not null)
+            {
+                _contributionItems = _track.Contributions
+                    .Select(c => new ContributionDisplay.ContributionListItem
+                        {
+                            ContributorId = c.ContributorId,
+                            ContributorName = c.ContributorName,
+                            Roles = c.Roles.Select(r => new ContributionDisplay.ContributionListRole
+                            {
+                                Id = r.Id,
+                                Name = r.Name
+                            }).ToList()
+                        })
+                    .ToList();
+            }
         }
         catch (Exception ex)
         {
@@ -295,31 +256,19 @@
 
             if (response.IsSuccessStatusCode)
             {
-                Navigation.NavigateTo($"/tracks");
+                Navigation.NavigateTo("/tracks");
             }
             else
             {
-                errorMessage = $"Could not delete track. Status code: {(int)response.StatusCode}";
+                _errorMessage = $"Could not delete track. Status code: {(int)response.StatusCode}";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Could not delete track: {ex.Message}";
+            _errorMessage = $"Could not delete track: {ex.Message}";
         }
     }
 
-    private bool IsMainArtist(ContributionDto contribution)
-    {
-        return contribution.Roles.Any(IsPerformingArtistRole);
-    }
-
-    private bool IsPerformingArtistRole(ContributionRoleDto role)
-    {
-        return role.Name.Equals("Main Artist", StringComparison.OrdinalIgnoreCase)
-            || role.Name.Equals("Primary Artist", StringComparison.OrdinalIgnoreCase)
-            || role.Name.Equals("Performing Artist", StringComparison.OrdinalIgnoreCase)
-            || role.Name.Equals("Artist", StringComparison.OrdinalIgnoreCase);
-    }
 
     public class TrackDetailsDto
     {

@@ -95,6 +95,31 @@
 
             _contributions.Add(Contribution.ForTrack(Id, contributorId, roleId));
         }
+
+        public void UpdateContributions(List<(Guid ContributorId, Guid ContributorRoleId)> contributions)
+        {
+            // Fjern contributions som ikke længere findes i requesten
+            _contributions.RemoveAll(existing =>
+                !contributions.Any(incoming =>
+                    incoming.ContributorId == existing.ContributorId &&
+                    incoming.ContributorRoleId == existing.ContributorRoleId));
+
+            // Tilføj nye contributions som ikke allerede findes
+            foreach (var incoming in contributions)
+            {
+                var alreadyExists = _contributions.Any(existing =>
+                    existing.ContributorId == incoming.ContributorId &&
+                    existing.ContributorRoleId == incoming.ContributorRoleId);
+
+                if (!alreadyExists)
+                {
+                    _contributions.Add(Contribution.ForTrack(
+                        Id,
+                        incoming.ContributorId,
+                        incoming.ContributorRoleId));
+                }
+            }
+        }
     }
 }
 

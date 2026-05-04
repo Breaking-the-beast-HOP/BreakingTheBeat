@@ -8,6 +8,8 @@ using MusicCatalog.Features.Genre;
 using MusicCatalog.Features.Genre.Interfaces;
 using MusicCatalog.Features.Language.GetLanguages;
 using MusicCatalog.Features.Language.Interfaces;
+using MusicCatalog.Features.Release;
+using MusicCatalog.Features.Release.Create;
 using MusicCatalog.Features.Track;
 using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Infrastructure;
@@ -49,6 +51,7 @@ namespace Gateway
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
             builder.Services.AddScoped<IContributorRepository, ContributorRepository>();
             builder.Services.AddScoped<IContributorRoleRepository, ContributionRoleRepository>();
+            builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
 
             // 3.2 Repositories (podcast)
             builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
@@ -67,6 +70,7 @@ namespace Gateway
                 cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(CreateTrackCommand).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(CreateContributorCommand).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(CreateReleaseCommand).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetContributorRolesQuery).Assembly);
 
                 // Podcast

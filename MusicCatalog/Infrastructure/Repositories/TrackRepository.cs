@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using MusicCatalog.Domain.Entities;
 using MusicCatalog.Features.Track;
-using SharedKernel.Interfaces.Base;
 
 namespace MusicCatalog.Infrastructure.Repositories
 {
@@ -37,7 +36,9 @@ namespace MusicCatalog.Infrastructure.Repositories
 
         public async Task<List<Track>> GetAllAsync()
         {
+
             return await _context.Tracks
+                .AsNoTracking()
                 .Include(t => t.Genre)
                 .Include(t => t.MetadataLanguage)
                 .Include(t => t.AudioLanguage)

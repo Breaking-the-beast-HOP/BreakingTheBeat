@@ -1,4 +1,4 @@
-﻿namespace Gateway.Contracts
+﻿namespace Gateway.Contracts.Music.Language
 {
     public class LanguageResponse
     {

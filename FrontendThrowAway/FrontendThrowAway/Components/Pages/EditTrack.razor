@@ -1,5 +1,6 @@
 ﻿@page "/tracks/edit/{Id:guid}"
 @rendermode InteractiveServer
+@using FrontendThrowAway.Components.Component
 @using MudBlazor
 @inject HttpClient Http
 @inject NavigationManager Navigation
@@ -144,12 +145,12 @@
                             </MudGrid>
                         </MudPaper>
 
-                        <MudPaper Class="pa-4" Elevation="5">
-                            <MudText Typo="Typo.h6" Class="mb-3">Contributors</MudText>
-                            <MudAlert Severity="Severity.Info" Dense="true">
-                                Editing contributors can be added later.
-                            </MudAlert>
-                        </MudPaper>
+                         <!-- Contributors -->
+                    <ContributionEditor Title="Contributors"
+                    Description="Add track-level contributors and their roles."
+                    Rows="_contributions"
+                    Contributors="_availableContributors"
+                    AvailableRoles="_contributionRoles" />
 
                     </MudStack>
                 </MudItem>

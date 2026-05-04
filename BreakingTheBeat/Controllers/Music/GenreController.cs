@@ -1,4 +1,4 @@
-﻿using Gateway.Contracts;
+﻿using Gateway.Contracts.Music.Genre;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Genre;

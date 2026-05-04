@@ -1,13 +1,14 @@
-﻿using Gateway.Contracts;
-using Gateway.Contracts.Gateway.Contracts;
+﻿using Gateway.Contracts.Music.Contribution;
+using Gateway.Contracts.Music.ContributionRole;
+using Gateway.Contracts.Music.Track;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Features.Contributor.Create;
 using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Features.Track.Delete;
 using MusicCatalog.Features.Track.Get;
 using MusicCatalog.Features.Track.GetById;
 using MusicCatalog.Features.Track.Update;
+
 
 namespace Gateway.Controllers.Music
 {
@@ -96,6 +97,13 @@ namespace Gateway.Controllers.Music
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateTrack(Guid id, [FromBody] UpdateTrackRequest request, CancellationToken cancellationToken)
         {
+            var contributions = request.Contributions
+                .SelectMany(c => c.RoleIds.Select(roleId =>
+                    new UpdateContributionCommand(
+                        c.ContributorId,
+                        roleId)))
+                .ToList();
+
             var result = await _mediator.Send(
                 new UpdateTrackCommand(
                     id,
@@ -103,8 +111,9 @@ namespace Gateway.Controllers.Music
                     request.Version,
                     request.ISRC,
                     request.GenreId,
+                    request.MetadataLanguageId,
                     request.AudioLanguageId,
-                    request.MetadataLanguageId),
+                    contributions),
                 cancellationToken);
 
             if (!result)

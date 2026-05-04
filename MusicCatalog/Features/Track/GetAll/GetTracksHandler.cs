@@ -20,6 +20,8 @@ namespace MusicCatalog.Features.Track.Get
 
         public async Task<List<TrackDTO>> Handle(GetTracksQuery request, CancellationToken cancellationToken)
         {
+
+
             var tracks = await _repository.GetAllAsync();
 
             return tracks.Select(t => new TrackDTO

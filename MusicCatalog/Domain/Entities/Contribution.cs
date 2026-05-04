@@ -20,6 +20,12 @@
 
         private Contribution(Guid contributorId, Guid contributorRoleId, Guid? trackId, Guid? releaseId)
         {
+            if (trackId is null && releaseId is null)
+                throw new ArgumentException("Contribution must belong to either a track or a release.");
+
+            if (trackId is not null && releaseId is not null)
+                throw new ArgumentException("Contribution cannot belong to both track and release.");
+
             Id = Guid.NewGuid();
 
             ContributorId = contributorId;
