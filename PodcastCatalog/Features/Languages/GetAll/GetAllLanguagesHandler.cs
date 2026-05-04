@@ -1,14 +1,15 @@
 ﻿using MediatR;
 using PodcastCatalog.Domain.Entities;
 using SharedKernel;
+using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Features.Languages.GetAll
 {
     public class GetAllLanguagesHandler : IRequestHandler<GetAllLanguagesQuery, List<LanguageDTO>>
     {
-        private readonly ICrudRepository<Language> _languageRepository;
+        private readonly IReadRepository<Language> _languageRepository;
 
-        public GetAllLanguagesHandler(ICrudRepository<Language> languageRepository)
+        public GetAllLanguagesHandler(IReadRepository<Language> languageRepository)
         {
             _languageRepository = languageRepository;
         }

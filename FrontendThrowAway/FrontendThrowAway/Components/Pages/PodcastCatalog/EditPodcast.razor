@@ -272,16 +272,15 @@
             _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") ?? new();
             Console.WriteLine($"Number of languages loaded: {_languages.Count}");
 
-            // try
-            // {
-            //     _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/PodcastCategory")
-            //                   ?? GetFallbackCategories();
-            // }
-            // catch
-            // {
-            //     _categories = GetFallbackCategories();
-            // }
-            _categories = GetFallbackCategories();
+            try
+            {
+                _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category")
+                              ?? GetFallbackCategories();
+            }
+            catch
+            {
+                _categories = GetFallbackCategories();
+            }
 
             EnsurePlaceholderExists();
 

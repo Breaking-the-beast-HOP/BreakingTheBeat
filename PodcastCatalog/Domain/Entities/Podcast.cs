@@ -61,12 +61,9 @@
             return this;
         }
 
-        public void AddCategory(Category category)
+        public void ChangeCategory(Guid categoryId)
         {
-            if (category == null)
-                throw new ArgumentNullException(nameof(category));
-            Category = category;
-            CategoryId = category.Id;
+            CategoryId = categoryId;
         }
 
         public void AddHost(Contribution host)

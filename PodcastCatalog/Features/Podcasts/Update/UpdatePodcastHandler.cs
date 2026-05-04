@@ -43,6 +43,7 @@ namespace PodcastCatalog.Features.Podcasts.Update
             // Opdater podcasten
             existingPodcast.Update(request.Title, request.Description);
             existingPodcast.ChangeLanguage(request.LanguageId);
+            existingPodcast.ChangeCategory(request.CategoryId);
             await _podcastRepository.UpdateAsync(existingPodcast);
 
             // Returner den opdaterede podcast

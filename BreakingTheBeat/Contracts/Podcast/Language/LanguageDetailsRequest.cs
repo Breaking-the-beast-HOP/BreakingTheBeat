@@ -1,4 +1,4 @@
-﻿namespace Gateway.Contracts.Podcast
+﻿namespace Gateway.Contracts.Podcast.Language
 {
     public class LanguageDetailsRequest
     {

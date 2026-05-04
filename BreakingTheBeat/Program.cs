@@ -25,6 +25,7 @@ using PodcastCatalog.Features.Podcasts.Update;
 using PodcastCatalog.Infrastructure;
 using PodcastCatalog.Infrastructure.Data;
 using SharedKernel;
+using SharedKernel.Interfaces.Base;
 using UserManagement.Domain.Entities;
 using UserManagement.Features.User.Register;
 using UserManagement.Infrastructure.Auth;
@@ -91,7 +92,8 @@ namespace Gateway
 
             // 5. Repositories (podcast)
             builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
-            builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
+            builder.Services.AddScoped<IReadRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
+            builder.Services.AddScoped<IReadRepository<Category>, PodcastCatalog.Infrastructure.Repositories.CategoryRepository>();
 
             // 6. Validators (podcast)
             builder.Services.AddValidatorsFromAssemblyContaining<CreatePodcastValidator>();
