@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Domain.Entities;
-using MusicCatalog.Features.Contributor;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MusicCatalog.Domain.Entities;
+using MusicCatalog.Features.Contributor;
 
 namespace MusicCatalog.Infrastructure.Repositories
 {

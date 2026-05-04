@@ -38,7 +38,7 @@ namespace PodcastCatalog.Features.Languages.UpdateLanguage
             {
                 Id = language.Id,
                 Name = language.Name,
-                IsoCode = language.ISO
+                ISO = language.ISO
             };
         }
     }

@@ -14,7 +14,7 @@
 
         private VolumeTrack() { }
 
-        internal static VolumeTrack Create( Guid releaseVolumeId,Guid trackId, int trackNumber)
+        internal static VolumeTrack Create(Guid releaseVolumeId, Guid trackId, int trackNumber)
         {
             if (releaseVolumeId == Guid.Empty)
                 throw new ArgumentException("ReleaseVolumeId is required.");

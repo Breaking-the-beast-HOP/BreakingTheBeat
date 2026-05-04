@@ -264,7 +264,7 @@
     {
         try
         {
-            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/Language") ?? new();
+            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") ?? new();
 
             _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/PodcastCategory")
                           ?? GetFallbackCategories();

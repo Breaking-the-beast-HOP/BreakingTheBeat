@@ -1,12 +1,12 @@
-﻿using MusicCatalog.Features.Track.Create;
-using MusicCatalog.Features.Track;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MusicCatalog.Domain.Entities;
 using MediatR;
+using MusicCatalog.Domain.Entities;
+using MusicCatalog.Features.Track;
+using MusicCatalog.Features.Track.Create;
 
 namespace MusicCatalog.Features.Contributor.Create
 {
