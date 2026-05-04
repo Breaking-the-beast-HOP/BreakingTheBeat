@@ -1,11 +1,11 @@
-﻿using MediatR;
-using MusicCatalog.Features.Genre.Interfaces;
-using MusicCatalog.Features.Genre;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
+using MusicCatalog.Features.Genre;
+using MusicCatalog.Features.Genre.Interfaces;
 
 namespace MusicCatalog.Features.Track.Get
 {

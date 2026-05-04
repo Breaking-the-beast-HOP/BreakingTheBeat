@@ -37,14 +37,18 @@ public class CreatePodcastHandler : IRequestHandler<CreatePodcastCommand, Podcas
 );
 
         await _podcastRepository.AddAsync(podcast);
+        var fullPodcast = await _podcastRepository.GetByIdAsync(podcast.Id);
 
         return new PodcastDTO
         {
-            Id = podcast.Id,
-            Title = podcast.Title,
-            Description = podcast.Description,
-            CategoryId = podcast.CategoryId,
-            LanguageId = podcast.LanguageId
+            Id = fullPodcast.Id,
+            Title = fullPodcast.Title,
+            Description = fullPodcast.Description,
+            CategoryId = fullPodcast.CategoryId,
+            CategoryName = fullPodcast.Category?.Name,
+            LanguageId = fullPodcast.LanguageId,
+            LanguageName = fullPodcast.Language?.Name
         };
+
     }
 }
