@@ -7,10 +7,11 @@
     <UserSecretsId>9b490dc1-215e-4e0c-817f-1a8cbdabb620</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
-	<DefaultItemExcludes>$(DefaultItemExcludes);wwwroot\**</DefaultItemExcludes>
+	<EnableDefaultContentItems>false</EnableDefaultContentItems>
   </PropertyGroup>
 
   <ItemGroup>
+	<Content Remove="wwwroot\**" />
     <PackageReference Include="MudBlazor" Version="9.3.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
     <ProjectReference Include="..\FrontendThrowAway.Client\FrontendThrowAway.Client.csproj" />
