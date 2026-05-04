@@ -7,6 +7,7 @@
     <UserSecretsId>9b490dc1-215e-4e0c-817f-1a8cbdabb620</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
+	<DefaultItemExcludes>$(DefaultItemExcludes);wwwroot\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
