@@ -41,7 +41,7 @@ jobs:
     docker-build-push:
       name: Docker Build and Push
       needs: linting
-      # if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master'
       runs-on: ubuntu-latest
       permissions:
         contents: read
@@ -64,6 +64,8 @@ jobs:
             file: ./BreakingTheBeat/Dockerfile
             push: true
             tags: ghcr.io/breaking-the-beast-hop/breakingthebeat-gateway:latest
+          env:
+            DOCKER_BUILDKIT: 0
 
         - name: Build and push Frontend Docker image
           uses: docker/build-push-action@v5
