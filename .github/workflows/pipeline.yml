@@ -69,7 +69,7 @@ jobs:
           uses: docker/build-push-action@v5
           with:
             context: .
-            file: ./FrontendThrowAway/FrontendThrowAway/Dockerfile
+            file: ./Frontend/Dockerfile
             push: true
             tags: ghcr.io/breaking-the-beast-hop/breakingthebeat-frontend:latest
 

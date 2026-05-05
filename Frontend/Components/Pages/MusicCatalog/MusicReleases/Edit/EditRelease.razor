@@ -1,0 +1,194 @@
+﻿@page "/releases/edit/{Id:guid}"
+@rendermode InteractiveServer
+@using Frontend.Components.Pages.MusicCatalog.MusicReleases.Components
+@using Frontend.Components.Shared;
+@using Frontend.Components.Layout
+@using Frontend.Components.Pages.MusicCatalog.SharedModels
+@using Frontend.Components.Pages.MusicCatalog.MusicReleases
+@using MudBlazor
+
+
+@namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Edit
+<PageTitle>Edit Release</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
+
+    <MudStack Spacing="4">
+
+        <MudPaper Class="pa-4" Elevation="5">
+            <MudStack Row="@true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h4">Edit Release</MudText>
+
+                <MudStack Row="@true" Spacing="2">
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               Href="@($"/releases/{Id}")">
+                        Cancel
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               OnClick="SaveRelease"
+                               Disabled="@(_isSaving || _isLoadingLookups)">
+                        @(_isSaving ? "Saving..." : "Save")
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(_successMessage))
+        {
+            <MudAlert Severity="Severity.Success">@_successMessage</MudAlert>
+        }
+
+        @if (_isLoadingLookups)
+        {
+            <MudProgressCircular Indeterminate="@true" />
+        }
+        else
+        {
+            <MudGrid Spacing="3">
+
+                <MudItem xs="12" md="7">
+                    <MudStack Spacing="3">
+
+                        <!-- Release Info -->
+                          <ReleaseInfoForm Model="_model"
+                         SelectedGenre="_selectedGenre"
+                         SelectedGenreChanged="OnGenreChanged"
+                         SelectedLanguage="_selectedLanguage"
+                         SelectedLanguageChanged="OnLanguageChanged"
+                         SearchGenres="SearchGenres"
+                         SearchLanguages="SearchLanguages"
+                         IsLoadingLookups="_isLoadingLookups" />
+
+                        <!-- Contributors -->
+                        <ContributionEditor Title="Release contributors"
+                                            Description="Add release-level contributors and their roles."
+                                            Rows="_contributions"
+                                            Contributors="_availableContributors"
+                                            AvailableRoles="_contributionRoles" />
+
+                    </MudStack>
+                </MudItem>
+
+                <MudItem xs="12" md="5">
+                    <MudStack Spacing="3">
+
+                        <MudPaper Class="pa-4" Elevation="5">
+                            <MudText Typo="Typo.h6" Class="mb-3">Cover</MudText>
+
+                            <MudPaper Class="dropzone pa-6" Outlined="@true">
+                                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
+                                    <MudIcon Icon="@Icons.Material.Filled.Image"
+                                             Size="Size.Large"
+                                             Color="Color.Warning" />
+
+                                    <MudText Typo="Typo.subtitle1">Drop zone</MudText>
+
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        Cover upload will be added later
+                                    </MudText>
+                                </MudStack>
+                            </MudPaper>
+                        </MudPaper>
+
+                        <MudPaper Class="pa-4" Elevation="5">
+                            <MudText Typo="Typo.h6" Class="mb-3">Booklet</MudText>
+
+                            <MudPaper Class="dropzone pa-6" Outlined="@true">
+                                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
+                                    <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf"
+                                             Size="Size.Large"
+                                             Color="Color.Warning" />
+
+                                    <MudText Typo="Typo.subtitle1">Drop zone</MudText>
+
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        Booklet upload will be added later
+                                    </MudText>
+                                </MudStack>
+                            </MudPaper>
+                        </MudPaper>
+
+                    </MudStack>
+                </MudItem>
+
+            </MudGrid>
+
+            <MudGrid Spacing="3">
+
+                <MudItem xs="12" md="7">
+                    <!-- Volumes -->
+                    <ReleaseVolumeEditor Model="_model"
+                                         IsLoadingLookups="_isLoadingLookups"
+                                         SearchTracks="SearchTracks"
+                                         AddTrackRequested="AddTrack"
+                                         AddVolumeRequested="AddVolume"
+                                         RemoveVolumeRequested="RemoveVolume"
+                                         RemoveTrackRequested="@(args => RemoveTrack(args.Volume, args.Track))"
+                                         TrackChanged="@(args => OnTrackChanged(args.Row, args.Track))"
+                                         PreviewTrackRequested="PreviewTrack"
+                                         FormatDuration="FormatDuration"
+                                         DisplayTrackSubtitle="DisplayTrackSubtitle" />
+                </MudItem>
+
+                <MudItem xs="12" md="5">
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Selected Track</MudText>
+
+                        @if (_isLoadingTrackPreview)
+                        {
+                            <MudProgressCircular Indeterminate="@true" />
+                        }
+                        else if (!string.IsNullOrWhiteSpace(_trackPreviewError))
+                        {
+                            <MudAlert Severity="Severity.Error" Dense="@true">
+                                @_trackPreviewError
+                            </MudAlert>
+                        }
+                        else if (_selectedTrackPreview is null)
+                        {
+                            <MudAlert Severity="Severity.Info" Dense="@true">
+                                Click the eye icon on a track to preview details here.
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12">
+                                    <DetailRow Label="Title" Value="@(_selectedTrackPreview.Title ?? "-")" />
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6">
+                                    <DetailRow Label="Version" Value="@(string.IsNullOrWhiteSpace(_selectedTrackPreview.Version) ? "-" : _selectedTrackPreview.Version)" />
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6">
+                                    <DetailRow Label="ISRC" Value="@(_selectedTrackPreview.ISRC ?? "-")" />
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6">
+                                    <DetailRow Label="Genre" Value="@(_selectedTrackPreview.GenreName ?? "-")" />
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6">
+                                    <DetailRow Label="Duration" Value="@FormatDuration(_selectedTrackPreview.DurationSeconds)" />
+                                </MudItem>
+                            </MudGrid>
+                        }
+                    </MudPaper>
+                </MudItem>
+
+            </MudGrid>
+        }
+
+    </MudStack>
+</MudContainer>
+
