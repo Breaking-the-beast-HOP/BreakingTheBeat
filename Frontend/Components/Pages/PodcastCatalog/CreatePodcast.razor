@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using MudBlazor
 @inject HttpClient Http
+@inject NavigationManager nav
 
 <PageTitle>Create Podcast</PageTitle>
 
@@ -72,7 +73,7 @@
 
                             <MudItem xs="12" sm="6">
                                 <MudAutocomplete T="PodcastCategoryDto"
-                                                 Label="Category"
+                                                 Label="Category *"
                                                  Variant="Variant.Outlined"
                                                  Value="_selectedCategory"
                                                  ValueChanged="OnCategoryChanged"
@@ -89,7 +90,7 @@
 
                             <MudItem xs="12" sm="6">
                                 <MudAutocomplete T="LanguageDto"
-                                                 Label="Language"
+                                                 Label="Language *"
                                                  Variant="Variant.Outlined"
                                                  Value="_selectedLanguage"
                                                  ValueChanged="OnLanguageChanged"
@@ -266,7 +267,7 @@
         {
             _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") ?? new();
 
-            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/PodcastCategory")
+            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category")
                           ?? GetFallbackCategories();
         }
         catch
@@ -277,12 +278,11 @@
         {
             EnsurePlaceholderExists();
 
-            // 🔥 DEFAULT SELECTION (det vigtige)
-            _selectedCategory = _categories.First(c => c.Id == PlaceholderId);
-            _selectedLanguage = _languages.First(c => c.Id == PlaceholderId);
+            _selectedCategory = null;
+            _selectedLanguage = null;
 
-            _model.CategoryId = PlaceholderId;
-            _model.LanguageId = PlaceholderId;
+            _model.CategoryId = null;
+            _model.LanguageId = null;
 
             _isLoadingLookups = false;
         }
@@ -371,6 +371,8 @@
                 _selectedCategory = null;
                 _selectedLanguage = null;
                 _contributions.Clear();
+                nav.NavigateTo("/podcasts");
+                return;
             }
             else
             {

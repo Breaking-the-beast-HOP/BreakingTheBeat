@@ -16,6 +16,7 @@ COPY ["BreakingTheBeat/Gateway.csproj", "BreakingTheBeat/"]
 COPY ["PodcastCatalog/PodcastCatalog.csproj", "BreakingTheBeat/PodcastCatalog/"]
 COPY ["MusicCatalog/MusicCatalog.csproj", "BreakingTheBeat/MusicCatalog/"]
 COPY ["SharedKernel/SharedKernel.csproj", "BreakingTheBeat/SharedKernel/"]
+COPY ["UserManagement/UserManagement.csproj", "BreakingTheBeat/UserManagement/"]
 RUN dotnet restore "./BreakingTheBeat/Gateway.csproj"
 COPY . .
 WORKDIR "/src/BreakingTheBeat"
