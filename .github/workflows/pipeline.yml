@@ -41,7 +41,7 @@ jobs:
     docker-build-push:
       name: Docker Build and Push
       needs: linting
-      if: github.ref == 'refs/heads/master'
+      # if: github.ref == 'refs/heads/master'
       runs-on: ubuntu-latest
       permissions:
         contents: read
