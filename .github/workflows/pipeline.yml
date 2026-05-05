@@ -1,9 +1,9 @@
 name: BreakingTheBeat Pipeline
 on:
     push:
-        branches: ["feature/**", "master"]
+        branches: ["feature/**", "bugfix/**", "master"]
     pull_request:
-        branches: ["feature/**", "master"]
+        branches: ["feature/**", bugfix/**, "master"]
 
 jobs:
     linting:

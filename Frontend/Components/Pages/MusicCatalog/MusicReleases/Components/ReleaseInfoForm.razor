@@ -1,0 +1,88 @@
+﻿@using Frontend.Components.Pages.MusicCatalog.SharedModels
+@using Frontend.Components.Pages.MusicCatalog.MusicReleases.Models
+@using MudBlazor
+
+<MudPaper Class="pa-4" Elevation="5">
+    <MudText Typo="Typo.h6" Class="mb-3">Release Info</MudText>
+
+    <MudGrid Spacing="2">
+
+        <MudItem xs="12">
+            <MudTextField Label="Title"
+                          @bind-Value="Model.Title"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          FullWidth="true" />
+        </MudItem>
+
+        <MudItem xs="12" sm="6">
+            <MudTextField Label="Version"
+                          @bind-Value="Model.Version"
+                          Variant="Variant.Outlined"
+                          FullWidth="true" />
+        </MudItem>
+
+        <MudItem xs="12" sm="6">
+            <MudTextField Label="EAN"
+                          @bind-Value="Model.EAN"
+                          Variant="Variant.Outlined"
+                          FullWidth="true" />
+        </MudItem>
+
+        <MudItem xs="12" sm="6">
+            <MudDatePicker Label="Release date"
+                           @bind-Date="Model.ReleaseDate"
+                           Variant="Variant.Outlined" />
+        </MudItem>
+
+        <MudItem xs="12" sm="6">
+            <MudAutocomplete T="GenreDto"
+                             Label="Genre"
+                             Variant="Variant.Outlined"
+                             Value="SelectedGenre"
+                             ValueChanged="SelectedGenreChanged"
+                             SearchFunc="SearchGenres"
+                             ToStringFunc="@(g => g?.Name ?? string.Empty)"
+                             Clearable="true"
+                             ResetValueOnEmptyText="true"
+                             CoerceText="false"
+                             Dense="true"
+                             FullWidth="true"
+                             MaxItems="8"
+                             Disabled="IsLoadingLookups" />
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudAutocomplete T="LanguageDto"
+                             Label="Metadata language"
+                             Variant="Variant.Outlined"
+                             Value="SelectedLanguage"
+                             ValueChanged="SelectedLanguageChanged"
+                             SearchFunc="SearchLanguages"
+                             ToStringFunc="@(l => l?.Name ?? string.Empty)"
+                             Clearable="true"
+                             ResetValueOnEmptyText="true"
+                             CoerceText="false"
+                             Dense="true"
+                             FullWidth="true"
+                             MaxItems="8"
+                             Disabled="IsLoadingLookups" />
+        </MudItem>
+
+    </MudGrid>
+</MudPaper>
+
+@code {
+    [Parameter] public ReleaseModel Model { get; set; } = default!;
+
+    [Parameter] public GenreDto? SelectedGenre { get; set; }
+    [Parameter] public EventCallback<GenreDto?> SelectedGenreChanged { get; set; }
+
+    [Parameter] public LanguageDto? SelectedLanguage { get; set; }
+    [Parameter] public EventCallback<LanguageDto?> SelectedLanguageChanged { get; set; }
+
+    [Parameter] public Func<string, CancellationToken, Task<IEnumerable<GenreDto>>> SearchGenres { get; set; } = default!;
+    [Parameter] public Func<string, CancellationToken, Task<IEnumerable<LanguageDto>>> SearchLanguages { get; set; } = default!;
+
+    [Parameter] public bool IsLoadingLookups { get; set; }
+}
