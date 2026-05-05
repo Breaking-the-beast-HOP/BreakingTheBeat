@@ -19,6 +19,9 @@
         // Primær konstruktør (bruges af de andre konstruktører)
         private Contribution(Guid id, Contributor contributor, ContributorRole role, Podcast? podcast, Episode? episode)
         {
+            if ((podcast == null && episode == null) || (podcast != null && episode != null))
+                throw new ArgumentException("A contribution must be associated with either a podcast or an episode, but not both.");
+
             Id = id;
             Contributor = contributor ?? throw new ArgumentNullException(nameof(contributor));
             Role = role ?? throw new ArgumentNullException(nameof(role));
