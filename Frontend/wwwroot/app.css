@@ -58,3 +58,99 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+/* ============================================
+   SIDEBAR NAV – læsbar tekst på mørk baggrund
+   ============================================ */
+.sidebar .mud-navmenu {
+    padding: 12px 8px;
+}
+
+.sidebar .mud-nav-link {
+    margin: 3px 4px;
+    border-radius: 8px;
+    min-height: 42px;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: background-color 0.15s ease;
+}
+
+    /* TEKST – hvid og synlig */
+    .sidebar .mud-nav-link,
+    .sidebar .mud-nav-link .mud-typography,
+    .sidebar .mud-nav-link > span,
+    .sidebar .mud-list-item-text,
+    .sidebar .mud-list-item-text *,
+    .sidebar .mud-nav-link .mud-list-item-gutters {
+        color: #ffffff !important;
+        opacity: 1 !important;
+        font-weight: 400 !important;
+        font-size: 0.92rem !important;
+    }
+
+        /* IKONER */
+        .sidebar .mud-nav-link .mud-icon-root,
+        .sidebar .mud-nav-link svg,
+        .sidebar .mud-icon-root,
+        .sidebar svg {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+            opacity: 1 !important;
+        }
+
+        /* HOVER */
+        .sidebar .mud-nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.14) !important;
+        }
+
+        /* AKTIV LINK */
+        .sidebar .mud-nav-link.active {
+            background-color: #f59e0b !important;
+        }
+
+            .sidebar .mud-nav-link.active,
+            .sidebar .mud-nav-link.active .mud-typography,
+            .sidebar .mud-nav-link.active > span,
+            .sidebar .mud-nav-link.active .mud-list-item-text,
+            .sidebar .mud-nav-link.active .mud-list-item-text * {
+                color: #000000 !important;
+                font-weight: 800 !important;
+            }
+
+                .sidebar .mud-nav-link.active .mud-icon-root,
+                .sidebar .mud-nav-link.active svg {
+                    color: #000000 !important;
+                    fill: #000000 !important;
+                }
+
+/* GRUPPE-HEADERS */
+.sidebar .mud-nav-group > .mud-nav-link .mud-list-item-text,
+.sidebar .mud-nav-group > .mud-nav-link .mud-list-item-text *,
+.sidebar .mud-nav-group > .mud-nav-link,
+.sidebar .mud-nav-group > .mud-nav-link .mud-typography,
+.sidebar .mud-nav-group > .mud-nav-link > span {
+    text-transform: uppercase !important;
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* EXPAND PIL */
+.sidebar .mud-expand-icon,
+.sidebar .mud-expand-icon svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* UNDERMENU */
+.sidebar .mud-nav-group .mud-navmenu {
+    padding-left: 10px;
+}
+
+/* SEPARATOR */
+.sidebar .mud-nav-group {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
