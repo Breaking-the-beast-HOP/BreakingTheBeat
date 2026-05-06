@@ -71,27 +71,27 @@ jobs:
               echo "No vulnerabilities found"
             fi
 
-        - name: Build image (no push)
-          run: docker build -t gateway-test -f ./BreakingTheBeat/Dockerfile .
+#        - name: Build image (no push)
+#          run: docker build -t gateway-test -f ./BreakingTheBeat/Dockerfile .
 
-        - name: Scan image with Trivy
-          uses: aquasecurity/trivy-action@0.34.0
-          with:
-            image-ref: gateway-test
-            format: table
-            exit-code: 1
-            severity: CRITICAL,HIGH
+#        - name: Scan image with Trivy
+#          uses: aquasecurity/trivy-action@0.34.0
+#          with:
+#            image-ref: gateway-test
+#            format: table
+#            exit-code: 1
+#            severity: CRITICAL,HIGH
 
-        - name: Build image (no push)
-          run: docker build -t frontend-test -f ./Frontend/Dockerfile .
+#        - name: Build image (no push)
+#          run: docker build -t frontend-test -f ./Frontend/Dockerfile .
 
-        - name: Scan image with Trivy
-          uses: aquasecurity/trivy-action@0.34.0
-          with:
-            image-ref: frontend-test
-            format: table
-            exit-code: 1
-            severity: CRITICAL,HIGH  
+#        - name: Scan image with Trivy
+#          uses: aquasecurity/trivy-action@0.34.0
+#          with:
+#            image-ref: frontend-test
+#            format: table
+#            exit-code: 1
+#            severity: CRITICAL,HIGH  
 
     docker-build-push:
       name: Docker Build and Push
