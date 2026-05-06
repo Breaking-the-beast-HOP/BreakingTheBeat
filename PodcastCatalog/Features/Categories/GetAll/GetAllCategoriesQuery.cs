@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace PodcastCatalog.Features.Categories.Get
+namespace PodcastCatalog.Features.Categories.GetAll
 {
     public record GetAllCategoriesQuery : IRequest<List<CategoryDTO>>
     {

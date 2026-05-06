@@ -2,7 +2,7 @@
 using PodcastCatalog.Domain.Entities;
 using SharedKernel.Interfaces.Base;
 
-namespace PodcastCatalog.Features.Categories.Get
+namespace PodcastCatalog.Features.Categories.GetAll
 {
     public class GetAllCategoriesHandler : IRequestHandler<GetAllCategoriesQuery, List<CategoryDTO>>
     {
