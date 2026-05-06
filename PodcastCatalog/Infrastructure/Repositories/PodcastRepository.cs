@@ -24,7 +24,10 @@ public class PodcastRepository : ICrudRepository<Podcast>
         return await _dbContext.Podcasts
             .Include(p => p.Seasons)
             .Include(p => p.Category)
-            .Include(p => p.Hosts)
+            .Include(p => p.Contributions)
+                .ThenInclude(h => h.Contributor)
+            .Include(p => p.Contributions)
+                .ThenInclude(h => h.Role)
             .Include(p => p.Language)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
@@ -35,7 +38,7 @@ public class PodcastRepository : ICrudRepository<Podcast>
             .AsNoTracking()
             .Include(p => p.Seasons)
             .Include(p => p.Category)
-            .Include(p => p.Hosts)
+            .Include(p => p.Contributions)
             .Include(p => p.Language)
             .ToListAsync();
     }

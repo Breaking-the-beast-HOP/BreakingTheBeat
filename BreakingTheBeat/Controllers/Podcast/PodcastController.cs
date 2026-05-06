@@ -64,7 +64,27 @@ namespace Gateway.Controllers.Podcast
             CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetPodcastQuery(id), cancellationToken);
-            return Ok(result);
+
+            var response = new PodcastDetailsResponse
+            {
+                Id = result.Id,
+                Title = result.Title,
+                Description = result.Description,
+                CategoryId = result.CategoryId,
+                CategoryName = result.CategoryName,
+                LanguageId = result.LanguageId,
+                LanguageName = result.LanguageName,
+                Contributions = result.Contributions.Select(c => new ContributionResponse
+                {
+                    Id = c.Id,
+                    PersonId = c.ContributorId,
+                    PersonName = c.ContributorName,
+                    RoleId = c.RoleId,
+                    RoleName = c.RoleName
+                }).ToList()
+            };
+
+            return Ok(response);
         }
 
         [HttpGet()]

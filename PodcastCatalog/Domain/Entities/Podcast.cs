@@ -4,7 +4,7 @@
     {
         public Podcast() { } // For EF Core
         private readonly List<Season> _seasons = new();
-        private readonly List<Contribution> _hosts = new();
+        private readonly List<Contribution> _contributions = new();
 
         public Guid Id { get; private set; }
         public string Title { get; private set; } = null!;
@@ -14,7 +14,7 @@
         public Language Language { get; private set; }
 
         public IReadOnlyList<Season> Seasons => _seasons.AsReadOnly();
-        public IReadOnlyList<Contribution> Hosts => _hosts.AsReadOnly();
+        public IReadOnlyList<Contribution> Contributions => _contributions.AsReadOnly();
 
         public Guid CategoryId { get; private set; }
         public Category Category { get; private set; }
@@ -69,14 +69,14 @@
             CategoryId = category.Id;
         }
 
-        public void AddHost(Contribution host)
+        public void AddContribution(Contribution host)
         {
             if (host == null)
                 throw new ArgumentNullException(nameof(host));
-            if (_hosts.Any(h => h.Id == host.Id))
+            if (_contributions.Any(h => h.Id == host.Id))
                 return;
 
-            _hosts.Add(host);
+            _contributions.Add(host);
         }
     }
 }

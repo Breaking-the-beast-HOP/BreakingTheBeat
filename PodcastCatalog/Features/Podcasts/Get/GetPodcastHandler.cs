@@ -1,13 +1,7 @@
-﻿// Feature/Podcasts/Get/GetPodcastHandler.cs
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using PodcastCatalog.Domain.Entities;
 using SharedKernel;
-using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Features.Podcasts.Get
 {
@@ -46,7 +40,18 @@ namespace PodcastCatalog.Features.Podcasts.Get
                 LanguageId = podcast.LanguageId,
                 LanguageName = podcast.Language.Name,
                 CategoryId = podcast.CategoryId,
-                CategoryName = podcast.Category.Name
+                CategoryName = podcast.Category.Name,
+
+                Contributions = podcast.Contributions
+                    .Select(h => new ContributionDTO
+                    {
+                        Id = h.Id,
+                        ContributorId = h.ContributorId,
+                        ContributorName = h.Contributor.Name,
+                        RoleId = h.ContributorRoleId,
+                        RoleName = h.Role.Name
+                    })
+                    .ToList()
             };
         }
     }

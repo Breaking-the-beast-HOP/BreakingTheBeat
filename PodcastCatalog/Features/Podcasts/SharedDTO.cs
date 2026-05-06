@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PodcastCatalog.Features.Podcasts
+﻿namespace PodcastCatalog.Features.Podcasts
 {
     public class SharedDTO
     {

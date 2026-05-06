@@ -24,6 +24,7 @@ using PodcastCatalog.Features.Podcasts.GetAll;
 using PodcastCatalog.Features.Podcasts.Update;
 using PodcastCatalog.Infrastructure;
 using PodcastCatalog.Infrastructure.Data;
+using PodcastCatalog.Infrastructure.Repositories;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
 using UserManagement.Domain.Entities;
