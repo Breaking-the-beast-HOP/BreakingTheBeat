@@ -1,32 +1,47 @@
 ﻿@page "/login"
+@layout Layout.LoginLayout
 @rendermode InteractiveServer
+
 @using System.Net.Http.Json
 @using Frontend.Auth
 @using Microsoft.AspNetCore.WebUtilities
+
 @inject HttpClient Http
 @inject CustomAuthStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 
 <PageTitle>Login</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="pa-6">
+<div class="login-page">
+    <MudPaper Class="login-card" Elevation="8">
 
-    <MudPaper Class="pa-6">
+        <MudStack Spacing="3" AlignItems="AlignItems.Center">
 
-        <MudStack Spacing="3">
-
-            <MudText Typo="Typo.h5">Login</MudText>
+            <div class="login-logo">DMG</div>
+            <div class="login-subtitle">DIGITAL DONE RIGHT</div>
 
             <MudTextField T="string"
-                          Label="Email"
+                          Placeholder="Email"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
                           @bind-Value="_model.Email" />
 
             <MudTextField T="string"
-                          Label="Password"
+                          Placeholder="Password"
                           InputType="InputType.Password"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
                           @bind-Value="_model.Password" />
 
+            <MudCheckBox T="bool"
+                         @bind-Checked="_rememberMe"
+                         Label="Remember me"
+                         Color="Color.Secondary"
+                         Class="align-self-start" />
+
             <MudButton Variant="Variant.Filled"
+                       Color="Color.Secondary"
+                       FullWidth="true"
                        OnClick="Login"
                        Disabled="_isLoading">
 
@@ -39,21 +54,26 @@
                 }
                 else
                 {
-                    <span>Login</span>
+                    <span>LOG IN</span>
                 }
 
             </MudButton>
 
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
+                       FullWidth="true"
                        OnClick="DevLogin"
                        Disabled="_isLoading">
                 Snyde-login
             </MudButton>
 
+            <MudLink Href="#" Typo="Typo.body2" Color="Color.Inherit">
+                Reset password
+            </MudLink>
+
             @if (!string.IsNullOrWhiteSpace(_error))
             {
-                <MudAlert Severity="Severity.Error">
+                <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">
                     @_error
                 </MudAlert>
             }
@@ -61,13 +81,66 @@
         </MudStack>
 
     </MudPaper>
+</div>
 
-</MudContainer>
+<style>
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.65)), url('/images/audiowaves.jpeg');
+        background-size: cover;
+        background-position: center;
+        padding: 24px;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 380px;
+        padding: 36px;
+        background: rgba(45, 45, 45, 0.94);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .login-logo {
+        font-size: 72px;
+        line-height: 0.9;
+        font-weight: 900;
+        letter-spacing: -4px;
+        color: white;
+    }
+
+    .login-subtitle {
+        margin-top: -6px;
+        margin-bottom: 18px;
+        font-size: 13px;
+        letter-spacing: 5px;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .align-self-start {
+        align-self: flex-start;
+    }
+</style>
 
 @code {
     private LoginUserRequest _model = new();
     private string? _error;
     private bool _isLoading;
+    private bool _rememberMe;
+    private string? _returnUrl;
+
+    protected override void OnInitialized()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var returnUrl))
+        {
+            _returnUrl = returnUrl;
+        }
+    }
 
     private async Task Login()
     {
@@ -106,23 +179,11 @@
         }
     }
 
-    private async Task DevLogin() //Remember to remove this method before deploying to production!
+    private async Task DevLogin()
     {
         _model.Email = "test@outlook.com";
         _model.Password = "Test123!";
         await Login();
-    }
-
-    private string? _returnUrl;
-
-    protected override void OnInitialized()
-    {
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var returnUrl))
-        {
-            _returnUrl = returnUrl;
-        }
     }
 
     private class LoginUserRequest

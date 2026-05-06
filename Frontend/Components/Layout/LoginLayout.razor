@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="_theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@Body
+
+@code {
+    private MudTheme _theme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = Colors.BlueGray.Darken4,
+            Secondary = Colors.Orange.Default,
+            Background = "#111111",
+            Surface = "#2d2d2d",
+            TextPrimary = "#ffffff"
+        }
+    };
+}

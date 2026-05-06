@@ -6,78 +6,70 @@
 
 <MudNavMenu>
 
-    <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">
-        Home
-    </MudNavLink>
-
-    <MudNavGroup Title="MusicCatalog" Icon="@Icons.Material.Filled.LibraryMusic" Expanded="true">
-
-        <MudNavLink Href="/tracks" Icon="@Icons.Material.Filled.QueueMusic">
-            Tracks
-        </MudNavLink>
-
-        <MudNavLink Href="/releases" Icon="@Icons.Material.Filled.Album">
-            Releases
-        </MudNavLink>
-
-        <MudNavLink Href="/contributors" Icon="@Icons.Material.Filled.Groups">
-            Contributors
-        </MudNavLink>
-
-        <MudNavLink Href="/labels" Icon="@Icons.Material.Filled.Business">
-            Labels
-        </MudNavLink>
-
-    </MudNavGroup>
-
-    <MudNavGroup Title="PodcastCatalog" Icon="@Icons.Material.Filled.Podcasts" Expanded="true">
-
-        <MudNavLink Href="/podcasts" Icon="@Icons.Material.Filled.QueueMusic">
-            Podcasts
-        </MudNavLink>
-
-    </MudNavGroup>
-
-    <MudNavGroup Title="Performance" Icon="@Icons.Material.Filled.BarChart">
-
-        <MudNavLink Href="/trends" Icon="@Icons.Material.Filled.ShowChart">
-            Trends
-        </MudNavLink>
-
-    </MudNavGroup>
-
-    <MudNavLink Href="/royalties" Icon="@Icons.Material.Filled.AttachMoney">
-        Royalties
-    </MudNavLink>
-
-    <MudNavGroup Title="Quality Control" Icon="@Icons.Material.Filled.Security">
-
-        <MudNavLink Href="/music-qc">
-            Music QC
-        </MudNavLink>
-
-        <MudNavLink Href="/podcast-qc">
-            Podcast QC
-        </MudNavLink>
-
-    </MudNavGroup>
-
-    <MudNavGroup Title="Administration" Icon="@Icons.Material.Filled.AdminPanelSettings">
-
-        <MudNavLink Href="/users" Icon="@Icons.Material.Filled.ManageAccounts">
-            User Management
-        </MudNavLink>
-
-    </MudNavGroup>
-
-      <MudDivider Class="my-2" />
-
     <AuthorizeView>
         <Authorized Context="auth">
+
+            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">
+                Home
+            </MudNavLink>
+
+            <MudNavGroup Title="MusicCatalog" Icon="@Icons.Material.Filled.LibraryMusic" Expanded="true">
+                <MudNavLink Href="/tracks" Icon="@Icons.Material.Filled.QueueMusic">
+                    Tracks
+                </MudNavLink>
+
+                <MudNavLink Href="/releases" Icon="@Icons.Material.Filled.Album">
+                    Releases
+                </MudNavLink>
+
+                <MudNavLink Href="/contributors" Icon="@Icons.Material.Filled.Groups">
+                    Contributors
+                </MudNavLink>
+
+                <MudNavLink Href="/labels" Icon="@Icons.Material.Filled.Business">
+                    Labels
+                </MudNavLink>
+            </MudNavGroup>
+
+
+            <MudNavGroup Title="PodcastCatalog" Icon="@Icons.Material.Filled.Podcasts" Expanded="true">
+                <MudNavLink Href="/podcasts" Icon="@Icons.Material.Filled.QueueMusic">
+                    Podcasts
+                </MudNavLink>
+            </MudNavGroup>
+
+            <MudNavGroup Title="Performance" Icon="@Icons.Material.Filled.BarChart">
+                <MudNavLink Href="/trends" Icon="@Icons.Material.Filled.ShowChart">
+                    Trends
+                </MudNavLink>
+            </MudNavGroup>
+
+            <MudNavLink Href="/royalties" Icon="@Icons.Material.Filled.AttachMoney">
+                Royalties
+            </MudNavLink>
+
+            <MudNavGroup Title="Quality Control" Icon="@Icons.Material.Filled.Security">
+                <MudNavLink Href="/music-qc">
+                    Music QC
+                </MudNavLink>
+
+                <MudNavLink Href="/podcast-qc">
+                    Podcast QC
+                </MudNavLink>
+            </MudNavGroup>
+
+            <MudNavGroup Title="Administration" Icon="@Icons.Material.Filled.AdminPanelSettings">
+                <MudNavLink Href="/users" Icon="@Icons.Material.Filled.ManageAccounts">
+                    User Management
+                </MudNavLink>
+            </MudNavGroup>
+
+            <MudDivider Class="my-2" />
+
             @{
                 var email = auth.User.FindFirst(ClaimTypes.Email)?.Value
-                ?? auth.User.FindFirst("email")?.Value
-                ?? "Unknown user";
+                    ?? auth.User.FindFirst("email")?.Value
+                    ?? "Unknown user";
             }
 
             <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.Person">
@@ -88,15 +80,23 @@
                         OnClick="Logout">
                 Log out
             </MudNavLink>
+
         </Authorized>
 
         <NotAuthorized>
             <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">
                 Login
             </MudNavLink>
+
+            
+            <MudNavGroup Title="PodcastCatalog" Icon="@Icons.Material.Filled.Podcasts" Expanded="true">
+                <MudNavLink Href="/podcasts" Icon="@Icons.Material.Filled.QueueMusic">
+                    Podcasts
+                </MudNavLink>
+            </MudNavGroup>
+
         </NotAuthorized>
     </AuthorizeView>
-
 
 </MudNavMenu>
 
