@@ -26,8 +26,28 @@
                           @bind-Value="_model.Password" />
 
             <MudButton Variant="Variant.Filled"
-                       OnClick="Login">
-                Login
+                       OnClick="Login"
+                       Disabled="_isLoading">
+
+                @if (_isLoading)
+                {
+                    <MudProgressCircular Indeterminate="true"
+                                         Size="Size.Small"
+                                         Class="me-2" />
+                    <span>Logger ind...</span>
+                }
+                else
+                {
+                    <span>Login</span>
+                }
+
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="DevLogin"
+                       Disabled="_isLoading">
+                Snyde-login
             </MudButton>
 
             @if (!string.IsNullOrWhiteSpace(_error))
@@ -46,10 +66,12 @@
 @code {
     private LoginUserRequest _model = new();
     private string? _error;
+    private bool _isLoading;
 
     private async Task Login()
     {
         _error = null;
+        _isLoading = true;
 
         try
         {
@@ -77,6 +99,17 @@
         {
             _error = "Der opstod en fejl under login.";
         }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task DevLogin() //Remember to remove this method before deploying to production!
+    {
+        _model.Email = "test@outlook.com";
+        _model.Password = "Test123!";
+        await Login();
     }
 
     private class LoginUserRequest

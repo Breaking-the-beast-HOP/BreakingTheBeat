@@ -45,6 +45,7 @@ else
 }
 
 app.UseHttpsRedirection();
+
 app.UseAntiforgery();
 
 // Static assets + Blazor app

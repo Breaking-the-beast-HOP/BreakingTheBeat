@@ -1,7 +1,9 @@
 ﻿@page "/tracks"
+@attribute [Authorize]
 @rendermode InteractiveServer
 @using Frontend.Components.Pages.MusicCatalog.SharedModels
 @using Frontend.Components.Pages.MusicCatalog.Tracks
+@using Microsoft.AspNetCore.Authorization
 
 <PageTitle>Track Catalog</PageTitle>
 
