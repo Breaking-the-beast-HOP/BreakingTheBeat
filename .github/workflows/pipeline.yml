@@ -37,10 +37,65 @@ jobs:
 
             - name: Run linting (dotnet format)
               run: dotnet format --verify-no-changes --severity error
+    
+    security-scans:
+      name: Secret Scanning (Gitleaks)
+      runs-on: ubuntu-latest
+      needs: linting
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+      
+        - name: Run Gitleaks
+          uses: gitleaks/gitleaks-action@v1
+          with: 
+            args: detect --source . --verbose --redact
+
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 9.0.x
+        
+        - name: Restore
+          run: dotnet restore
+        
+        - name: List vulnerable packages
+          run: |
+            dotnet list package --vulnerable --include-transitive | tee output.txt
+            cat output.txt
+
+            if grep -i "has the following vulnerable packages" output.txt; then
+              echo "Vulnerabilities found!"
+              exit 1
+            else
+              echo "No vulnerabilities found"
+            fi
+
+        - name: Build image (no push)
+          run: docker build -t gateway-test -f ./BreakingTheBeat/Dockerfile .
+
+        - name: Scan image with Trivy
+          uses: aquasecurity/trivy-action@0.34.0
+          with:
+            image-ref: gateway-test
+            format: table
+            exit-code: 1
+            severity: CRITICAL,HIGH
+
+        - name: Build image (no push)
+          run: docker build -t frontend-test -f ./Frontend/Dockerfile .
+
+        - name: Scan image with Trivy
+          uses: aquasecurity/trivy-action@0.34.0
+          with:
+            image-ref: frontend-test
+            format: table
+            exit-code: 1
+            severity: CRITICAL,HIGH  
 
     docker-build-push:
       name: Docker Build and Push
-      needs: linting
+      needs: [linting, security-scans]
       if: github.ref == 'refs/heads/master'
       runs-on: ubuntu-latest
       permissions:
