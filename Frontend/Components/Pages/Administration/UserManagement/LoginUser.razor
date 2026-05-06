@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using System.Net.Http.Json
 @using Frontend.Auth
+@using Microsoft.AspNetCore.WebUtilities
 @inject HttpClient Http
 @inject CustomAuthStateProvider AuthStateProvider
 @inject NavigationManager Navigation
@@ -93,7 +94,7 @@
 
             AuthStateProvider.MarkUserAsAuthenticated(result.Token);
 
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo(string.IsNullOrWhiteSpace(_returnUrl) ? "/" : _returnUrl);
         }
         catch
         {
@@ -110,6 +111,18 @@
         _model.Email = "test@outlook.com";
         _model.Password = "Test123!";
         await Login();
+    }
+
+    private string? _returnUrl;
+
+    protected override void OnInitialized()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var returnUrl))
+        {
+            _returnUrl = returnUrl;
+        }
     }
 
     private class LoginUserRequest

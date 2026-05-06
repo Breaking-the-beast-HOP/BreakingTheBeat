@@ -3,6 +3,8 @@
 @code {
     protected override void OnInitialized()
     {
-        Navigation.NavigateTo("/login");
+        var currentUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
+
+        Navigation.NavigateTo($"/login?returnUrl=/{currentUrl}", replace: true);
     }
 }

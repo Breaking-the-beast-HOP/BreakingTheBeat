@@ -1,5 +1,8 @@
 ﻿@page "/users/register"
 @rendermode InteractiveServer
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 @using MudBlazor
 @using System.Net.Http.Json
 @inject HttpClient Http

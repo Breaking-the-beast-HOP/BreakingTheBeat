@@ -1,5 +1,8 @@
 ﻿@page "/tracks/edit/{Id:guid}"
 @rendermode InteractiveServer
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 @using Frontend.Components.Shared;
 @using MudBlazor
 @inject HttpClient Http

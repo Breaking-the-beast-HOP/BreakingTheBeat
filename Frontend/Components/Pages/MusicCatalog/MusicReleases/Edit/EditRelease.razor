@@ -1,5 +1,8 @@
 ﻿@page "/releases/edit/{Id:guid}"
 @rendermode InteractiveServer
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 @using Frontend.Components.Pages.MusicCatalog.MusicReleases.Components
 @using Frontend.Components.Shared;
 @using Frontend.Components.Layout

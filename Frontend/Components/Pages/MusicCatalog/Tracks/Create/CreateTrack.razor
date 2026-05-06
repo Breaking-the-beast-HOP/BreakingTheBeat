@@ -1,5 +1,8 @@
 ﻿@page "/create-track"
 @rendermode InteractiveServer
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 @using Frontend.Components.Shared;
 @using Frontend.Components.Pages.MusicCatalog.SharedModels
 @using MudBlazor
