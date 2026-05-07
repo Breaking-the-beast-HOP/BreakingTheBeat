@@ -154,8 +154,8 @@
                                                            FullWidth="true">
                                                     @foreach (var role in _contributionRoles)
                                                     {
-                                                        <MudSelectItem T="string" Value="@role">
-                                                            @role
+                                                        <MudSelectItem T="string" Value="@role.Name">
+                                                            @role.Name
                                                         </MudSelectItem>
                                                     }
                                                 </MudSelect>
@@ -245,16 +245,7 @@
 
     private List<ContributionRow> _contributions = new();
 
-    private readonly List<string> _contributionRoles = new()
-    {
-        "Host",
-        "Co-host",
-        "Guest",
-        "Producer",
-        "Editor",
-        "Researcher",
-        "Narrator"
-    };
+    private List<ContributionRoles> _contributionRoles = new();
 
     private bool _isLoadingLookups = true;
     private bool _isSaving = false;
@@ -269,6 +260,8 @@
 
             _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category")
                           ?? GetFallbackCategories();
+            _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>("api/podcasts/ContributorRole")
+                                ?? _contributionRoles;
         }
         catch
         {
@@ -435,6 +428,13 @@
     {
         public string? Name { get; set; }
         public string? Role { get; set; }
+    }
+
+    public class ContributionRoles
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
     }
 
     public class LanguageDto

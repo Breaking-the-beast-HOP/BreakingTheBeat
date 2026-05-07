@@ -95,6 +95,7 @@ namespace Gateway
             builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
             builder.Services.AddScoped<IReadRepository<Category>, PodcastCatalog.Infrastructure.Repositories.CategoryRepository>();
+            builder.Services.AddScoped<IReadRepository<ContributorRole>, ContributorRoleRepository>();
 
             // 6. Validators (podcast)
             builder.Services.AddValidatorsFromAssemblyContaining<CreatePodcastValidator>();
