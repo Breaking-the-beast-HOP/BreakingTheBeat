@@ -126,7 +126,7 @@
                             </MudButton>
                         </MudStack>
 
-                        @if (!_contributions.Any())
+                        @if (!_contributionRows.Any())
                         {
                             <MudAlert Severity="Severity.Info" Dense="true">
                                 No contributors added yet.
@@ -135,15 +135,24 @@
                         else
                         {
                             <MudStack Spacing="2">
-                                @foreach (var contribution in _contributions.Select((value, index) => new { value, index }))
+                                @foreach (var contribution in _contributionRows.Select((value, index) => new { value, index }))
                                 {
                                     <MudPaper Outlined="true" Class="pa-3">
                                         <MudGrid Spacing="2">
                                             <MudItem xs="12" sm="5">
-                                                <MudTextField Label="Contributor"
-                                                              @bind-Value="contribution.value.Name"
-                                                              Variant="Variant.Outlined"
-                                                              FullWidth="true" />
+                                                <MudAutocomplete T="ContributionDTO"
+                                                                 Label="Contributor"
+                                                                 Variant="Variant.Outlined"
+                                                                 Value="_selectedContribution"
+                                                                 ValueChanged="@(value => OnContributionChanged(value, contribution.value))"
+                                                                 SearchFunc="SearchContributions"
+                                                                 ToStringFunc="@(c => c?.Name ?? string.Empty)"
+                                                                 Clearable="true"
+                                                                 ResetValueOnEmptyText="true"
+                                                                 CoerceText="false"
+                                                                 Dense="true"
+                                                                 FullWidth="true"
+                                                                 MaxItems="8" />
                                             </MudItem>
 
                                             <MudItem xs="12" sm="5">
@@ -243,9 +252,11 @@
     private LanguageDto? _selectedLanguage;
     private PodcastCategoryDto? _selectedCategory;
 
-    private List<ContributionRow> _contributions = new();
+    private List<ContributionRow> _contributionRows = new();
 
     private List<ContributionRoles> _contributionRoles = new();
+    private List<ContributionDTO> _contributions = new();
+    private ContributionDTO? _selectedContribution;
 
     private bool _isLoadingLookups = true;
     private bool _isSaving = false;
@@ -262,6 +273,8 @@
                           ?? GetFallbackCategories();
             _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>("api/podcasts/ContributorRole")
                                 ?? _contributionRoles;
+            _contributions = await Http.GetFromJsonAsync<List<ContributionDTO>>("api/podcasts/Contributor")
+                                ?? _contributions;
         }
         catch
         {
@@ -302,6 +315,16 @@
         return Task.FromResult(result);
     }
 
+    private Task<IEnumerable<ContributionDTO>> SearchContributions(string value, CancellationToken token)
+    {
+        IEnumerable<ContributionDTO> result = string.IsNullOrWhiteSpace(value)
+            ? _contributions
+            : _contributions.Where(c =>
+                c.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                c.Role.Contains(value, StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(result);
+    }
+
     private Task OnCategoryChanged(PodcastCategoryDto? category)
     {
         _selectedCategory = category;
@@ -316,15 +339,22 @@
         return Task.CompletedTask;
     }
 
+    private Task OnContributionChanged(ContributionDTO? contribution, ContributionRow row)
+    {
+        row.Name = contribution?.Name;
+        row.Role = contribution?.Role;
+        return Task.CompletedTask;
+    }
+
     private void AddContributionRow()
     {
-        _contributions.Add(new ContributionRow());
+        _contributionRows.Add(new ContributionRow());
     }
 
     private void RemoveContributionRow(int index)
     {
-        if (index >= 0 && index < _contributions.Count)
-            _contributions.RemoveAt(index);
+        if (index >= 0 && index < _contributionRows.Count)
+            _contributionRows.RemoveAt(index);
     }
 
     private async Task SavePodcast()
@@ -363,7 +393,7 @@
                 _model = new PodcastModel();
                 _selectedCategory = null;
                 _selectedLanguage = null;
-                _contributions.Clear();
+                _contributionRows.Clear();
                 nav.NavigateTo("/podcasts");
                 return;
             }
@@ -435,6 +465,13 @@
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
+    }
+
+    public class ContributionDTO
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Role { get; set; } = "";
     }
 
     public class LanguageDto

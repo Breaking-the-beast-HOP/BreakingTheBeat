@@ -1,9 +1,7 @@
-﻿// Feature/Podcast/Create/CreatePodcastHandler.cs
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using PodcastCatalog.Domain.Entities;
 using SharedKernel;
-using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Features.Podcasts.Create;
 

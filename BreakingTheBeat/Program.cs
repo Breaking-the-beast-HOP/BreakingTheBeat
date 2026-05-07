@@ -87,15 +87,16 @@ namespace Gateway
             builder.Services.AddScoped<ILanguageRepository, MusicCatalog.Infrastructure.Repositories.LanguageRepository>();
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
-            builder.Services.AddScoped<IContributorRepository, ContributorRepository>();
+            builder.Services.AddScoped<IContributorRepository, MusicCatalog.Infrastructure.Repositories.ContributorRepository>();
             builder.Services.AddScoped<IContributorRoleRepository, ContributionRoleRepository>();
             builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
 
             // 5. Repositories (podcast)
             builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
-            builder.Services.AddScoped<IReadRepository<Category>, PodcastCatalog.Infrastructure.Repositories.CategoryRepository>();
+            builder.Services.AddScoped<IReadRepository<Category>, CategoryRepository>();
             builder.Services.AddScoped<IReadRepository<ContributorRole>, ContributorRoleRepository>();
+            builder.Services.AddScoped<ICrudRepository<Contributor>, PodcastCatalog.Infrastructure.Repositories.ContributorRepository>();
 
             // 6. Validators (podcast)
             builder.Services.AddValidatorsFromAssemblyContaining<CreatePodcastValidator>();
