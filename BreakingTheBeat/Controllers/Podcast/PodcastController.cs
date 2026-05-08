@@ -1,7 +1,9 @@
 ﻿using Gateway.Contracts.Podcast;
+using Gateway.Contracts.Podcast.Contribution;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PodcastCatalog.Features.Podcasts;
 using PodcastCatalog.Features.Podcasts.Create;
 using PodcastCatalog.Features.Podcasts.Delete;
 using PodcastCatalog.Features.Podcasts.Get;
@@ -26,12 +28,19 @@ namespace Gateway.Controllers.Podcast
             [FromBody] NewPodcastRequest request,
             CancellationToken cancellationToken)
         {
+            var contributions = request.Contributions.Select(c => new CreateContributionDTO
+            {
+                ContributorId = c.ContributorId,
+                ContributorRoleId = c.ContributorRoleId,
+                HasRights = c.HasRights
+            }).ToList();
+
             var command = new CreatePodcastCommand(
                 request.Title,
                 request.Description,
                 request.CategoryId,
                 request.LanguageId,
-                request.Contributors
+                contributions
             );
 
             var result = await _mediator.Send(command, cancellationToken);

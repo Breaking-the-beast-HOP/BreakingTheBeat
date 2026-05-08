@@ -35,9 +35,10 @@ namespace PodcastCatalog.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public Task<Contributor?> GetByIdAsync(Guid id)
+        public async Task<Contributor?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Contributors
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public Task<bool> UpdateAsync(Contributor entity)

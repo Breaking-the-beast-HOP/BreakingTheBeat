@@ -19,9 +19,10 @@ namespace PodcastCatalog.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public Task<ContributorRole?> GetByIdAsync(Guid id)
+        public async Task<ContributorRole?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _dbContext.ContributorRoles
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
     }
 }

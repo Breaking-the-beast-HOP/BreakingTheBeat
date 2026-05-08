@@ -162,7 +162,7 @@
                                                 <MudSelect T="Guid?"
                                                            Label="Role"
                                                            Value="contribution.value.ContributorRoleId"
-                                                           ValueChanged="@(value => OnRoleChanged(value, contribution.value))"
+                                                           ValueChanged="@(async (Guid? value) => await OnRoleChanged(value, contribution.value))"
                                                            Variant="Variant.Outlined"
                                                            FullWidth="true">
 
@@ -393,11 +393,12 @@
             return;
         }
 
-        _model.Contributions = _contributionRows.Select(r => new ContributionRow
+        _model.Contributions = _contributionRows.Select(r => new ContributionRequest
             {
-                ContributorId = r.ContributorId,
-                ContributorRoleId = r.ContributorRoleId,
-                HasRights = r.HasRights
+                ContributorId = r.ContributorId ?? Guid.Empty,
+                ContributorRoleId = r.ContributorRoleId ?? Guid.Empty,
+                HasRights = r.HasRights,
+                ContributorName = r.ContributorName
             }).ToList();
 
         if(!_model.Contributions.Any())
@@ -486,7 +487,14 @@
         public Guid? CategoryId { get; set; }
         public Guid? LanguageId { get; set; }
 
-        public List<ContributionRow> Contributions { get; set; } = new();
+        public List<ContributionRequest> Contributions { get; set; } = new();
+    }
+    public class ContributionRequest
+    {
+        public Guid ContributorId { get; set; }
+        public string? ContributorName { get; set; }
+        public Guid ContributorRoleId { get; set; }
+        public bool HasRights { get; set; }
     }
 
     public class ContributionRow

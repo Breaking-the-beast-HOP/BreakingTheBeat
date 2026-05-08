@@ -1,4 +1,5 @@
-﻿using PodcastCatalog.Features.Podcasts;
+﻿using Gateway.Contracts.Podcast.Contribution;
+using PodcastCatalog.Features.Podcasts.Get;
 
 namespace Gateway.Contracts.Podcast
 {
@@ -10,6 +11,6 @@ namespace Gateway.Contracts.Podcast
         public Guid CategoryId { get; set; }
         public Guid LanguageId { get; set; }
 
-        public List<CreateContributionDTO> Contributors { get; set; } = [];
+        public List<ContributionRequest> Contributions { get; set; } = new();
     }
 }
