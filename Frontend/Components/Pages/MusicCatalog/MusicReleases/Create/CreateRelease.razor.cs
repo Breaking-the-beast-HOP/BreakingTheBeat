@@ -149,8 +149,7 @@ namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Create
 
             try
             {
-                _selectedTrackPreview =
-                    await Http.GetFromJsonAsync<TrackDetailsDto>($"api/track/{trackId}");
+                _selectedTrackPreview = await Http.GetFromJsonAsync<TrackDetailsDto>($"api/track/{trackId}");
             }
             catch (Exception ex)
             {

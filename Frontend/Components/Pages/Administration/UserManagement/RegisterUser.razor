@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using MudBlazor
 @using System.Net.Http.Json
+
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
@@ -16,17 +17,14 @@
 
         <MudStack Spacing="4">
 
-            <!-- Header -->
             <MudStack Spacing="1">
                 <MudText Typo="Typo.h4">Opret bruger</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Opret en ny bruger til systemet.
+                    Opret en ny bruger og tildel en rolle.
                 </MudText>
             </MudStack>
 
-            <!-- Form -->
             <MudForm @ref="_form">
-
                 <MudStack Spacing="3">
 
                     <MudTextField T="string"
@@ -36,6 +34,30 @@
                                   RequiredError="Email er påkrævet"
                                   InputType="InputType.Email"
                                   Variant="Variant.Outlined" />
+
+                    <MudTextField T="string"
+                                  Label="Brugernavn"
+                                  @bind-Value="_model.UserName"
+                                  Required="true"
+                                  RequiredError="Brugernavn er påkrævet"
+                                  Variant="Variant.Outlined" />
+
+                    <MudSelect T="string"
+                               Label="Rolle"
+                               @bind-Value="_model.Role"
+                               Required="true"
+                               RequiredError="Rolle er påkrævet"
+                               Variant="Variant.Outlined"
+                               Disabled="_isLoadingRoles">
+
+                        @foreach (var role in _roles)
+                        {
+                            <MudSelectItem T="string" Value="@role.Name">
+                                @role.Name
+                            </MudSelectItem>
+                        }
+
+                    </MudSelect>
 
                     <MudTextField T="string"
                                   Label="Adgangskode"
@@ -53,11 +75,14 @@
                                   InputType="InputType.Password"
                                   Variant="Variant.Outlined" />
 
-                </MudStack>
+                    <MudAlert Severity="Severity.Info" Dense="true">
+                        Ved oprettelse bekræfter administratoren, at brugeren må oprettes i systemet,
+                        og at nødvendige personoplysninger behandles til adgangsstyring og systemadministration.
+                    </MudAlert>
 
+                </MudStack>
             </MudForm>
 
-            <!-- Errors -->
             @if (_errorMessages.Any())
             {
                 <MudAlert Severity="Severity.Error">
@@ -70,19 +95,18 @@
                 </MudAlert>
             }
 
-            <!-- Actions -->
             <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="2">
 
                 <MudButton Variant="Variant.Text"
                            Color="Color.Default"
-                           Href="/">
+                           Href="/users">
                     Cancel
                 </MudButton>
 
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Warning"
                            OnClick="CreateUser"
-                           Disabled="_isSaving">
+                           Disabled="_isSaving || _isLoadingRoles">
                     @(_isSaving ? "Opretter..." : "Opret bruger")
                 </MudButton>
 
@@ -97,11 +121,31 @@
 @code {
     private MudForm? _form;
     private bool _isSaving;
+    private bool _isLoadingRoles;
     private string? _confirmPassword;
 
     private List<string> _errorMessages = new();
+    private List<RoleDto> _roles = new();
 
     private RegisterUserRequest _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoadingRoles = true;
+
+        try
+        {
+            _roles = await Http.GetFromJsonAsync<List<RoleDto>>("api/Role") ?? new();
+        }
+        catch
+        {
+            _errorMessages.Add("Roller kunne ikke hentes.");
+        }
+        finally
+        {
+            _isLoadingRoles = false;
+        }
+    }
 
     private async Task CreateUser()
     {
@@ -136,7 +180,7 @@
                 return;
             }
 
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/users");
         }
         catch
         {
@@ -151,6 +195,14 @@
     private class RegisterUserRequest
     {
         public string? Email { get; set; }
+        public string? UserName { get; set; }
         public string? Password { get; set; }
+        public string? Role { get; set; }
+    }
+
+    private class RoleDto
+    {
+        public Guid Id { get; set; }
+        public string? Name { get; set; }
     }
 }
