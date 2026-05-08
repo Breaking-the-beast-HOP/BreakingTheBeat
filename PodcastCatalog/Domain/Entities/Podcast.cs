@@ -69,14 +69,19 @@
             CategoryId = category.Id;
         }
 
-        public void AddContribution(Contribution host)
+        public void AddContribution(Contribution contribution)
         {
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
-            if (_contributions.Any(h => h.Id == host.Id))
+            if (contribution == null)
+                throw new ArgumentNullException(nameof(contribution));
+            if (_contributions.Any(h => h.Id == contribution.Id))
                 return;
 
-            _contributions.Add(host);
+            _contributions.Add(contribution);
+        }
+
+        public void RemoveContribution(Guid contributionId)
+        {
+            _contributions.RemoveAll(c => c.Id == contributionId);
         }
     }
 }

@@ -139,13 +139,15 @@
                                 {
                                     <MudPaper Outlined="true" Class="pa-3">
                                         <MudGrid Spacing="2">
+
+                                            <!-- Contributor -->
                                             <MudItem xs="12" sm="5">
-                                                <MudAutocomplete T="ContributionDTO"
+                                                <MudAutocomplete T="Contributor"
                                                                  Label="Contributor"
                                                                  Variant="Variant.Outlined"
-                                                                 Value="_selectedContribution"
+                                                                 Value="_contributors.FirstOrDefault(c => c.Id == contribution.value.ContributorId)"
                                                                  ValueChanged="@(value => OnContributionChanged(value, contribution.value))"
-                                                                 SearchFunc="SearchContributions"
+                                                                 SearchFunc="SearchContributors"
                                                                  ToStringFunc="@(c => c?.Name ?? string.Empty)"
                                                                  Clearable="true"
                                                                  ResetValueOnEmptyText="true"
@@ -155,21 +157,26 @@
                                                                  MaxItems="8" />
                                             </MudItem>
 
+                                            <!-- Role -->
                                             <MudItem xs="12" sm="5">
-                                                <MudSelect T="string"
+                                                <MudSelect T="Guid?"
                                                            Label="Role"
-                                                           @bind-Value="contribution.value.Role"
+                                                           Value="contribution.value.ContributorRoleId"
+                                                           ValueChanged="@(value => OnRoleChanged(value, contribution.value))"
                                                            Variant="Variant.Outlined"
                                                            FullWidth="true">
+
                                                     @foreach (var role in _contributionRoles)
                                                     {
-                                                        <MudSelectItem T="string" Value="@role.Name">
+                                                        <MudSelectItem T="Guid?" Value="@role.Id">
                                                             @role.Name
                                                         </MudSelectItem>
                                                     }
+
                                                 </MudSelect>
                                             </MudItem>
 
+                                            <!-- Remove -->
                                             <MudItem xs="12" sm="2" Class="d-flex align-center">
                                                 <MudButton Variant="Variant.Text"
                                                            Color="Color.Error"
@@ -178,13 +185,13 @@
                                                     Remove
                                                 </MudButton>
                                             </MudItem>
+
                                         </MudGrid>
                                     </MudPaper>
                                 }
-                            </MudStack>
+                        </MudStack>
                         }
                     </MudPaper>
-
                 </MudStack>
             </MudItem>
 
@@ -255,8 +262,7 @@
     private List<ContributionRow> _contributionRows = new();
 
     private List<ContributionRoles> _contributionRoles = new();
-    private List<ContributionDTO> _contributions = new();
-    private ContributionDTO? _selectedContribution;
+    private List<Contributor> _contributors = new();
 
     private bool _isLoadingLookups = true;
     private bool _isSaving = false;
@@ -273,8 +279,8 @@
                           ?? GetFallbackCategories();
             _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>("api/podcasts/ContributorRole")
                                 ?? _contributionRoles;
-            _contributions = await Http.GetFromJsonAsync<List<ContributionDTO>>("api/podcasts/Contributor")
-                                ?? _contributions;
+            _contributors = await Http.GetFromJsonAsync<List<Contributor>>("api/podcasts/Contributor")
+                                ?? _contributors;
         }
         catch
         {
@@ -315,13 +321,13 @@
         return Task.FromResult(result);
     }
 
-    private Task<IEnumerable<ContributionDTO>> SearchContributions(string value, CancellationToken token)
+    private Task<IEnumerable<Contributor>> SearchContributors(string value, CancellationToken token)
     {
-        IEnumerable<ContributionDTO> result = string.IsNullOrWhiteSpace(value)
-            ? _contributions
-            : _contributions.Where(c =>
+        IEnumerable<Contributor> result = string.IsNullOrWhiteSpace(value)
+            ? _contributors
+            : _contributors.Where(c =>
                 c.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                c.Role.Contains(value, StringComparison.OrdinalIgnoreCase));
+                c.Id.ToString().Contains(value, StringComparison.OrdinalIgnoreCase));
         return Task.FromResult(result);
     }
 
@@ -339,10 +345,16 @@
         return Task.CompletedTask;
     }
 
-    private Task OnContributionChanged(ContributionDTO? contribution, ContributionRow row)
+    private Task OnContributionChanged(Contributor? contributor, ContributionRow row)
     {
-        row.Name = contribution?.Name;
-        row.Role = contribution?.Role;
+        row.ContributorId = contributor?.Id;
+        row.ContributorName = contributor?.Name;
+        return Task.CompletedTask;
+    }
+
+    private Task OnRoleChanged(Guid? roleId, ContributionRow row)
+    {
+        row.ContributorRoleId = roleId;
         return Task.CompletedTask;
     }
 
@@ -362,6 +374,7 @@
         _errorMessage = null;
         _successMessage = null;
 
+
         if (string.IsNullOrWhiteSpace(_model.Title))
         {
             _errorMessage = "Title is required.";
@@ -379,6 +392,26 @@
             _errorMessage = "Language is required.";
             return;
         }
+
+        _model.Contributions = _contributionRows.Select(r => new ContributionRow
+            {
+                ContributorId = r.ContributorId,
+                ContributorRoleId = r.ContributorRoleId,
+                HasRights = r.HasRights
+            }).ToList();
+
+        if(!_model.Contributions.Any())
+        {
+            _errorMessage = "At least one contribution is required.";
+            return;
+        }
+
+        if (_model.Contributions.Any(c => c.ContributorId == null || c.ContributorRoleId == null))
+        {
+            _errorMessage = "All contributions must have a contributor and a role selected.";
+            return;
+        }
+
 
         try
         {
@@ -452,12 +485,17 @@
         public string? Description { get; set; }
         public Guid? CategoryId { get; set; }
         public Guid? LanguageId { get; set; }
+
+        public List<ContributionRow> Contributions { get; set; } = new();
     }
 
     public class ContributionRow
     {
-        public string? Name { get; set; }
-        public string? Role { get; set; }
+        public Guid? ContributorId { get; set; }
+        public string? ContributorName { get; set; }
+
+        public Guid? ContributorRoleId { get; set; }
+        public bool HasRights { get; set; }
     }
 
     public class ContributionRoles
@@ -467,11 +505,11 @@
         public string Description { get; set; } = "";
     }
 
-    public class ContributionDTO
+    public class Contributor
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
-        public string Role { get; set; } = "";
+        public string? Description { get; set; } = "";
     }
 
     public class LanguageDto

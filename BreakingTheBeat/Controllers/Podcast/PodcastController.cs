@@ -23,14 +23,15 @@ namespace Gateway.Controllers.Podcast
         // POST: api/podcasts/podcast
         [HttpPost]
         public async Task<IActionResult> CreatePodcast(
-    [FromBody] NewPodcastRequest request,
-    CancellationToken cancellationToken)
+            [FromBody] NewPodcastRequest request,
+            CancellationToken cancellationToken)
         {
             var command = new CreatePodcastCommand(
                 request.Title,
                 request.Description,
                 request.CategoryId,
-                request.LanguageId
+                request.LanguageId,
+                request.Contributors
             );
 
             var result = await _mediator.Send(command, cancellationToken);
