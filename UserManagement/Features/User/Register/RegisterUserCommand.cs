@@ -2,7 +2,7 @@
 
 namespace UserManagement.Features.User.Register
 {
-    public record RegisterUserCommand(string Email, string username,string Password,string roleName) : IRequest<RegisterUserResult>;
+    public record RegisterUserCommand(string Email, string username, string Password, string roleName) : IRequest<RegisterUserResult>;
 
     public class RegisterUserResult
     {

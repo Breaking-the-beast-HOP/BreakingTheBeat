@@ -14,7 +14,7 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand>
         _userManager = userManager;
     }
 
-    public async Task Handle( UpdateUserCommand request,CancellationToken cancellationToken)
+    public async Task Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByIdAsync(request.Id.ToString());
 
