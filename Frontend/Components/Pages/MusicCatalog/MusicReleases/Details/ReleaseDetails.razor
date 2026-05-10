@@ -1,5 +1,5 @@
 ﻿@page "/releases/{Id:guid}"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
 
 @using Microsoft.AspNetCore.Authorization
 @using Frontend.Components.Shared;

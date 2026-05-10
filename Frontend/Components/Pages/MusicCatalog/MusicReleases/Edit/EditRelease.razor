@@ -1,6 +1,6 @@
 ﻿@page "/releases/edit/{Id:guid}"
 @rendermode InteractiveServer
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
 
 @using Microsoft.AspNetCore.Authorization
 @using Frontend.Components.Pages.MusicCatalog.MusicReleases.Components

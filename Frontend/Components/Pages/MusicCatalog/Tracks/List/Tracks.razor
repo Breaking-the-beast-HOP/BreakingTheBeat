@@ -1,5 +1,5 @@
 ﻿@page "/tracks"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
 @rendermode InteractiveServer
 @using Frontend.Components.Pages.MusicCatalog.SharedModels
 @using Frontend.Components.Pages.MusicCatalog.Tracks

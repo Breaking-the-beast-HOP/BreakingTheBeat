@@ -1,5 +1,5 @@
 ﻿@page "/contributors"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
 
 @using Microsoft.AspNetCore.Authorization
 
