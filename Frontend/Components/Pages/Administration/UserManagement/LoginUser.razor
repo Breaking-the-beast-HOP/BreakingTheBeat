@@ -62,9 +62,25 @@
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
                        FullWidth="true"
-                       OnClick="DevLogin"
+                       OnClick="DevQCLogin"
                        Disabled="_isLoading">
-                Snyde-login
+                Snyde QC-login
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       FullWidth="true"
+                       OnClick="DevAdminLogin"
+                       Disabled="_isLoading">
+                Snyde Admin-login
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       FullWidth="true"
+                       OnClick="DevCustomerLogin"
+                       Disabled="_isLoading">
+                Snyde kunde-login
             </MudButton>
 
             <MudLink Href="#" Typo="Typo.body2" Color="Color.Inherit">
@@ -179,9 +195,23 @@
         }
     }
 
-    private async Task DevLogin()
+    private async Task DevQCLogin()
     {
-        _model.Email = "test@outlook.com";
+        _model.Email = "QC@Test.com";
+        _model.Password = "Test123!";
+        await Login();
+    }
+
+    private async Task DevAdminLogin()
+    {
+        _model.Email = "Admin@Test.com";
+        _model.Password = "Test123!";
+        await Login();
+    }
+
+    private async Task DevCustomerLogin()
+    {
+        _model.Email = "Customer@Test.com";
         _model.Password = "Test123!";
         await Login();
     }

@@ -1,0 +1,96 @@
+﻿@page "/music-qc"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Quality controller,Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using MudBlazor
+
+<PageTitle>Music QC</PageTitle>
+
+<MudStack Spacing="4">
+
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+        <MudStack Spacing="1">
+            <MudText Typo="Typo.h4">Music Quality Control</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Review music releases awaiting approval or re-check after corrections.
+            </MudText>
+        </MudStack>
+
+        <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled">
+            @_pendingCount pending
+        </MudChip>
+    </MudStack>
+
+    <MudGrid>
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4" Elevation="3">
+                <MudText Typo="Typo.h6">Awaiting QC</MudText>
+                <MudText Typo="Typo.h3" Color="Color.Warning">@_awaitingQc.Count</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    New releases waiting for first review.
+                </MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4" Elevation="3">
+                <MudText Typo="Typo.h6">Returned for fixes</MudText>
+                <MudText Typo="Typo.h3" Color="Color.Error">@_returnedForFixes.Count</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Releases where corrections were requested.
+                </MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4" Elevation="3">
+                <MudText Typo="Typo.h6">Ready for re-check</MudText>
+                <MudText Typo="Typo.h3" Color="Color.Info">@_readyForRecheck.Count</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Corrections submitted and ready for another QC pass.
+                </MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudTabs Elevation="2" Rounded="true" PanelClass="pa-4">
+
+        <MudTabPanel Text="Awaiting QC">
+            <ReleaseQcTable Releases="_awaitingQc" />
+        </MudTabPanel>
+
+        <MudTabPanel Text="Ready for re-check">
+            <ReleaseQcTable Releases="_readyForRecheck" />
+        </MudTabPanel>
+
+        <MudTabPanel Text="Returned for fixes">
+            <ReleaseQcTable Releases="_returnedForFixes" />
+        </MudTabPanel>
+
+    </MudTabs>
+
+</MudStack>
+
+@code {
+    private int _pendingCount => _awaitingQc.Count + _readyForRecheck.Count;
+
+    private readonly List<QcReleaseDto> _awaitingQc =
+    [
+        new("Midnight Waves", "The Northern Lights", "Album", "1234567890123", "Awaiting QC", DateTime.Today.AddDays(-2), null),
+        new("Broken Signals", "Echo Frame", "Single", "2234567890123", "Awaiting QC", DateTime.Today.AddDays(-1), null),
+        new("Ocean Memory", "Sofia Vale", "EP", "3234567890123", "Awaiting QC", DateTime.Today, null)
+    ];
+
+    private readonly List<QcReleaseDto> _readyForRecheck =
+    [
+        new("Afterglow", "Mira Sound", "Single", "4234567890123", "Ready for re-check", DateTime.Today.AddDays(-4), "Cover image updated and explicit flag corrected."),
+        new("Static Heart", "Low City", "Album", "5234567890123", "Ready for re-check", DateTime.Today.AddDays(-6), "Track metadata corrected.")
+    ];
+
+    private readonly List<QcReleaseDto> _returnedForFixes =
+    [
+        new("Golden Room", "Noah Reed", "EP", "6234567890123", "Returned for fixes", DateTime.Today.AddDays(-8), "EAN mismatch and missing contributor roles."),
+        new("Late Night Drive", "Ava North", "Single", "7234567890123", "Returned for fixes", DateTime.Today.AddDays(-10), "Artwork resolution too low.")
+    ];
+}

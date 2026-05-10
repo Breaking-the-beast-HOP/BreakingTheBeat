@@ -1,8 +1,16 @@
 ﻿@page "/users"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
 @using MudBlazor
+@using System.Net.Http.Json
+
+@inject HttpClient Http
 @inject NavigationManager NavigationManager
 
 <MudPaper Class="pa-4">
+
     <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
         <MudText Typo="Typo.h5">Brugere</MudText>
 
@@ -14,36 +22,70 @@
         </MudButton>
     </MudStack>
 
-    <MudTable Items="_users" Hover="true" Striped="true" Dense="true">
-        <HeaderContent>
-            <MudTh>Navn</MudTh>
-            <MudTh>Email</MudTh>
-            <MudTh>Brugernavn</MudTh>
-        </HeaderContent>
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <MudAlert Severity="Severity.Error">@_error</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="_users" T="UserOverviewDto" Hover="true" Striped="true" Dense="true">
+            <HeaderContent>
+                <MudTh>Email</MudTh>
+                <MudTh>Brugernavn</MudTh>
+                <MudTh>Rolle</MudTh>
+            </HeaderContent>
 
-        <RowTemplate>
-            <MudTd DataLabel="Navn">@context.Name</MudTd>
-            <MudTd DataLabel="Email">@context.Email</MudTd>
-            <MudTd DataLabel="Brugernavn">@context.UserName</MudTd>
-        </RowTemplate>
-    </MudTable>
+            <RowTemplate>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Brugernavn">@context.UserName</MudTd>
+                <MudTd DataLabel="Rolle">
+                    <MudChip T="string" Color="Color.Info" Size="Size.Small">
+                        @context.Role
+                    </MudChip>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+
 </MudPaper>
 
 @code {
-    private List<UserOverviewDto> _users = new()
+    private List<UserOverviewDto> _users = new();
+    private bool _isLoading;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
     {
-        new("Test Bruger", "test@test.dk", "testbruger"),
-        new("Admin", "admin@test.dk", "admin")
-    };
+        _isLoading = true;
+
+        try
+        {
+            _users = await Http.GetFromJsonAsync<List<UserOverviewDto>>("api/users") ?? new();
+        }
+        catch
+        {
+            _error = "Brugere kunne ikke hentes.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
 
     private void CreateUser()
     {
         NavigationManager.NavigateTo("/users/register");
     }
 
-    private record UserOverviewDto(
-        string Name,
-        string Email,
-        string UserName
-    );
+    private class UserOverviewDto
+    {
+        public Guid Id { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+    }
 }

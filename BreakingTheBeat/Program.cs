@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +28,7 @@ using PodcastCatalog.Infrastructure.Data;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
 using UserManagement.Domain.Entities;
+using UserManagement.Features.User.GetAll;
 using UserManagement.Features.User.Register;
 using UserManagement.Infrastructure.Auth;
 using UserManagement.Infrastructure.Persistence;
@@ -75,12 +77,18 @@ namespace Gateway
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
+
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
                         ValidAudience = builder.Configuration["Jwt:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+
+                        RoleClaimType = ClaimTypes.Role,
+                        NameClaimType = ClaimTypes.Name
                     };
                 });
+
+            builder.Services.AddAuthorization();
 
             // 4. Repositories (music)
             builder.Services.AddScoped<ILanguageRepository, MusicCatalog.Infrastructure.Repositories.LanguageRepository>();
@@ -119,6 +127,7 @@ namespace Gateway
 
                 // UserManagement
                 cfg.RegisterServicesFromAssembly(typeof(RegisterUserCommand).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetUsersQuery).Assembly);
             });
 
             // 8. Controllers
