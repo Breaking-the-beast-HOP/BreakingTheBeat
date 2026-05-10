@@ -13,7 +13,9 @@
 <PageTitle>Login</PageTitle>
 
 <div class="login-page">
-    <MudPaper Class="login-card" Elevation="8">
+    <MudPaper Class="login-card"
+              Style="width: 420px; max-width: 90vw;"
+              Elevation="8">
 
         <MudStack Spacing="3" AlignItems="AlignItems.Center">
 
@@ -173,6 +175,4 @@
         _model.Password = "Test123!";
         await Login();
     }
-
-   
 }
