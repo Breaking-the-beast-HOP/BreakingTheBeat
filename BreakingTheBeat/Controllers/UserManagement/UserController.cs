@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using UserManagement.Features.User.GetAll;
+using UserManagement.Features.User.ResetPassword;
 
 namespace Gateway.Controllers.UserManagement
 {
@@ -38,13 +39,13 @@ namespace Gateway.Controllers.UserManagement
             return NoContent();
         }
 
-        //[HttpPost("{id:guid}/reset-password")]
-        //public async Task<IActionResult> ResetPassword( Guid id, ResetPasswordRequest request,CancellationToken cancellationToken)
-        //{
-        //    await _mediator.Send(new ResetUserPasswordCommand(id,request.NewPassword), cancellationToken);
+        [HttpPost("{id:guid}/reset-password")]
+        public async Task<IActionResult> ResetPassword(Guid id, [FromBody] Contracts.UserManagement.ResetPasswordRequest request,CancellationToken cancellationToken)
+        {
+            await _mediator.Send(new ResetUserPasswordCommand(id, request.NewPassword), cancellationToken);
 
-        //    return NoContent();
-        //}
+            return NoContent();
+        }
 
         //[HttpDelete("{id:guid}")]
         //public async Task<IActionResult> DeleteUser(Guid id,CancellationToken cancellationToken)
