@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using UserManagement.Features.User.Delete;
 using UserManagement.Features.User.GetAll;
 using UserManagement.Features.User.ResetPassword;
 
@@ -47,12 +48,12 @@ namespace Gateway.Controllers.UserManagement
             return NoContent();
         }
 
-        //[HttpDelete("{id:guid}")]
-        //public async Task<IActionResult> DeleteUser(Guid id,CancellationToken cancellationToken)
-        //{
-        //    await _mediator.Send(new DeleteUserCommand(id), cancellationToken);
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteUser(Guid id, CancellationToken cancellationToken)
+        {
+            await _mediator.Send(new DeleteUserCommand(id), cancellationToken);
 
-        //    return NoContent();
-        //}
+            return NoContent();
+        }
     }
 }
