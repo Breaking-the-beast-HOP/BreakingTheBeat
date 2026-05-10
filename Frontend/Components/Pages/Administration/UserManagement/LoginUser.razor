@@ -99,48 +99,6 @@
     </MudPaper>
 </div>
 
-<style>
-    .login-page {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.65)), url('/images/audiowaves.jpeg');
-        background-size: cover;
-        background-position: center;
-        padding: 24px;
-    }
-
-    .login-card {
-        width: 100%;
-        max-width: 380px;
-        padding: 36px;
-        background: rgba(45, 45, 45, 0.94);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-    }
-
-    .login-logo {
-        font-size: 72px;
-        line-height: 0.9;
-        font-weight: 900;
-        letter-spacing: -4px;
-        color: white;
-    }
-
-    .login-subtitle {
-        margin-top: -6px;
-        margin-bottom: 18px;
-        font-size: 13px;
-        letter-spacing: 5px;
-        color: rgba(255, 255, 255, 0.85);
-    }
-
-    .align-self-start {
-        align-self: flex-start;
-    }
-</style>
-
 @code {
     private LoginUserRequest _model = new();
     private string? _error;
@@ -216,16 +174,5 @@
         await Login();
     }
 
-    private class LoginUserRequest
-    {
-        public string? Email { get; set; }
-        public string? Password { get; set; }
-    }
-
-    private class LoginUserResponse
-    {
-        public bool Succeeded { get; set; }
-        public string? Token { get; set; }
-        public List<string> Errors { get; set; } = new();
-    }
+   
 }
