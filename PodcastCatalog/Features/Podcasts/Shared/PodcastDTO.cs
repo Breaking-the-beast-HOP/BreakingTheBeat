@@ -1,6 +1,6 @@
-﻿namespace PodcastCatalog.Features.Podcasts
+﻿namespace PodcastCatalog.Features.Podcasts.Shared
 {
-    public class SharedDTO
+    public class PodcastDTO
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = null!;
@@ -15,6 +15,6 @@
         public string? LanguageName { get; set; }
 
         // List of contributors
-        public List<ContributionRowDTO> Contributions { get; set; }
+        public List<ContributionRowDTO> Contributions { get; set; } = new();
     }
 }

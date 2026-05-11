@@ -109,14 +109,14 @@
                     {
                         <MudTable Items="_podcast.Contributions" Dense="true" Hover="true" Elevation="0">
                             <HeaderContent>
-                                <MudTh>Name</MudTh>
-                                <MudTh>Role</MudTh>
+                                <MudTh>ContributorName</MudTh>
+                                <MudTh>ContributorRole</MudTh>
                             </HeaderContent>
                             <RowTemplate>
-                                <MudTd DataLabel="Name">@context.PersonName</MudTd>
-                                <MudTd DataLabel="Role">
+                                <MudTd DataLabel="ContributorName">@context.ContributorName</MudTd>
+                                <MudTd DataLabel="ContributorRole">
                                     <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">
-                                        @context.RoleName
+                                        @context.ContributorRoleName
                                     </MudChip>
                                 </MudTd>
                             </RowTemplate>
@@ -300,10 +300,10 @@
     public class ContributionDto
     {
         public Guid Id { get; set; }
-        public Guid PersonId { get; set; }
-        public string PersonName { get; set; } = null!;
-        public Guid RoleId { get; set; }
-        public string RoleName { get; set; } = null!;
+        public Guid ContributorId { get; set; }
+        public string ContributorName { get; set; } = null!;
+        public Guid ContributorRoleId { get; set; }
+        public string ContributorRoleName { get; set; } = null!;
     }
 
     public class EpisodeDto

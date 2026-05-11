@@ -140,24 +140,39 @@
                                         <MudPaper Outlined="true" Class="pa-3">
                                             <MudGrid Spacing="2">
                                                 <MudItem xs="12" sm="5">
-                                                    <MudTextField Label="Contributor"
-                                                                  @bind-Value="contribution.value.Name"
-                                                                  Variant="Variant.Outlined"
-                                                                  FullWidth="true" />
+                                                    <MudAutocomplete T="Contributor"
+                                                                     Label="Contributor"
+                                                                     Variant="Variant.Outlined"
+                                                                     Value="_contributors.FirstOrDefault(c => c.Id == contribution.value.ContributorId)"
+                                                                     ValueChanged="@(value => OnContributionChanged(value, contribution.value))"
+                                                                     SearchFunc="SearchContributors"
+                                                                     ToStringFunc="@(c => c?.Name ?? string.Empty)"
+                                                                     Clearable="true"
+                                                                     ResetValueOnEmptyText="true"
+                                                                     CoerceText="false"
+                                                                     Dense="true"
+                                                                     FullWidth="true"
+                                                                     MaxItems="8"
+                                                                     Disabled ="@IsContributorLocked(contribution.value, contribution.index)"
+                                                                     ItemDisabledFunc="@(c => UsedContributorIds.Contains(c.Id)
+                                                                                            && c.Id != contribution.value.ContributorId)"/>
                                                 </MudItem>
 
                                                 <MudItem xs="12" sm="5">
-                                                    <MudSelect T="string"
+                                                    <MudSelect T="Guid?"
                                                                Label="Role"
-                                                               @bind-Value="contribution.value.Role"
+                                                               Value="contribution.value.ContributorRoleId"
+                                                               ValueChanged="@(async (Guid? value) => await OnRoleChanged(value, contribution.value))"
                                                                Variant="Variant.Outlined"
                                                                FullWidth="true">
+
                                                         @foreach (var role in _contributionRoles)
                                                         {
-                                                            <MudSelectItem T="string" Value="@role">
-                                                                @role
+                                                            <MudSelectItem T="Guid?" Value="@role.Id">
+                                                                @role.Name
                                                             </MudSelectItem>
                                                         }
+
                                                     </MudSelect>
                                                 </MudItem>
 
@@ -249,21 +264,24 @@
 
     private List<ContributionRow> _contributions = new();
 
-    private readonly List<string> _contributionRoles = new()
-    {
-        "Host",
-        "Co-host",
-        "Guest",
-        "Producer",
-        "Editor",
-        "Researcher",
-        "Narrator"
-    };
+    private List<ContributionRoles> _contributionRoles = new();
+    private List<Contributor> _contributors = new();
 
     private bool _isLoading = true;
     private bool _isSaving = false;
     private string? _errorMessage;
     private string? _successMessage;
+
+    private HashSet<Guid> UsedContributorIds =>
+        _contributions
+            .Where(c => c.ContributorId.HasValue)
+            .Select(c => c.ContributorId!.Value)
+            .ToHashSet();
+
+    private bool IsContributorLocked(ContributionRow row, int index)
+    {
+        return row.ContributorId.HasValue;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -272,15 +290,14 @@
             _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") ?? new();
             Console.WriteLine($"Number of languages loaded: {_languages.Count}");
 
-            try
-            {
-                _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category")
-                              ?? GetFallbackCategories();
-            }
-            catch
-            {
-                _categories = GetFallbackCategories();
-            }
+            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>(
+                "api/Podcasts/Category") ?? GetFallbackCategories();
+
+            _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>(
+                "api/podcasts/ContributorRole") ?? new();
+
+            _contributors = await Http.GetFromJsonAsync<List<Contributor>>(
+                "api/podcasts/Contributor") ?? new();
 
             EnsurePlaceholderExists();
 
@@ -331,10 +348,13 @@
 
             _contributions = podcast.Contributions?
                 .Select(c => new ContributionRow
-                    {
-                        Name = c.Name,
-                        Role = c.Role
-                    })
+                {
+                    Id = c.Id,
+                    ContributorId = c.ContributorId,
+                    ContributorName = c.ContributorName,
+                    ContributorRoleId = c.ContributorRoleId,
+                    HasRights = c.HasRights
+                })
                 .ToList() ?? new();
         }
         catch (Exception ex)
@@ -390,6 +410,20 @@
         return Task.FromResult(result);
     }
 
+    private Task<IEnumerable<Contributor>> SearchContributors(
+        string value,
+        CancellationToken token)
+    {
+        var query = _contributors.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            query = query.Where(c =>
+                c.Name.Contains(value, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return Task.FromResult(query);
+    }
 
     private Task OnCategoryChanged(PodcastCategoryDto? category)
     {
@@ -402,6 +436,25 @@
     {
         _selectedLanguage = language;
         _model.LanguageId = language?.Id;
+        return Task.CompletedTask;
+    }
+
+    private Task OnContributionChanged(
+    Contributor? contributor,
+    ContributionRow row)
+    {
+        if (row.ContributorId.HasValue)
+            return Task.CompletedTask;
+        row.ContributorId = contributor?.Id;
+        row.ContributorName = contributor?.Name;
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnRoleChanged(Guid? roleId, ContributionRow row)
+    {
+        row.ContributorRoleId = roleId;
+
         return Task.CompletedTask;
     }
 
@@ -436,6 +489,27 @@
         if (_model.LanguageId is null || _model.LanguageId == Guid.Empty)
         {
             _errorMessage = "Language is required.";
+            return;
+        }
+
+        _model.Contributions = _contributions.Select(r => new ContributionDto
+        {
+            Id = r.Id,
+            ContributorId = r.ContributorId ?? Guid.Empty,
+            ContributorRoleId = r.ContributorRoleId ?? Guid.Empty,
+            HasRights = r.HasRights,
+            ContributorName = r.ContributorName
+        }).ToList();
+
+        if (!_model.Contributions.Any())
+        {
+            _errorMessage = "At least one contribution is required.";
+            return;
+        }
+
+        if (_model.Contributions.Any(c => c.ContributorId == null || c.ContributorRoleId == null))
+        {
+            _errorMessage = "All contributions must have a contributor and a role selected.";
             return;
         }
 
@@ -481,6 +555,8 @@
         public string? Description { get; set; }
         public Guid? CategoryId { get; set; }
         public Guid? LanguageId { get; set; }
+
+        public List<ContributionDto> Contributions { get; set; } = new();
     }
 
     public class PodcastDetailsDto
@@ -497,17 +573,37 @@
 
         public List<ContributionDto> Contributions { get; set; } = new();
     }
-
     public class ContributionDto
     {
-        public string? Name { get; set; }
-        public string? Role { get; set; }
+        public Guid? Id { get; set; }
+        public Guid ContributorId { get; set; }
+        public string? ContributorName { get; set; }
+        public Guid ContributorRoleId { get; set; }
+        public bool HasRights { get; set; }
     }
 
     public class ContributionRow
     {
-        public string? Name { get; set; }
-        public string? Role { get; set; }
+        public Guid? Id { get; set; }
+        public Guid? ContributorId { get; set; }
+        public string? ContributorName { get; set; }
+
+        public Guid? ContributorRoleId { get; set; }
+        public bool HasRights { get; set; }
+    }
+
+    public class ContributionRoles
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
+
+    public class Contributor
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string? Description { get; set; } = "";
     }
 
     public class LanguageDto

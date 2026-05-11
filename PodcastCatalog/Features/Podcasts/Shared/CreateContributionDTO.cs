@@ -1,4 +1,4 @@
-﻿namespace PodcastCatalog.Features.Podcasts
+﻿namespace PodcastCatalog.Features.Podcasts.Shared
 {
     public class CreateContributionDTO
     {

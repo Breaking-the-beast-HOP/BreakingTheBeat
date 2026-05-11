@@ -45,7 +45,25 @@ public class PodcastRepository : ICrudRepository<Podcast>
 
     public async Task<bool> UpdateAsync(Podcast entity)
     {
-        _dbContext.Podcasts.Update(entity);
+        // This is an anti-pattern, so contributions will be updated separately.
+        // This must be fixed in the future, but for now, we will just add new contributions and remove missing ones.
+        var existingContributions = await _dbContext.Contributions
+            .Where(c => c.PodcastId == entity.Id)
+            .ToListAsync();
+        foreach (var contribution in entity.Contributions)
+        {
+            if (!existingContributions.Any(c => c.Id == contribution.Id))
+            {
+                _dbContext.Contributions.Add(contribution);
+            }
+        }
+        foreach (var existingContribution in existingContributions)
+        {
+            if (!entity.Contributions.Any(c => c.Id == existingContribution.Id))
+            {
+                _dbContext.Contributions.Remove(existingContribution);
+            }
+        }
         return await _dbContext.SaveChangesAsync() > 0;
     }
 

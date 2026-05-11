@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using PodcastCatalog.Domain.Entities;
-using PodcastCatalog.Features.Podcasts;
+using PodcastCatalog.Features.Podcasts.Shared;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
 
@@ -71,26 +71,7 @@ public class CreatePodcastHandler : IRequestHandler<CreatePodcastCommand, Podcas
 
         var fullPodcast = await _podcastRepository.GetByIdAsync(podcast.Id);
 
-        return new PodcastDTO
-        {
-            Id = fullPodcast.Id,
-            Title = fullPodcast.Title,
-            Description = fullPodcast.Description,
-            CategoryId = fullPodcast.CategoryId,
-            CategoryName = fullPodcast.Category?.Name,
-            LanguageId = fullPodcast.LanguageId,
-            LanguageName = fullPodcast.Language?.Name,
-            Contributions = fullPodcast.Contributions
-                .Select(c => new ContributionRowDTO
-                {
-                    Id = c.Id,
-                    ContributorId = c.ContributorId,
-                    ContributorName = c.Contributor.Name,
-                    ContributorRoleId = c.ContributorRoleId,
-                    ContributorRoleName = c.Role.Name,
-                    HasRights = c.HasRights
-                }).ToList()
-        };
+        return podcast.ToDto();
 
     }
 }

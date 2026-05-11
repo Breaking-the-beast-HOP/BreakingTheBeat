@@ -79,9 +79,42 @@
             _contributions.Add(contribution);
         }
 
+        public void UpsertContribution(
+            Contributor contributor,
+            ContributorRole role,
+            bool hasRights)
+        {
+            var existing = _contributions
+                .FirstOrDefault(c => c.ContributorId == contributor.Id);
+
+            if (existing != null)
+            {
+                existing.ChangeRole(role);
+                existing.SetRights(hasRights);
+                return;
+            }
+
+            var newContribution = new Contribution(
+                Guid.NewGuid(),
+                contributor,
+                role,
+                this);
+
+            newContribution.SetRights(hasRights);
+            _contributions.Add(newContribution);
+        }
+
         public void RemoveContribution(Guid contributionId)
         {
             _contributions.RemoveAll(c => c.Id == contributionId);
+        }
+        public void RemoveMissingContributions(List<Guid> contributorIds)
+        {
+            var toRemove = _contributions.Where(c => !contributorIds.Contains(c.ContributorId)).ToList();
+            foreach (var contribution in toRemove)
+            {
+                _contributions.Remove(contribution);
+            }
         }
     }
 }

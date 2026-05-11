@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using PodcastCatalog.Domain.Entities;
+using PodcastCatalog.Features.Podcasts.Shared;
 using SharedKernel;
-using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Features.Podcasts.GetAll;
 

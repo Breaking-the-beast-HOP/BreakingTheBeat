@@ -1,13 +1,14 @@
 ﻿using Gateway.Contracts.Podcast;
 using Gateway.Contracts.Podcast.Contribution;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicCatalog.Features.Contributor.GetById;
 using PodcastCatalog.Features.Podcasts;
 using PodcastCatalog.Features.Podcasts.Create;
 using PodcastCatalog.Features.Podcasts.Delete;
 using PodcastCatalog.Features.Podcasts.Get;
 using PodcastCatalog.Features.Podcasts.GetAll;
+using PodcastCatalog.Features.Podcasts.Shared;
 using PodcastCatalog.Features.Podcasts.Update;
 
 namespace Gateway.Controllers.Podcast
@@ -55,13 +56,23 @@ namespace Gateway.Controllers.Podcast
             [FromBody] PodcastUpdateRequest request,
             CancellationToken cancellationToken)
         {
+            var contributions = request.Contributions.Select(c => new ContributionRowDTO
+            {
+                Id = c.Id ?? Guid.Empty,
+                ContributorId = c.ContributorId,
+                ContributorName = c.ContributorName,
+                ContributorRoleId = c.ContributorRoleId,
+                HasRights = c.HasRights
+
+            }).ToList();
             await _mediator.Send(
                 new UpdatePodcastCommand(
                     Id: id,
                     Title: request.Title,
                     Description: request.Description,
                     CategoryId: request.CategoryId,
-                    LanguageId: request.LanguageId),
+                    LanguageId: request.LanguageId,
+                    contributions),
                 cancellationToken);
 
             return NoContent();
@@ -87,10 +98,10 @@ namespace Gateway.Controllers.Podcast
                 Contributions = result.Contributions.Select(c => new ContributionResponse
                 {
                     Id = c.Id,
-                    PersonId = c.ContributorId,
-                    PersonName = c.ContributorName,
-                    RoleId = c.RoleId,
-                    RoleName = c.RoleName
+                    ContributorId = c.ContributorId,
+                    ContributorName = c.ContributorName,
+                    ContributorRoleId = c.ContributorRoleId,
+                    ContributorRoleName = c.ContributorRoleName
                 }).ToList()
             };
 
