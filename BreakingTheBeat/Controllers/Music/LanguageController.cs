@@ -19,6 +19,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet(Name = "GetLanguages")]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<ActionResult<List<LanguageResponse>>> Get(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetLanguagesQuery(), cancellationToken);

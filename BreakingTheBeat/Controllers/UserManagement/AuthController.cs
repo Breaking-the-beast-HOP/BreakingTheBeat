@@ -20,6 +20,7 @@ public class AuthController : ControllerBase
 
     [HttpPost("register")]
     [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Register([FromBody] RegisterUserRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Email))

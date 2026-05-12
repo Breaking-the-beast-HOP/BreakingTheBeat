@@ -18,6 +18,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<IActionResult> GetContributorRoles(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new MusicCatalog.Features.ContributorRole.GetAll.GetContributorRolesQuery(), cancellationToken);

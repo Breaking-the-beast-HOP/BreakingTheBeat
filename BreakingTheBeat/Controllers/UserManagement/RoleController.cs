@@ -19,6 +19,7 @@ public class RoleController : ControllerBase
     }
 
     [HttpGet(Name = "GetRoles")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<List<RoleResponse>>> Get(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetRolesQuery(), cancellationToken);

@@ -10,7 +10,6 @@ using MusicCatalog.Features.Track.Get;
 using MusicCatalog.Features.Track.GetById;
 using MusicCatalog.Features.Track.Update;
 
-
 namespace Gateway.Controllers.Music
 {
     [Route("api/[controller]")]
@@ -27,6 +26,7 @@ namespace Gateway.Controllers.Music
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Content Creator")]
         public async Task<IActionResult> CreateTrack([FromBody] TrackRequest request, CancellationToken cancellationToken)
         {
 
@@ -52,6 +52,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet(Name = "GetTracks")]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<ActionResult<List<TrackResponse>>> Get(CancellationToken cancellationToken)
         {
             Console.WriteLine($"Authenticated: {User.Identity?.IsAuthenticated}");
@@ -61,6 +62,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<ActionResult<TrackDetailsResponse>> Get(Guid id, CancellationToken cancellationToken)
         {
             var track = await _mediator.Send(new GetTrackByIdQuery(id), cancellationToken);
@@ -98,6 +100,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin,Content Creator")]
         public async Task<IActionResult> UpdateTrack(Guid id, [FromBody] UpdateTrackRequest request, CancellationToken cancellationToken)
         {
             var contributions = request.Contributions
@@ -126,6 +129,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin,Content Creator")]
         public async Task<IActionResult> DeleteTrack(Guid id, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new DeleteTrackCommand(id), cancellationToken);
