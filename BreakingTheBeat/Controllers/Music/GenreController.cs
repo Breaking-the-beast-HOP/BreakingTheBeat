@@ -1,11 +1,13 @@
 ﻿using Gateway.Contracts.Music.Genre;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Genre;
 
 namespace Gateway.Controllers
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     public class GenreController : ControllerBase
     {

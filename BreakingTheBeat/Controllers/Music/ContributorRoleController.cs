@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.ContributorRole;
 
 namespace Gateway.Controllers.Music
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class ContributorRoleController : ControllerBase
     {

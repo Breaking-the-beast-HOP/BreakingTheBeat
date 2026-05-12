@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using FluentValidation;
+using Gateway.Infrastructure.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -41,24 +42,51 @@ namespace Gateway
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // 1. Connection strings
-            var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatDb");
+            // 1. Auth context + PostgreSQL role switching
+            builder.Services.AddHttpContextAccessor();
 
-            var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatDb")
-                ?? throw new InvalidOperationException("Connection string 'PodcastCatDb' not found.");
-
-            var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb")
-                ?? throw new InvalidOperationException("Connection string 'UserManagementDb' not found.");
+            builder.Services.AddScoped<PostgresRoleService>();
+            builder.Services.AddScoped<PostgresRoleInterceptor>();
 
             // 2. DbContexts
-            builder.Services.AddDbContext<MusicCatalogDbContext>(options =>
-                options.UseNpgsql(musicCatalogConnectionString));
+            builder.Services.AddDbContext<MusicCatalogDbContext>((sp, options) =>
+            {
+                var interceptor = sp.GetRequiredService<PostgresRoleInterceptor>();
 
-            builder.Services.AddDbContext<PodcastCatalogDbContext>(options =>
-                options.UseNpgsql(podcastCatalogConnectionString));
+                var connectionString =
+                    builder.Configuration.GetConnectionString("MusicCatalogDb")
+                    ?? throw new InvalidOperationException(
+                        "Connection string 'MusicCatalogDb' not found.");
 
-            builder.Services.AddDbContext<UserManagementDbContext>(options =>
-                options.UseNpgsql(userManagementConnectionString));
+                options.UseNpgsql(connectionString);
+                options.AddInterceptors(interceptor);
+            });
+
+            builder.Services.AddDbContext<PodcastCatalogDbContext>((sp, options) =>
+            {
+                var interceptor = sp.GetRequiredService<PostgresRoleInterceptor>();
+
+                var connectionString =
+                    builder.Configuration.GetConnectionString("PodcastCatalogDb")
+                    ?? throw new InvalidOperationException(
+                        "Connection string 'PodcastCatalogDb' not found.");
+
+                options.UseNpgsql(connectionString);
+                options.AddInterceptors(interceptor);
+            });
+
+            builder.Services.AddDbContext<UserManagementDbContext>((sp, options) =>
+            {
+                var interceptor = sp.GetRequiredService<PostgresRoleInterceptor>();
+
+                var connectionString =
+                    builder.Configuration.GetConnectionString("UserManagementDb")
+                    ?? throw new InvalidOperationException(
+                        "Connection string 'UserManagementDb' not found.");
+
+                options.UseNpgsql(connectionString);
+                options.AddInterceptors(interceptor);
+            });
 
             // 3. Identity
             builder.Services

@@ -1,5 +1,6 @@
 ﻿using Gateway.Contracts.Podcast.Categories;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PodcastCatalog.Features.Categories.Get;
@@ -7,6 +8,7 @@ using PodcastCatalog.Features.Categories.Get;
 namespace Gateway.Controllers.Podcast
 {
     [Route("api/podcasts/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class CategoryController : ControllerBase
     {

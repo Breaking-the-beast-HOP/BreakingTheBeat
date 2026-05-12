@@ -1,5 +1,6 @@
 ﻿using Gateway.Contracts.Music.Contributor;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Contributor.Create;
 using MusicCatalog.Features.Contributor.Delete;
@@ -9,6 +10,7 @@ using MusicCatalog.Features.Contributor.GetById;
 namespace Gateway.Controllers.Music
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class ContributorController : ControllerBase
     {

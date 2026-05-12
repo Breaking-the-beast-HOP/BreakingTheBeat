@@ -1,11 +1,13 @@
 ﻿using Gateway.Contracts.Music.Language;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Language.GetLanguages;
 
 namespace Gateway.Controllers.Music
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     public class LanguageController : ControllerBase
     {

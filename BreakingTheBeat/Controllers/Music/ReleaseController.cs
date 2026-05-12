@@ -3,6 +3,7 @@ using Gateway.Contracts.Music.MusicRelease.Get;
 using Gateway.Contracts.Music.MusicRelease.GetAll;
 using Gateway.Contracts.Music.MusicRelease.Update;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Release.Create;
 using MusicCatalog.Features.Release.GetAll;
@@ -13,6 +14,7 @@ namespace Gateway.Controllers.Music
 {
 
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class ReleaseController : ControllerBase
     {

@@ -1,5 +1,6 @@
 ﻿using Gateway.Contracts.Podcast;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PodcastCatalog.Features.Podcasts.Create;
@@ -11,6 +12,7 @@ using PodcastCatalog.Features.Podcasts.Update;
 namespace Gateway.Controllers.Podcast
 {
     [Route("api/podcasts/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class PodcastController : ControllerBase
     {
