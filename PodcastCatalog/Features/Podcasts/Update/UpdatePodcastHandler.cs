@@ -4,71 +4,56 @@ using PodcastCatalog.Domain.Entities;
 using PodcastCatalog.Features.Podcasts.Shared;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
-
 namespace PodcastCatalog.Features.Podcasts.Update
 {
     public class UpdatePodcastHandler : IRequestHandler<UpdatePodcastCommand, PodcastDTO>
     {
         private readonly ICrudRepository<Podcast> _podcastRepository;
-        private readonly ICrudRepository<Contributor> _contributorRepository;
-        private readonly IReadRepository<ContributorRole> _roleRepository;
         private readonly IValidator<UpdatePodcastCommand> _validator;
 
         public UpdatePodcastHandler(
-        ICrudRepository<Podcast> podcastRepository,
-        ICrudRepository<Contributor> contributorRepository,
-        IReadRepository<ContributorRole> roleRepository,
-        IValidator<UpdatePodcastCommand> validator)
+            ICrudRepository<Podcast> podcastRepository,
+            IValidator<UpdatePodcastCommand> validator)
         {
             _podcastRepository = podcastRepository;
-            _contributorRepository = contributorRepository;
-            _roleRepository = roleRepository;
             _validator = validator;
         }
 
         public async Task<PodcastDTO> Handle(UpdatePodcastCommand request, CancellationToken cancellationToken)
         {
-            // Valider input
             var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
             if (!validationResult.IsValid)
-            {
                 throw new ValidationException(validationResult.Errors);
-            }
 
-            // Hent den eksisterende podcast
-            var existingPodcast = await _podcastRepository.GetByIdAsync(request.Id);
-            //if (existingPodcast == null)
-            //{
-            //    throw new KeyNotFoundException($"Podcast with ID {request.Id} not found.");
-            //}
+            var podcast = await _podcastRepository.GetByIdAsync(request.Id);
 
-            //// Opdater podcasten
-            //existingPodcast.Update(request.Title, request.Description);
-            //existingPodcast.ChangeLanguage(request.LanguageId);
+            if (podcast is null)
+                throw new KeyNotFoundException($"Podcast with ID {request.Id} not found.");
 
-            //foreach (var c in request.Contributors)
-            //{
-            //    var contributor = await _contributorRepository.GetByIdAsync(c.ContributorId);
-            //    var role = await _roleRepository.GetByIdAsync(c.ContributorRoleId);
+            podcast.UpdateDetails(
+                request.Title,
+                request.Description,
+                request.CategoryId,
+                request.LanguageId);
 
-            //    existingPodcast.UpsertContribution(
-            //        contributor,
-            //        role,
-            //        c.HasRights);
-            //}
+            var contributions = request.Contributions
+                .Where(c =>
+                    c.ContributorId != Guid.Empty &&
+                    c.ContributorRoleId != Guid.Empty)
+                .Select(c => (
+                    ContributorId: c.ContributorId,
+                    ContributorRoleId: c.ContributorRoleId,
+                    HasRights: c.HasRights
+                ))
+                .Distinct()
+                .ToList();
 
-            //foreach (var contribution in existingPodcast.Contributions.ToList())
-            //{
-            //    if (!request.Contributors.Any(c => c.ContributorId == contribution.ContributorId))
-            //    {
-            //        existingPodcast.RemoveContribution(contribution.Id);
-            //    }
-            //}
+            podcast.UpdateContributions(contributions);
 
-            await _podcastRepository.UpdateAsync(existingPodcast);
+            await _podcastRepository.UpdateAsync(podcast);
 
-            // Returner den opdaterede podcast
-            return existingPodcast.ToDto();
+            return podcast.ToDto();
         }
     }
 }

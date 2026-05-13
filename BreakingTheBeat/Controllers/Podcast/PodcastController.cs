@@ -70,20 +70,15 @@ namespace Gateway.Controllers.Podcast
 
         // PUT: api/podcasts/podcast/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePodcast(
-            Guid id,
-            [FromBody] PodcastUpdateRequest request,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdatePodcast( Guid id,[FromBody] PodcastUpdateRequest request,CancellationToken cancellationToken)
         {
-            var contributions = request.Contributions.Select(c => new ContributionRowDTO
-            {
-                Id = c.Id ?? Guid.Empty,
-                ContributorId = c.ContributorId,
-                ContributorName = c.ContributorName,
-                ContributorRoleId = c.ContributorRoleId,
-                HasRights = c.HasRights
+            var contributions = request.Contributions.Select(c =>
+                new UpdatePodcastContributionInput(
+                    c.ContributorId,
+                    c.ContributorRoleId,
+                    c.HasRights
+                )).ToList();
 
-            }).ToList();
             await _mediator.Send(
                 new UpdatePodcastCommand(
                     Id: id,
@@ -91,7 +86,8 @@ namespace Gateway.Controllers.Podcast
                     Description: request.Description,
                     CategoryId: request.CategoryId,
                     LanguageId: request.LanguageId,
-                    contributions),
+                    Contributions: contributions
+                ),
                 cancellationToken);
 
             return NoContent();
