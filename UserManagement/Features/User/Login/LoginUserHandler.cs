@@ -42,8 +42,9 @@ namespace UserManagement.Features.User.Login
                 };
             }
 
+            var roles = await _userManager.GetRolesAsync(user);
 
-            var token = _jwtService.GenerateToken(user);
+            var token = _jwtService.GenerateToken(user, roles);
 
             return new LoginUserResult
             {

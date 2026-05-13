@@ -22,8 +22,8 @@ builder.Services.AddCascadingAuthenticationState();
 
 // Custom auth provider
 builder.Services.AddScoped<CustomAuthStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
-    sp.GetRequiredService<CustomAuthStateProvider>());
+builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
+    provider.GetRequiredService<CustomAuthStateProvider>());
 
 // HttpClient (API calls)
 builder.Services.AddScoped(_ => new HttpClient
@@ -45,6 +45,7 @@ else
 }
 
 app.UseHttpsRedirection();
+
 app.UseAntiforgery();
 
 // Static assets + Blazor app

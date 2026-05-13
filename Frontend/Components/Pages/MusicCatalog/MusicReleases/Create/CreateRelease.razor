@@ -1,5 +1,8 @@
 ﻿@page "/create-release"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
+
+@using Microsoft.AspNetCore.Authorization
 @using Frontend.Components.Pages.MusicCatalog.MusicReleases.Components
 @using Frontend.Components.Shared;
 @using Frontend.Components.Layout

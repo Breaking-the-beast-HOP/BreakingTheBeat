@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
             return BadRequest(new List<string> { "Adgangskode er påkrævet." });
 
         var result = await _mediator.Send(
-            new RegisterUserCommand(request.Email, request.Password),
+            new RegisterUserCommand(request.Email, request.Username, request.Password, request.RoleName),
             cancellationToken);
 
         if (!result.Succeeded)

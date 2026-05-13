@@ -1,4 +1,7 @@
 ﻿@page "/contributors"
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
+
+@using Microsoft.AspNetCore.Authorization
 
 @namespace Frontend.Components.Pages.MusicCatalog.Contributors.List 
 

@@ -1,0 +1,180 @@
+﻿@page "/users"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using System.Net.Http.Json
+@using Frontend.Components.Pages.Administration.UserManagement
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<MudPaper Class="pa-4">
+
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudText Typo="Typo.h5">Brugere</MudText>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="CreateUser">
+            Opret bruger
+        </MudButton>
+    </MudStack>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <MudAlert Severity="Severity.Error">@_error</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="_users" T="UserOverviewDto" Hover="true" Striped="true" Dense="true">
+            <HeaderContent>
+                <MudTh>Email</MudTh>
+                <MudTh>Brugernavn</MudTh>
+                <MudTh>Rolle</MudTh>
+                <MudTh Align="Align.Right">Handlinger</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Brugernavn">@context.UserName</MudTd>
+                <MudTd DataLabel="Rolle">
+                    <MudChip T="string" Color="Color.Info" Size="Size.Small">
+                        @context.Role
+                    </MudChip>
+                </MudTd>
+
+                <MudTd Align="Align.Right">
+                    <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="1">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       OnClick="@(() => OpenEditDialog(context))" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.LockReset"
+                                       Color="Color.Warning"
+                                       Size="Size.Small"
+                                       OnClick="@(() => OpenPasswordDialog(context))" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() => DeleteUser(context.Id))" />
+                    </MudStack>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+
+</MudPaper>
+
+<EditUserDialog Visible="_editDialogOpen"
+                VisibleChanged="@(value => _editDialogOpen = value)"
+                User="_editUser"
+                Roles="_roles"
+                OnSaved="OnUserSaved" />
+
+<ResetPasswordDialog Visible="_passwordDialogOpen"
+                     VisibleChanged="@(value => _passwordDialogOpen = value)"
+                     UserId="_passwordUserId" />
+
+@code {
+    private List<UserOverviewDto> _users = new();
+    private List<RoleDto> _roles = new();
+
+    private bool _isLoading;
+    private string? _error;
+
+    private bool _editDialogOpen;
+    private UserOverviewDto _editUser = new();
+
+    private bool _passwordDialogOpen;
+    private Guid _passwordUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        _error = null;
+
+        try
+        {
+            _users = await Http.GetFromJsonAsync<List<UserOverviewDto>>("api/users") ?? new();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Brugere kunne ikke hentes: {ex.Message}";
+            _isLoading = false;
+            return;
+        }
+
+        try
+        {
+            _roles = await Http.GetFromJsonAsync<List<RoleDto>>("api/Role") ?? new();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Roller kunne ikke hentes: {ex.Message}";
+            _isLoading = false;
+            return;
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task LoadUsers()
+    {
+        _users = await Http.GetFromJsonAsync<List<UserOverviewDto>>("api/users") ?? new();
+    }
+
+    private void CreateUser()
+    {
+        NavigationManager.NavigateTo("/users/register");
+    }
+
+    private void OpenEditDialog(UserOverviewDto user)
+    {
+        _editUser = new UserOverviewDto
+        {
+            Id = user.Id,
+            Email = user.Email,
+            UserName = user.UserName,
+            Role = user.Role
+        };
+
+        _editDialogOpen = true;
+    }
+
+    private void OpenPasswordDialog(UserOverviewDto user)
+    {
+        _passwordUserId = user.Id;
+        _passwordDialogOpen = true;
+    }
+
+    private async Task OnUserSaved()
+    {
+        await LoadUsers();
+    }
+
+    private async Task DeleteUser(Guid userId)
+    {
+        var response = await Http.DeleteAsync($"api/users/{userId}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _error = "Brugeren kunne ikke slettes.";
+            return;
+        }
+
+        await LoadUsers();
+    }
+}

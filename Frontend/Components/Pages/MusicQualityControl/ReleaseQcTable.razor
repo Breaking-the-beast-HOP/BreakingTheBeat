@@ -1,0 +1,58 @@
+﻿
+@using MudBlazor
+
+<MudTable Items="Releases" T="QcReleaseDto" Hover="true" Dense="true" Elevation="0">
+
+    <HeaderContent>
+        <MudTh>Title</MudTh>
+        <MudTh>Artist</MudTh>
+        <MudTh>Type</MudTh>
+        <MudTh>EAN</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Submitted</MudTh>
+        <MudTh>Latest QC note</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+
+    <RowTemplate>
+        <MudTd>@context.Title</MudTd>
+        <MudTd>@context.Artist</MudTd>
+        <MudTd>@context.Type</MudTd>
+        <MudTd>@context.Ean</MudTd>
+        <MudTd>
+            <MudChip T="string" Color="@GetStatusColor(context.Status)" Size="Size.Small">
+                @context.Status
+            </MudChip>
+        </MudTd>
+        <MudTd>@context.SubmittedAt.ToString("dd-MM-yyyy")</MudTd>
+        <MudTd>
+            @(string.IsNullOrWhiteSpace(context.LatestQcNote) ? "-" : context.LatestQcNote)
+        </MudTd>
+        <MudTd>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Warning"
+                       Size="Size.Small">
+                Review
+            </MudButton>
+        </MudTd>
+    </RowTemplate>
+
+</MudTable>
+
+@code {
+    [Parameter]
+    public List<QcReleaseDto> Releases { get; set; } = [];
+
+    private static Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "Awaiting QC" => Color.Warning,
+            "Ready for re-check" => Color.Info,
+            "Returned for fixes" => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+   
+}

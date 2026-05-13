@@ -1,5 +1,8 @@
-﻿@page "/"
+﻿@page "/DashBoard"
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
+@using Microsoft.AspNetCore.Authorization
 @using MudBlazor
+@inject NavigationManager Navigation
 
 <PageTitle>Dashboard</PageTitle>
 

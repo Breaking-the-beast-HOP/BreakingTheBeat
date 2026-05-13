@@ -1,38 +1,98 @@
 ﻿@page "/login"
+@page "/"
+@layout Layout.LoginLayout
 @rendermode InteractiveServer
+
 @using System.Net.Http.Json
 @using Frontend.Auth
+@using Microsoft.AspNetCore.WebUtilities
+
 @inject HttpClient Http
 @inject CustomAuthStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 
 <PageTitle>Login</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="pa-6">
+<div class="login-page">
+    <MudPaper Class="login-card"
+              Style="width: 420px; max-width: 90vw;"
+              Elevation="8">
 
-    <MudPaper Class="pa-6">
+        <MudStack Spacing="3" AlignItems="AlignItems.Center">
 
-        <MudStack Spacing="3">
-
-            <MudText Typo="Typo.h5">Login</MudText>
+            <div class="login-logo">DMG</div>
+            <div class="login-subtitle">DIGITAL DONE RIGHT</div>
 
             <MudTextField T="string"
-                          Label="Email"
+                          Placeholder="Email"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
                           @bind-Value="_model.Email" />
 
             <MudTextField T="string"
-                          Label="Password"
+                          Placeholder="Password"
                           InputType="InputType.Password"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
                           @bind-Value="_model.Password" />
 
+            <MudCheckBox T="bool"
+                         @bind-Checked="_rememberMe"
+                         Label="Remember me"
+                         Color="Color.Secondary"
+                         Class="align-self-start" />
+
             <MudButton Variant="Variant.Filled"
-                       OnClick="Login">
-                Login
+                       Color="Color.Secondary"
+                       FullWidth="true"
+                       OnClick="Login"
+                       Disabled="_isLoading">
+
+                @if (_isLoading)
+                {
+                    <MudProgressCircular Indeterminate="true"
+                                         Size="Size.Small"
+                                         Class="me-2" />
+                    <span>Logger ind...</span>
+                }
+                else
+                {
+                    <span>LOG IN</span>
+                }
+
             </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       FullWidth="true"
+                       OnClick="DevQCLogin"
+                       Disabled="_isLoading">
+                Snyde QC-login
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       FullWidth="true"
+                       OnClick="DevAdminLogin"
+                       Disabled="_isLoading">
+                Snyde Admin-login
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       FullWidth="true"
+                       OnClick="DevCustomerLogin"
+                       Disabled="_isLoading">
+                Snyde kunde-login
+            </MudButton>
+
+            <MudLink Href="#" Typo="Typo.body2" Color="Color.Inherit">
+                Reset password
+            </MudLink>
 
             @if (!string.IsNullOrWhiteSpace(_error))
             {
-                <MudAlert Severity="Severity.Error">
+                <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">
                     @_error
                 </MudAlert>
             }
@@ -40,16 +100,29 @@
         </MudStack>
 
     </MudPaper>
-
-</MudContainer>
+</div>
 
 @code {
     private LoginUserRequest _model = new();
     private string? _error;
+    private bool _isLoading;
+    private bool _rememberMe;
+    private string? _returnUrl;
+
+    protected override void OnInitialized()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var returnUrl))
+        {
+            _returnUrl = returnUrl;
+        }
+    }
 
     private async Task Login()
     {
         _error = null;
+        _isLoading = true;
 
         try
         {
@@ -71,24 +144,36 @@
 
             AuthStateProvider.MarkUserAsAuthenticated(result.Token);
 
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo(string.IsNullOrWhiteSpace(_returnUrl) ? "/DashBoard" : _returnUrl);
         }
         catch
         {
             _error = "Der opstod en fejl under login.";
         }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
-    private class LoginUserRequest
+    private async Task DevQCLogin()
     {
-        public string? Email { get; set; }
-        public string? Password { get; set; }
+        _model.Email = "QC@Test.com";
+        _model.Password = "Test123!";
+        await Login();
     }
 
-    private class LoginUserResponse
+    private async Task DevAdminLogin()
     {
-        public bool Succeeded { get; set; }
-        public string? Token { get; set; }
-        public List<string> Errors { get; set; } = new();
+        _model.Email = "Admin@Test.com";
+        _model.Password = "Test123!";
+        await Login();
+    }
+
+    private async Task DevCustomerLogin()
+    {
+        _model.Email = "Customer@test.com";
+        _model.Password = "Test123!";
+        await Login();
     }
 }

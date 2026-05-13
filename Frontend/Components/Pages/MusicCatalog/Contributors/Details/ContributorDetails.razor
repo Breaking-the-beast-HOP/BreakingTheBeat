@@ -1,5 +1,8 @@
 ﻿@page "/contributors/{Id:guid}"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
+
+@using Microsoft.AspNetCore.Authorization
 @using Frontend.Components.Layout
 @using MudBlazor
 @using Frontend.Components.Shared

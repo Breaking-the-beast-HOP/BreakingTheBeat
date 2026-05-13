@@ -1,5 +1,8 @@
 ﻿@page "/create-contributor"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
+
+@using Microsoft.AspNetCore.Authorization
 @using MudBlazor
 
 <PageTitle>Create Contributor</PageTitle>
