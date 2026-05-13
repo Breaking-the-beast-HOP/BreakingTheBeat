@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Gateway.Infrastructure.Auth
-{ 
+{
 
     public class PostgresRoleInterceptor : DbConnectionInterceptor
     {
@@ -13,7 +13,7 @@ namespace Gateway.Infrastructure.Auth
             _roleService = roleService;
         }
 
-        public override async Task ConnectionOpenedAsync(DbConnection connection,ConnectionEndEventData eventData,CancellationToken cancellationToken = default)
+        public override async Task ConnectionOpenedAsync(DbConnection connection, ConnectionEndEventData eventData, CancellationToken cancellationToken = default)
         {
             var role = await _roleService.GetDatabaseRole();
 

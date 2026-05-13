@@ -3,7 +3,7 @@ using SharedKernel;
 
 namespace PodcastCatalog.Features.Podcasts.Interfaces
 {
-    public interface IPodcastRepository: ICrudRepository<Domain.Entities.Podcast>
+    public interface IPodcastRepository : ICrudRepository<Domain.Entities.Podcast>
     {
         Task<Season> AddSeasonAsync(Guid podcastId, string? title, int seasonNumber);
         Task<bool> DeleteSeasonAsync(Guid seasonId);
@@ -15,6 +15,6 @@ namespace PodcastCatalog.Features.Podcasts.Interfaces
             DateTime? airingDate,
             Guid? tagId);
         Task<bool> DeleteEpisodeAsync(Guid episodeId);
-        
+
     }
 }

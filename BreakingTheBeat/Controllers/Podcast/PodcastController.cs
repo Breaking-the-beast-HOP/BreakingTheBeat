@@ -29,7 +29,7 @@ namespace Gateway.Controllers.Podcast
         }
         // POST: api/podcasts/podcast
         [HttpPost]
-        public async Task<IActionResult> CreatePodcast( [FromBody] NewPodcastRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> CreatePodcast([FromBody] NewPodcastRequest request, CancellationToken cancellationToken)
         {
             //TODO
             var contributions = request.Contributions?
@@ -74,7 +74,7 @@ namespace Gateway.Controllers.Podcast
 
         // PUT: api/podcasts/podcast/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePodcast( Guid id,[FromBody] PodcastUpdateRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdatePodcast(Guid id, [FromBody] PodcastUpdateRequest request, CancellationToken cancellationToken)
         {
             var contributions = request.Contributions.Select(c =>
                 new UpdatePodcastContributionInput(
@@ -100,7 +100,7 @@ namespace Gateway.Controllers.Podcast
 
         // GET: api/podcasts/podcast/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<PodcastDetailsResponse>> GetPodcast(Guid id,CancellationToken cancellationToken)
+        public async Task<ActionResult<PodcastDetailsResponse>> GetPodcast(Guid id, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetPodcastQuery(id), cancellationToken);
 
@@ -146,7 +146,7 @@ namespace Gateway.Controllers.Podcast
 
             return Ok(response);
         }
-        
+
 
         [HttpGet()]
         public async Task<ActionResult<List<PodcastResponse>>> GetAllPodcasts(
@@ -166,7 +166,7 @@ namespace Gateway.Controllers.Podcast
         }
 
         [HttpPost("{podcastId:guid}/seasons")]
-        public async Task<IActionResult> CreateSeason(Guid podcastId,[FromBody] CreatePodcastSeasonRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateSeason(Guid podcastId, [FromBody] CreatePodcastSeasonRequest request, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(
                 new AddSeasonCommand(
@@ -190,7 +190,7 @@ namespace Gateway.Controllers.Podcast
         }
 
         [HttpPost("seasons/{seasonId:guid}/episodes")]
-        public async Task<IActionResult> CreateEpisode(Guid seasonId,[FromBody] CreatePodcastEpisodeRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateEpisode(Guid seasonId, [FromBody] CreatePodcastEpisodeRequest request, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(
                 new CreatePodcastEpisodeCommand(

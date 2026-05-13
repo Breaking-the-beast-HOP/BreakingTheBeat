@@ -18,7 +18,7 @@ public class CreatePodcastHandler : IRequestHandler<CreatePodcastCommand, Podcas
         _validator = validator;
     }
 
-    public async Task<PodcastDTO> Handle(CreatePodcastCommand request,CancellationToken cancellationToken)
+    public async Task<PodcastDTO> Handle(CreatePodcastCommand request, CancellationToken cancellationToken)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 

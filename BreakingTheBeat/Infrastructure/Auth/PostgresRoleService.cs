@@ -1,5 +1,5 @@
 ﻿namespace Gateway.Infrastructure.Auth
-{ 
+{
 
     public class PostgresRoleService
     {

@@ -10,7 +10,7 @@ public class CreatePodcastEpisodeHandler : IRequestHandler<CreatePodcastEpisodeC
     private readonly IPodcastRepository _podcastRepository;
     private readonly IValidator<CreatePodcastEpisodeCommand> _validator;
 
-    public CreatePodcastEpisodeHandler( IPodcastRepository podcastRepository,IValidator<CreatePodcastEpisodeCommand> validator)
+    public CreatePodcastEpisodeHandler(IPodcastRepository podcastRepository, IValidator<CreatePodcastEpisodeCommand> validator)
     {
         _podcastRepository = podcastRepository;
         _validator = validator;

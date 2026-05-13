@@ -2,7 +2,7 @@
 
 namespace Gateway.Contracts.Podcast
 {
-   
+
     public class PodcastDetailsResponse
     {
         public Guid Id { get; set; }
@@ -46,5 +46,5 @@ namespace Gateway.Contracts.Podcast
 
         public string Status { get; set; } = "Draft";
     }
-    
+
 }

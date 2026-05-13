@@ -17,7 +17,7 @@
 
         private Season() { } // EF Core
 
-        public static Season Create(Guid podcastId,string? title,int seasonNumber,DateOnly? releaseDate = null)
+        public static Season Create(Guid podcastId, string? title, int seasonNumber, DateOnly? releaseDate = null)
         {
             if (podcastId == Guid.Empty)
                 throw new ArgumentException("PodcastId is required.");
