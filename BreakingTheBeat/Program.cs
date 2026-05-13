@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using System.Text;
 using FluentValidation;
+using Gateway.Middleware;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -133,6 +135,14 @@ namespace Gateway
                 cfg.RegisterServicesFromAssembly(typeof(GetUsersQuery).Assembly);
             });
 
+            // Logging MediatR
+            builder.Services.AddTransient(
+                typeof(IPipelineBehavior<,>),
+                typeof(LoggingBehavior<,>));
+            builder.Services.AddTransient(
+                typeof(IPipelineBehavior<,>),
+                typeof(ExceptionHandlingBehavior<,>));
+
             // 8. Controllers
             builder.Services.AddControllers();
 
@@ -165,6 +175,10 @@ namespace Gateway
             {
                 app.MapOpenApi();
             }
+
+            // Logging
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+            app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
             app.UseHttpsRedirection();
 
