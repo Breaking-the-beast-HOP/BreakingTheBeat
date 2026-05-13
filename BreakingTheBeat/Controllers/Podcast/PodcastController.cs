@@ -100,8 +100,7 @@ namespace Gateway.Controllers.Podcast
 
         // GET: api/podcasts/podcast/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<PodcastDetailsResponse>> GetPodcast(Guid id,
-            CancellationToken cancellationToken)
+        public async Task<ActionResult<PodcastDetailsResponse>> GetPodcast(Guid id,CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetPodcastQuery(id), cancellationToken);
 
@@ -110,22 +109,44 @@ namespace Gateway.Controllers.Podcast
                 Id = result.Id,
                 Title = result.Title,
                 Description = result.Description,
+
                 CategoryId = result.CategoryId,
                 CategoryName = result.CategoryName,
+
                 LanguageId = result.LanguageId,
                 LanguageName = result.LanguageName,
+
                 Contributions = result.Contributions.Select(c => new ContributionResponse
                 {
                     Id = c.Id,
                     ContributorId = c.ContributorId,
                     ContributorName = c.ContributorName,
                     ContributorRoleId = c.ContributorRoleId,
-                    ContributorRoleName = c.ContributorRoleName
+                    ContributorRoleName = c.ContributorRoleName,
+                    //HasRights = c.HasRights
+                }).ToList(),
+
+                Seasons = result.Seasons.Select(s => new SeasonResponse
+                {
+                    Id = s.Id,
+                    Title = s.Title,
+                    SeasonNumber = s.SeasonNumber,
+                    ReleaseDate = s.ReleaseDate,
+
+                    Episodes = s.Episodes.Select(e => new EpisodeResponse
+                    {
+                        Id = e.Id,
+                        Title = e.Title,
+                        Description = e.Description,
+                        EpisodeNumber = e.EpisodeNumber,
+                        Status = e.Status
+                    }).ToList()
                 }).ToList()
             };
 
             return Ok(response);
         }
+        
 
         [HttpGet()]
         public async Task<ActionResult<List<PodcastResponse>>> GetAllPodcasts(

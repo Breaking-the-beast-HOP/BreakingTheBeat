@@ -22,14 +22,17 @@ public class PodcastRepository : ICrudRepository<Podcast>
     public async Task<Podcast?> GetByIdAsync(Guid id)
     {
         return await _dbContext.Podcasts
-            .Include(p => p.Seasons)
-            .Include(p => p.Category)
-            .Include(p => p.Contributions)
-                .ThenInclude(h => h.Contributor)
-            .Include(p => p.Contributions)
-                .ThenInclude(h => h.Role)
-            .Include(p => p.Language)
-            .FirstOrDefaultAsync(p => p.Id == id);
+                .AsNoTracking()
+                .Include(p => p.Category)
+                .Include(p => p.Language)
+                .Include(p => p.Contributions)
+                    .ThenInclude(c => c.Contributor)
+                .Include(p => p.Contributions)
+                    .ThenInclude(c => c.Role)
+                .Include(p => p.Seasons)
+                    .ThenInclude(s => s.Episodes)
+                        .ThenInclude(e => e.EpisodeTag)
+                .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task<List<Podcast>> GetAllAsync()

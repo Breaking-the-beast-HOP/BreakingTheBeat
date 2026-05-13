@@ -1,0 +1,124 @@
+﻿@using MudBlazor
+
+<MudPaper Class="pa-4" Elevation="1">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
+        <MudText Typo="Typo.h6">Seasons</MudText>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="@CreateEpisodeHref">
+            Create Episode
+        </MudButton>
+    </MudStack>
+
+    @if (Seasons is null || !Seasons.Any())
+    {
+        <MudAlert Severity="Severity.Info" Dense="true">
+            No seasons created yet.
+        </MudAlert>
+    }
+    else
+    {
+        <MudExpansionPanels MultiExpansion="true">
+            @foreach (var season in Seasons.OrderBy(s => s.SeasonNumber))
+            {
+                <MudExpansionPanel>
+                    <TitleContent>
+                        <MudStack Row="true"
+                                  Justify="Justify.SpaceBetween"
+                                  AlignItems="AlignItems.Center"
+                                  Style="width:100%">
+                            <MudText Typo="Typo.subtitle1">
+                                Season @season.SeasonNumber
+                                @if (!string.IsNullOrWhiteSpace(season.Title))
+                                {
+                                    <span>— @season.Title</span>
+                                }
+                            </MudText>
+
+                            @if (season.ReleaseDate.HasValue)
+                            {
+                                <MudChip T="string"
+                                         Size="Size.Small"
+                                         Color="Color.Info"
+                                         Variant="Variant.Outlined">
+                                    @season.ReleaseDate.Value.ToString("dd MMM yyyy")
+                                </MudChip>
+                            }
+                        </MudStack>
+                    </TitleContent>
+
+                    <ChildContent>
+                        @if (season.Episodes is null || !season.Episodes.Any())
+                        {
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">
+                                No episodes in this season.
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            <MudStack Spacing="2" Class="mt-2">
+                                @foreach (var episode in season.Episodes.OrderBy(e => e.EpisodeNumber))
+                                {
+                                    <MudPaper Outlined="true" Class="pa-3">
+                                        <MudStack Spacing="1">
+                                            <MudStack Row="true"
+                                                      Justify="Justify.SpaceBetween"
+                                                      AlignItems="AlignItems.Center">
+                                                <MudText Typo="Typo.subtitle2">
+                                                    Episode @episode.EpisodeNumber
+                                                    @if (!string.IsNullOrWhiteSpace(episode.Title))
+                                                    {
+                                                        <span>— @episode.Title</span>
+                                                    }
+                                                </MudText>
+
+                                                <MudChip T="string"
+                                                         Size="Size.Small"
+                                                         Color="@(episode.Status == "Draft" ? Color.Warning : Color.Success)"
+                                                         Variant="Variant.Filled">
+                                                    @episode.Status
+                                                </MudChip>
+                                            </MudStack>
+
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                @(string.IsNullOrWhiteSpace(episode.Description) ? "-" : episode.Description)
+                                            </MudText>
+                                        </MudStack>
+                                    </MudPaper>
+                                }
+                            </MudStack>
+                        }
+                    </ChildContent>
+                </MudExpansionPanel>
+            }
+        </MudExpansionPanels>
+    }
+</MudPaper>
+
+@code {
+    [Parameter]
+    public List<SeasonDto> Seasons { get; set; } = new();
+
+    [Parameter]
+    public string CreateEpisodeHref { get; set; } = "";
+
+    public class SeasonDto
+    {
+        public Guid Id { get; set; }
+        public string? Title { get; set; }
+        public int SeasonNumber { get; set; }
+        public DateOnly? ReleaseDate { get; set; }
+        public List<EpisodeDto> Episodes { get; set; } = new();
+    }
+
+    public class EpisodeDto
+    {
+        public Guid Id { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public int EpisodeNumber { get; set; }
+        public string Status { get; set; } = "Draft";
+    }
+}
