@@ -224,6 +224,19 @@
         await LoadPodcast();
     }
 
+    private async Task DeleteSeason(PodcastSeasonsPanel.SeasonDto season)
+    {
+        var response = await Http.DeleteAsync( $"api/podcasts/podcast/seasons/{season.Id}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _errorMessage = await response.Content.ReadAsStringAsync();
+            return;
+        }
+
+        await LoadPodcast();
+    }
+
     private async Task OpenAddEpisodeDialog(PodcastSeasonsPanel.SeasonDto season)
     {
         var dialog = await DialogService.ShowAsync<EpisodeDialog>(
@@ -258,8 +271,7 @@
             EpisodeNumber = nextEpisodeNumber
         };
 
-        var response = await Http.PostAsJsonAsync(
-            $"api/podcasts/seasons/{season.Id}/episodes",
+        var response = await Http.PostAsJsonAsync($"api/podcasts/seasons/{season.Id}/episodes",
             request);
 
         if (!response.IsSuccessStatusCode)
@@ -271,19 +283,7 @@
         await LoadPodcast();
     }
 
-    private async Task DeleteSeason(PodcastSeasonsPanel.SeasonDto season)
-    {
-        var response = await Http.DeleteAsync(
-            $"api/podcasts/seasons/{season.Id}");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            _errorMessage = await response.Content.ReadAsStringAsync();
-            return;
-        }
-
-        await LoadPodcast();
-    }
+   
 
     private async Task DeleteEpisode(PodcastSeasonsPanel.EpisodeDto episode)
     {

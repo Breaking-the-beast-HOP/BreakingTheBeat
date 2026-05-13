@@ -64,6 +64,7 @@ public class PodcastRepository : IPodcastRepository
         return await _dbContext.SaveChangesAsync() > 0;
     }
 
+    // --- Seasons ---
     public async Task<Season> AddSeasonAsync(Guid podcastId, string? title, int seasonNumber)
     {
         var podcast = await _dbContext.Podcasts
@@ -80,5 +81,58 @@ public class PodcastRepository : IPodcastRepository
         await _dbContext.SaveChangesAsync();
 
         return season;
+    }
+    public async Task<bool> DeleteSeasonAsync(Guid seasonId)
+    {
+        var season = await _dbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Id == seasonId);
+
+        if (season is null)
+            return false;
+
+        _dbContext.Seasons.Remove(season);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
+    // --- Episodes ---
+
+    public async Task<Episode> AddEpisodeAsync(
+      Guid seasonId,
+      string? title,
+      string? description,
+      TimeSpan? duration,
+      DateTime? airingDate,
+      Guid? tagId)
+    {
+        var season = await _dbContext.Seasons
+            .Include(s => s.Episodes)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == seasonId);
+
+        if (season is null)
+            throw new KeyNotFoundException($"Season with ID {seasonId} not found.");
+
+        var episode = season.AddEpisode(title, description, duration, airingDate, tagId);
+
+        _dbContext.Episodes.Add(episode);
+        await _dbContext.SaveChangesAsync();
+
+        return episode;
+    }
+
+    public async Task<bool> DeleteEpisodeAsync(Guid episodeId)
+    {
+        var episode = await _dbContext.Episodes
+            .FirstOrDefaultAsync(e => e.Id == episodeId);
+
+        if (episode is null)
+            return false;
+
+        _dbContext.Episodes.Remove(episode);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 }
