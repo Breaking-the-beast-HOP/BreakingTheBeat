@@ -1,4 +1,4 @@
-﻿namespace PodcastCatalog.Features.Categories.Get
+﻿namespace PodcastCatalog.Features.Categories.GetAll
 {
     public class CategoryDTO
     {

@@ -1,13 +1,8 @@
-﻿// Feature/Podcasts/Get/GetPodcastHandler.cs
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using PodcastCatalog.Domain.Entities;
+using PodcastCatalog.Features.Podcasts.Shared;
 using SharedKernel;
-using SharedKernel.Interfaces.Base;
 
 namespace PodcastCatalog.Features.Podcasts.Get
 {
@@ -38,16 +33,7 @@ namespace PodcastCatalog.Features.Podcasts.Get
                 throw new KeyNotFoundException($"Podcast with ID {request.Id} not found.");
             }
 
-            return new PodcastDTO
-            {
-                Id = podcast.Id,
-                Title = podcast.Title,
-                Description = podcast.Description,
-                LanguageId = podcast.LanguageId,
-                LanguageName = podcast.Language.Name,
-                CategoryId = podcast.CategoryId,
-                CategoryName = podcast.Category.Name
-            };
+            return podcast.ToDto();
         }
     }
 }

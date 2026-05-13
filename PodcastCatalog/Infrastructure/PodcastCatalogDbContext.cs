@@ -92,7 +92,7 @@ namespace PodcastCatalog.Infrastructure.Data
 
                 // Relation til Podcast (nullable)
                 entity.HasOne(c => c.Podcast)
-                    .WithMany(p => p.Hosts)
+                    .WithMany(p => p.Contributions)
                     .HasForeignKey(c => c.PodcastId)
                     .OnDelete(DeleteBehavior.NoAction)
                     .IsRequired(false);

@@ -20,6 +20,18 @@ namespace PodcastCatalog.Features.Podcasts.Create
 
             RuleFor(x => x.CategoryId)
                 .NotEmpty().WithMessage("CategoryId is required");
+
+            RuleForEach(x => x.Contributors)
+                .ChildRules(contributor =>
+                {
+                    contributor.RuleFor(c => c.ContributorId)
+                        .NotEmpty()
+                        .WithMessage("ContributorId is required");
+
+                    contributor.RuleFor(c => c.ContributorRoleId)
+                        .NotEmpty()
+                        .WithMessage("ContributorRoleId is required");
+                });
         }
     }
 }

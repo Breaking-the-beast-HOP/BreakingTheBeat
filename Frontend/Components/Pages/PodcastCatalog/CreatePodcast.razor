@@ -126,7 +126,7 @@
                             </MudButton>
                         </MudStack>
 
-                        @if (!_contributions.Any())
+                        @if (!_contributionRows.Any())
                         {
                             <MudAlert Severity="Severity.Info" Dense="true">
                                 No contributors added yet.
@@ -135,32 +135,48 @@
                         else
                         {
                             <MudStack Spacing="2">
-                                @foreach (var contribution in _contributions.Select((value, index) => new { value, index }))
+                                @foreach (var contribution in _contributionRows.Select((value, index) => new { value, index }))
                                 {
                                     <MudPaper Outlined="true" Class="pa-3">
                                         <MudGrid Spacing="2">
+
+                                            <!-- Contributor -->
                                             <MudItem xs="12" sm="5">
-                                                <MudTextField Label="Contributor"
-                                                              @bind-Value="contribution.value.Name"
-                                                              Variant="Variant.Outlined"
-                                                              FullWidth="true" />
+                                                <MudAutocomplete T="Contributor"
+                                                                 Label="Contributor"
+                                                                 Variant="Variant.Outlined"
+                                                                 Value="_contributors.FirstOrDefault(c => c.Id == contribution.value.ContributorId)"
+                                                                 ValueChanged="@(value => OnContributionChanged(value, contribution.value))"
+                                                                 SearchFunc="SearchContributors"
+                                                                 ToStringFunc="@(c => c?.Name ?? string.Empty)"
+                                                                 Clearable="true"
+                                                                 ResetValueOnEmptyText="true"
+                                                                 CoerceText="false"
+                                                                 Dense="true"
+                                                                 FullWidth="true"
+                                                                 MaxItems="8" />
                                             </MudItem>
 
+                                            <!-- Role -->
                                             <MudItem xs="12" sm="5">
-                                                <MudSelect T="string"
+                                                <MudSelect T="Guid?"
                                                            Label="Role"
-                                                           @bind-Value="contribution.value.Role"
+                                                           Value="contribution.value.ContributorRoleId"
+                                                           ValueChanged="@(async (Guid? value) => await OnRoleChanged(value, contribution.value))"
                                                            Variant="Variant.Outlined"
                                                            FullWidth="true">
+
                                                     @foreach (var role in _contributionRoles)
                                                     {
-                                                        <MudSelectItem T="string" Value="@role">
-                                                            @role
+                                                        <MudSelectItem T="Guid?" Value="@role.Id">
+                                                            @role.Name
                                                         </MudSelectItem>
                                                     }
+
                                                 </MudSelect>
                                             </MudItem>
 
+                                            <!-- Remove -->
                                             <MudItem xs="12" sm="2" Class="d-flex align-center">
                                                 <MudButton Variant="Variant.Text"
                                                            Color="Color.Error"
@@ -169,13 +185,13 @@
                                                     Remove
                                                 </MudButton>
                                             </MudItem>
+
                                         </MudGrid>
                                     </MudPaper>
                                 }
-                            </MudStack>
+                        </MudStack>
                         }
                     </MudPaper>
-
                 </MudStack>
             </MudItem>
 
@@ -243,18 +259,10 @@
     private LanguageDto? _selectedLanguage;
     private PodcastCategoryDto? _selectedCategory;
 
-    private List<ContributionRow> _contributions = new();
+    private List<ContributionRow> _contributionRows = new();
 
-    private readonly List<string> _contributionRoles = new()
-    {
-        "Host",
-        "Co-host",
-        "Guest",
-        "Producer",
-        "Editor",
-        "Researcher",
-        "Narrator"
-    };
+    private List<ContributionRoles> _contributionRoles = new();
+    private List<Contributor> _contributors = new();
 
     private bool _isLoadingLookups = true;
     private bool _isSaving = false;
@@ -269,6 +277,10 @@
 
             _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category")
                           ?? GetFallbackCategories();
+            _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>("api/podcasts/ContributorRole")
+                                ?? _contributionRoles;
+            _contributors = await Http.GetFromJsonAsync<List<Contributor>>("api/podcasts/Contributor")
+                                ?? _contributors;
         }
         catch
         {
@@ -309,6 +321,16 @@
         return Task.FromResult(result);
     }
 
+    private Task<IEnumerable<Contributor>> SearchContributors(string value, CancellationToken token)
+    {
+        IEnumerable<Contributor> result = string.IsNullOrWhiteSpace(value)
+            ? _contributors
+            : _contributors.Where(c =>
+                c.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                c.Id.ToString().Contains(value, StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(result);
+    }
+
     private Task OnCategoryChanged(PodcastCategoryDto? category)
     {
         _selectedCategory = category;
@@ -323,21 +345,35 @@
         return Task.CompletedTask;
     }
 
+    private Task OnContributionChanged(Contributor? contributor, ContributionRow row)
+    {
+        row.ContributorId = contributor?.Id;
+        row.ContributorName = contributor?.Name;
+        return Task.CompletedTask;
+    }
+
+    private Task OnRoleChanged(Guid? roleId, ContributionRow row)
+    {
+        row.ContributorRoleId = roleId;
+        return Task.CompletedTask;
+    }
+
     private void AddContributionRow()
     {
-        _contributions.Add(new ContributionRow());
+        _contributionRows.Add(new ContributionRow());
     }
 
     private void RemoveContributionRow(int index)
     {
-        if (index >= 0 && index < _contributions.Count)
-            _contributions.RemoveAt(index);
+        if (index >= 0 && index < _contributionRows.Count)
+            _contributionRows.RemoveAt(index);
     }
 
     private async Task SavePodcast()
     {
         _errorMessage = null;
         _successMessage = null;
+
 
         if (string.IsNullOrWhiteSpace(_model.Title))
         {
@@ -357,6 +393,27 @@
             return;
         }
 
+        _model.Contributions = _contributionRows.Select(r => new ContributionRequest
+            {
+                ContributorId = r.ContributorId ?? Guid.Empty,
+                ContributorRoleId = r.ContributorRoleId ?? Guid.Empty,
+                HasRights = r.HasRights,
+                ContributorName = r.ContributorName
+            }).ToList();
+
+        if(!_model.Contributions.Any())
+        {
+            _errorMessage = "At least one contribution is required.";
+            return;
+        }
+
+        if (_model.Contributions.Any(c => c.ContributorId == null || c.ContributorRoleId == null))
+        {
+            _errorMessage = "All contributions must have a contributor and a role selected.";
+            return;
+        }
+
+
         try
         {
             _isSaving = true;
@@ -370,7 +427,7 @@
                 _model = new PodcastModel();
                 _selectedCategory = null;
                 _selectedLanguage = null;
-                _contributions.Clear();
+                _contributionRows.Clear();
                 nav.NavigateTo("/podcasts");
                 return;
             }
@@ -429,12 +486,38 @@
         public string? Description { get; set; }
         public Guid? CategoryId { get; set; }
         public Guid? LanguageId { get; set; }
+
+        public List<ContributionRequest> Contributions { get; set; } = new();
+    }
+    public class ContributionRequest
+    {
+        public Guid ContributorId { get; set; }
+        public string? ContributorName { get; set; }
+        public Guid ContributorRoleId { get; set; }
+        public bool HasRights { get; set; }
     }
 
     public class ContributionRow
     {
-        public string? Name { get; set; }
-        public string? Role { get; set; }
+        public Guid? ContributorId { get; set; }
+        public string? ContributorName { get; set; }
+
+        public Guid? ContributorRoleId { get; set; }
+        public bool HasRights { get; set; }
+    }
+
+    public class ContributionRoles
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
+
+    public class Contributor
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string? Description { get; set; } = "";
     }
 
     public class LanguageDto

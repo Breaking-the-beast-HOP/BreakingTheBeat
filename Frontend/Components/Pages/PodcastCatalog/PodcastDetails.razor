@@ -109,14 +109,14 @@
                     {
                         <MudTable Items="_podcast.Contributions" Dense="true" Hover="true" Elevation="0">
                             <HeaderContent>
-                                <MudTh>Name</MudTh>
-                                <MudTh>Role</MudTh>
+                                <MudTh>ContributorName</MudTh>
+                                <MudTh>ContributorRole</MudTh>
                             </HeaderContent>
                             <RowTemplate>
-                                <MudTd DataLabel="Name">@context.Name</MudTd>
-                                <MudTd DataLabel="Role">
+                                <MudTd DataLabel="ContributorName">@context.ContributorName</MudTd>
+                                <MudTd DataLabel="ContributorRole">
                                     <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">
-                                        @context.Role
+                                        @context.ContributorRoleName
                                     </MudChip>
                                 </MudTd>
                             </RowTemplate>
@@ -213,6 +213,8 @@
         try
         {
             _podcast = await Http.GetFromJsonAsync<PodcastDetailsDto>($"api/podcasts/podcast/{Id}");
+            var json = await Http.GetStringAsync($"api/podcasts/podcast/{Id}");
+            Console.WriteLine($"Fetched podcast details: {json}");
         }
         catch (Exception ex)
         {
@@ -297,8 +299,11 @@
 
     public class ContributionDto
     {
-        public string? Name { get; set; }
-        public string? Role { get; set; }
+        public Guid Id { get; set; }
+        public Guid ContributorId { get; set; }
+        public string ContributorName { get; set; } = null!;
+        public Guid ContributorRoleId { get; set; }
+        public string ContributorRoleName { get; set; } = null!;
     }
 
     public class EpisodeDto

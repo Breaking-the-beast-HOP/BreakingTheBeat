@@ -11,13 +11,13 @@ public class DeleteUserHandler : IRequestHandler<DeleteUserCommand>
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly UserManagementDbContext _dbContext;
 
-    public DeleteUserHandler( UserManager<ApplicationUser> userManager,UserManagementDbContext dbContext)
+    public DeleteUserHandler(UserManager<ApplicationUser> userManager, UserManagementDbContext dbContext)
     {
         _userManager = userManager;
         _dbContext = dbContext;
     }
 
-    public async Task Handle( DeleteUserCommand request, CancellationToken cancellationToken)
+    public async Task Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
         await using var transaction =
             await _dbContext.Database.BeginTransactionAsync(cancellationToken);

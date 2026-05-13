@@ -28,7 +28,7 @@ namespace Gateway.Controllers.UserManagement
             return Ok(result);
         }
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateUser( Guid id, [FromBody] UpdateUserRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
         {
             await _mediator.Send(new UpdateUserCommand(
                 id,
@@ -41,7 +41,7 @@ namespace Gateway.Controllers.UserManagement
         }
 
         [HttpPost("{id:guid}/reset-password")]
-        public async Task<IActionResult> ResetPassword(Guid id, [FromBody] Contracts.UserManagement.ResetPasswordRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> ResetPassword(Guid id, [FromBody] Contracts.UserManagement.ResetPasswordRequest request, CancellationToken cancellationToken)
         {
             await _mediator.Send(new ResetUserPasswordCommand(id, request.NewPassword), cancellationToken);
 

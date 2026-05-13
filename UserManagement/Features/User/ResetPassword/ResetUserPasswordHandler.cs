@@ -2,8 +2,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace UserManagement.Features.User.ResetPassword 
-{ 
+namespace UserManagement.Features.User.ResetPassword
+{
 
     public class ResetUserPasswordHandler : IRequestHandler<ResetUserPasswordCommand>
     {
@@ -14,7 +14,7 @@ namespace UserManagement.Features.User.ResetPassword
             _userManager = userManager;
         }
 
-        public async Task Handle(ResetUserPasswordCommand request,CancellationToken cancellationToken)
+        public async Task Handle(ResetUserPasswordCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(request.UserId.ToString());
 

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
+using PodcastCatalog.Features.Podcasts.Shared;
 
 namespace PodcastCatalog.Features.Podcasts.Update
 {
-    public record UpdatePodcastCommand(Guid Id, string Title, string Description, Guid CategoryId, Guid LanguageId) : IRequest<PodcastDTO>
+    public record UpdatePodcastCommand(Guid Id, string Title, string Description, Guid CategoryId, Guid LanguageId, List<ContributionRowDTO> Contributors) : IRequest<PodcastDTO>
     {
     }
 }

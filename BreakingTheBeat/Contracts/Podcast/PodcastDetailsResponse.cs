@@ -1,4 +1,6 @@
-﻿namespace Gateway.Contracts.Podcast
+﻿using Gateway.Contracts.Podcast.Contribution;
+
+namespace Gateway.Contracts.Podcast
 {
     public class PodcastDetailsResponse
     {
@@ -9,5 +11,7 @@
         public string? CategoryName { get; set; }
         public Guid LanguageId { get; set; }
         public string? LanguageName { get; set; }
+
+        public List<ContributionResponse> Contributions { get; set; } = new();
     }
 }

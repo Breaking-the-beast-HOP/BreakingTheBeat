@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PodcastCatalog.Features.Categories.Get;
+using PodcastCatalog.Features.Categories.GetAll;
 
 namespace Gateway.Controllers.Podcast
 {

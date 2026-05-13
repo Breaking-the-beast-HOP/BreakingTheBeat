@@ -24,7 +24,10 @@ public class PodcastRepository : ICrudRepository<Podcast>
         return await _dbContext.Podcasts
             .Include(p => p.Seasons)
             .Include(p => p.Category)
-            .Include(p => p.Hosts)
+            .Include(p => p.Contributions)
+                .ThenInclude(h => h.Contributor)
+            .Include(p => p.Contributions)
+                .ThenInclude(h => h.Role)
             .Include(p => p.Language)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
@@ -35,14 +38,32 @@ public class PodcastRepository : ICrudRepository<Podcast>
             .AsNoTracking()
             .Include(p => p.Seasons)
             .Include(p => p.Category)
-            .Include(p => p.Hosts)
+            .Include(p => p.Contributions)
             .Include(p => p.Language)
             .ToListAsync();
     }
 
     public async Task<bool> UpdateAsync(Podcast entity)
     {
-        _dbContext.Podcasts.Update(entity);
+        // This is an anti-pattern, so contributions will be updated separately.
+        // This must be fixed in the future, but for now, we will just add new contributions and remove missing ones.
+        var existingContributions = await _dbContext.Contributions
+            .Where(c => c.PodcastId == entity.Id)
+            .ToListAsync();
+        foreach (var contribution in entity.Contributions)
+        {
+            if (!existingContributions.Any(c => c.Id == contribution.Id))
+            {
+                _dbContext.Contributions.Add(contribution);
+            }
+        }
+        foreach (var existingContribution in existingContributions)
+        {
+            if (!entity.Contributions.Any(c => c.Id == existingContribution.Id))
+            {
+                _dbContext.Contributions.Remove(existingContribution);
+            }
+        }
         return await _dbContext.SaveChangesAsync() > 0;
     }
 

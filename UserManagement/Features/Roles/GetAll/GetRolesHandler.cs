@@ -12,7 +12,7 @@ public class GetRolesHandler : IRequestHandler<GetRolesQuery, List<RoleDto>>
         _roleManager = roleManager;
     }
 
-    public async Task<List<RoleDto>> Handle( GetRolesQuery request,CancellationToken cancellationToken)
+    public async Task<List<RoleDto>> Handle(GetRolesQuery request, CancellationToken cancellationToken)
     {
         return await _roleManager.Roles
             .OrderBy(role => role.Name)
