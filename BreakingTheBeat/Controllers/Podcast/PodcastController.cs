@@ -1,9 +1,8 @@
 ﻿using Gateway.Contracts.Podcast;
 using Gateway.Contracts.Podcast.Contribution;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Features.Contributor.GetById;
-using PodcastCatalog.Features.Podcasts;
 using PodcastCatalog.Features.Podcasts.Create;
 using PodcastCatalog.Features.Podcasts.Delete;
 using PodcastCatalog.Features.Podcasts.Get;
