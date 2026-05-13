@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using PodcastCatalog.Features.Podcasts.Shared;
 
-namespace PodcastCatalog.Features.Podcasts.Update;
+namespace PodcastCatalog.Features.Podcasts.PodcastCore.Update;
 
 public record UpdatePodcastCommand( Guid Id,string? Title,string? Description,Guid? CategoryId,Guid? LanguageId,List<UpdatePodcastContributionInput> Contributions) : IRequest<PodcastDTO>;
 

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace PodcastCatalog.Features.Podcasts.Update
+namespace PodcastCatalog.Features.Podcasts.PodcastCore.Update
 {
     public class UpdatePodcastValidator : AbstractValidator<UpdatePodcastCommand>
     {

@@ -20,11 +20,11 @@ using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Infrastructure;
 using MusicCatalog.Infrastructure.Repositories;
 using PodcastCatalog.Domain.Entities;
-using PodcastCatalog.Features.Podcasts.Create;
-using PodcastCatalog.Features.Podcasts.Get;
-using PodcastCatalog.Features.Podcasts.GetAll;
-using PodcastCatalog.Features.Podcasts.Update;
-using PodcastCatalog.Infrastructure;
+using PodcastCatalog.Features.Podcasts.Interfaces;
+using PodcastCatalog.Features.Podcasts.PodcastCore.Create;
+using PodcastCatalog.Features.Podcasts.PodcastCore.Get;
+using PodcastCatalog.Features.Podcasts.PodcastCore.GetAll;
+using PodcastCatalog.Features.Podcasts.PodcastCore.Update;
 using PodcastCatalog.Infrastructure.Data;
 using PodcastCatalog.Infrastructure.Repositories;
 using SharedKernel;
@@ -128,7 +128,7 @@ namespace Gateway
             builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
 
             // 5. Repositories (podcast)
-            builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
+            builder.Services.AddScoped<IPodcastRepository, PodcastRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
             builder.Services.AddScoped<IReadRepository<Category>, CategoryRepository>();
             builder.Services.AddScoped<IReadRepository<ContributorRole>, ContributorRoleRepository>();

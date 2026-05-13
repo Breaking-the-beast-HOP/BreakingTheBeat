@@ -3,6 +3,7 @@
 @using MudBlazor
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IDialogService DialogService
 
 <PageTitle>Podcast Details</PageTitle>
 
@@ -100,7 +101,11 @@
                     </MudPaper>
 
                     <PodcastSeasonsPanel Seasons="_podcast.Seasons"
-                    CreateEpisodeHref="@($"/podcasts/{Id}/create-episode")" />
+                                         CreateSeasonRequested="CreateSeason"
+                                         AddEpisodeRequested="OpenAddEpisodeDialog"
+                                         DeleteSeasonRequested="DeleteSeason"
+                                         DeleteEpisodeRequested="DeleteEpisode" />
+
                 </MudStack>
             </MudItem>
 
@@ -126,9 +131,18 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadPodcast();
+    }
+
+    private async Task LoadPodcast()
+    {
         try
         {
-            _podcast = await Http.GetFromJsonAsync<PodcastDetailsDto>($"api/podcasts/podcast/{Id}");
+            _isLoading = true;
+            _errorMessage = null;
+
+            _podcast = await Http.GetFromJsonAsync<PodcastDetailsDto>(
+                $"api/podcasts/podcast/{Id}");
 
             _contributionItems = _podcast?.Contributions
                 .Where(c => c.ContributorId != Guid.Empty)
@@ -182,6 +196,109 @@
         }
     }
 
+    private async Task CreateSeason()
+    {
+        if (_podcast is null)
+            return;
+
+        var nextSeasonNumber = _podcast.Seasons.Any()
+            ? _podcast.Seasons.Max(s => s.SeasonNumber) + 1
+            : 1;
+
+        var request = new CreateSeasonRequest
+        {
+            Title = $"Season {nextSeasonNumber}",
+            SeasonNumber = nextSeasonNumber
+        };
+
+        var response = await Http.PostAsJsonAsync(
+            $"api/podcasts/podcast/{Id}/seasons",
+            request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _errorMessage = await response.Content.ReadAsStringAsync();
+            return;
+        }
+
+        await LoadPodcast();
+    }
+
+    private async Task OpenAddEpisodeDialog(PodcastSeasonsPanel.SeasonDto season)
+    {
+        var dialog = await DialogService.ShowAsync<EpisodeDialog>(
+            "Add Episode",
+            new DialogParameters(),
+            new DialogOptions
+            {
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true,
+                CloseButton = true
+            });
+
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled)
+            return;
+
+        if (result.Data is not EpisodeDialog.EpisodeDialogResult episode)
+            return;
+
+        var nextEpisodeNumber = season.Episodes.Any()
+            ? season.Episodes.Max(e => e.EpisodeNumber) + 1
+            : 1;
+
+        var request = new CreateEpisodeRequest
+        {
+            Title = episode.Title,
+            Description = episode.Description,
+            Duration = episode.Duration,
+            AiringDate = episode.AiringDate,
+            TagId = episode.TagId,
+            EpisodeNumber = nextEpisodeNumber
+        };
+
+        var response = await Http.PostAsJsonAsync(
+            $"api/podcasts/seasons/{season.Id}/episodes",
+            request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _errorMessage = await response.Content.ReadAsStringAsync();
+            return;
+        }
+
+        await LoadPodcast();
+    }
+
+    private async Task DeleteSeason(PodcastSeasonsPanel.SeasonDto season)
+    {
+        var response = await Http.DeleteAsync(
+            $"api/podcasts/seasons/{season.Id}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _errorMessage = await response.Content.ReadAsStringAsync();
+            return;
+        }
+
+        await LoadPodcast();
+    }
+
+    private async Task DeleteEpisode(PodcastSeasonsPanel.EpisodeDto episode)
+    {
+        var response = await Http.DeleteAsync(
+            $"api/podcasts/episodes/{episode.Id}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _errorMessage = await response.Content.ReadAsStringAsync();
+            return;
+        }
+
+        await LoadPodcast();
+    }
+
     public class PodcastDetailsDto
     {
         public Guid Id { get; set; }
@@ -207,5 +324,21 @@
         public Guid ContributorRoleId { get; set; }
         public string? ContributorRoleName { get; set; }
         public bool HasRights { get; set; }
+    }
+
+    public class CreateSeasonRequest
+    {
+        public string? Title { get; set; }
+        public int SeasonNumber { get; set; }
+    }
+
+    public class CreateEpisodeRequest
+    {
+        public string Title { get; set; } = "";
+        public string? Description { get; set; }
+        public int EpisodeNumber { get; set; }
+        public TimeSpan? Duration { get; set; }
+        public DateOnly AiringDate { get; set; }
+        public Guid? TagId { get; set; }
     }
 }

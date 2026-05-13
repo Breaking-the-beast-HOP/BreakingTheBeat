@@ -1,15 +1,16 @@
 ﻿using MediatR;
 using PodcastCatalog.Domain.Entities;
+using PodcastCatalog.Features.Podcasts.Interfaces;
 using PodcastCatalog.Features.Podcasts.Shared;
 using SharedKernel;
 
-namespace PodcastCatalog.Features.Podcasts.GetAll;
+namespace PodcastCatalog.Features.Podcasts.PodcastCore.GetAll;
 
 public class GetAllPodcastsHandler : IRequestHandler<GetAllPodcastsQuery, List<PodcastDTO>>
 {
-    private readonly ICrudRepository<Podcast> _podcastRepository;
+    private readonly IPodcastRepository _podcastRepository;
 
-    public GetAllPodcastsHandler(ICrudRepository<Podcast> podcastRepository)
+    public GetAllPodcastsHandler(IPodcastRepository podcastRepository)
     {
         _podcastRepository = podcastRepository;
     }

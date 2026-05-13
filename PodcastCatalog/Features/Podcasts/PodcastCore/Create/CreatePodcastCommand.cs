@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using PodcastCatalog.Features.Podcasts.Shared;
 
-namespace PodcastCatalog.Features.Podcasts.Create
+namespace PodcastCatalog.Features.Podcasts.PodcastCore.Create
 {
     public record CreatePodcastCommand(
                                 string Title, 

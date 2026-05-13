@@ -7,14 +7,14 @@
         <MudButton Variant="Variant.Filled"
                    Color="Color.Warning"
                    StartIcon="@Icons.Material.Filled.Add"
-                   Href="@CreateEpisodeHref">
-            Create Episode
+                   OnClick="CreateSeasonRequested">
+            Create Season
         </MudButton>
     </MudStack>
 
     @if (Seasons is null || !Seasons.Any())
     {
-        <MudAlert Severity="Severity.Info" Dense="true">
+        <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3">
             No seasons created yet.
         </MudAlert>
     }
@@ -37,15 +37,27 @@
                                 }
                             </MudText>
 
-                            @if (season.ReleaseDate.HasValue)
-                            {
-                                <MudChip T="string"
-                                         Size="Size.Small"
-                                         Color="Color.Info"
-                                         Variant="Variant.Outlined">
-                                    @season.ReleaseDate.Value.ToString("dd MMM yyyy")
-                                </MudChip>
-                            }
+                            <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                                @if (season.ReleaseDate.HasValue)
+                                {
+                                    <MudChip T="string"
+                                             Size="Size.Small"
+                                             Color="Color.Info"
+                                             Variant="Variant.Outlined">
+                                        @season.ReleaseDate.Value.ToString("dd MMM yyyy")
+                                    </MudChip>
+                                }
+
+                                <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                               Color="Color.Warning"
+                                               Size="Size.Small"
+                                               OnClick="@(() => AddEpisodeRequested.InvokeAsync(season))" />
+
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               OnClick="@(() => DeleteSeasonRequested.InvokeAsync(season))" />
+                            </MudStack>
                         </MudStack>
                     </TitleContent>
 
@@ -74,12 +86,19 @@
                                                     }
                                                 </MudText>
 
-                                                <MudChip T="string"
-                                                         Size="Size.Small"
-                                                         Color="@(episode.Status == "Draft" ? Color.Warning : Color.Success)"
-                                                         Variant="Variant.Filled">
-                                                    @episode.Status
-                                                </MudChip>
+                                                <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                                                    <MudChip T="string"
+                                                             Size="Size.Small"
+                                                             Color="@(episode.Status == "Draft" ? Color.Warning : Color.Success)"
+                                                             Variant="Variant.Filled">
+                                                        @episode.Status
+                                                    </MudChip>
+
+                                                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                                   Color="Color.Error"
+                                                                   Size="Size.Small"
+                                                                   OnClick="@(() => DeleteEpisodeRequested.InvokeAsync(episode))" />
+                                                </MudStack>
                                             </MudStack>
 
                                             <MudText Typo="Typo.body2" Color="Color.Secondary">
@@ -102,7 +121,16 @@
     public List<SeasonDto> Seasons { get; set; } = new();
 
     [Parameter]
-    public string CreateEpisodeHref { get; set; } = "";
+    public EventCallback CreateSeasonRequested { get; set; }
+
+    [Parameter]
+    public EventCallback<SeasonDto> AddEpisodeRequested { get; set; }
+
+    [Parameter]
+    public EventCallback<SeasonDto> DeleteSeasonRequested { get; set; }
+
+    [Parameter]
+    public EventCallback<EpisodeDto> DeleteEpisodeRequested { get; set; }
 
     public class SeasonDto
     {

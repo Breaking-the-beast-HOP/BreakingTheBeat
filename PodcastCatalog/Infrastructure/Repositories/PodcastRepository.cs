@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PodcastCatalog.Domain.Entities;
+using PodcastCatalog.Features.Podcasts.Interfaces;
 using PodcastCatalog.Infrastructure.Data;
 using SharedKernel;
 
-public class PodcastRepository : ICrudRepository<Podcast>
+public class PodcastRepository : IPodcastRepository
 {
     private readonly PodcastCatalogDbContext _dbContext;
 
@@ -43,7 +44,7 @@ public class PodcastRepository : ICrudRepository<Podcast>
         .Include(p => p.Category)
         .Include(p => p.Contributions)
         .Include(p => p.Language)
-        .ToListAsync(); 
+        .ToListAsync();
     }
 
     public async Task<bool> UpdateAsync(Podcast entity)
@@ -61,5 +62,23 @@ public class PodcastRepository : ICrudRepository<Podcast>
 
         _dbContext.Podcasts.Remove(podcast);
         return await _dbContext.SaveChangesAsync() > 0;
+    }
+
+    public async Task<Season> AddSeasonAsync(Guid podcastId, string? title, int seasonNumber)
+    {
+        var podcast = await _dbContext.Podcasts
+            .Include(p => p.Seasons)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == podcastId);
+
+        if (podcast is null)
+            throw new KeyNotFoundException($"Podcast with ID {podcastId} not found.");
+
+        var season = podcast.AddSeason(title, seasonNumber);
+
+        _dbContext.Seasons.Add(season);
+        await _dbContext.SaveChangesAsync();
+
+        return season;
     }
 }

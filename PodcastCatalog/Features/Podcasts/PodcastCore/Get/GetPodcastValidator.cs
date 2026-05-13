@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace PodcastCatalog.Features.Podcasts.Get
+namespace PodcastCatalog.Features.Podcasts.PodcastCore.Get
 {
     public class GetPodcastValidator : AbstractValidator<GetPodcastQuery>
     {

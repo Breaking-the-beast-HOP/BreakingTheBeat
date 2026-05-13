@@ -27,4 +27,10 @@
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Podcasts\Episodes\AddToPodcast\" />
+    <Folder Include="Features\Podcasts\Episodes\RemoveFromPodcast\" />
+    <Folder Include="Features\Podcasts\Seasons\RemoveFromPodcast\" />
+  </ItemGroup>
+
 </Project>
