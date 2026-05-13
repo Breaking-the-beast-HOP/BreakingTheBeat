@@ -1,0 +1,131 @@
+﻿@using MudBlazor
+@using Microsoft.AspNetCore.Components.Forms
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudTextField Label="Title"
+                          @bind-Value="_model.Title"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          FullWidth />
+
+            <MudTextField Label="Description"
+                          @bind-Value="_model.Description"
+                          Variant="Variant.Outlined"
+                          Lines="4"
+                          FullWidth />
+
+            <MudDatePicker Label="Airing date"
+                           @bind-Date="_airingDate"
+                           Variant="Variant.Outlined"
+                           Required="true"
+                           FullWidth />
+
+            <MudTextField Label="Episode tag"
+                          @bind-Value="_model.TagName"
+                          Variant="Variant.Outlined"
+                          FullWidth />
+
+            <MudFileUpload T="IBrowserFile"
+                           FilesChanged="OnAudioSelected"
+                           Accept=".mp3,.wav,.m4a,.aac,.flac">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.AudioFile">
+                        Upload audio file
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+
+            @if (_audioFile is not null)
+            {
+                <MudAlert Severity="Severity.Info" Dense="true">
+                    Selected file: @_audioFile.Name
+                </MudAlert>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Dense="true">
+                    @_errorMessage
+                </MudAlert>
+            }
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Default"
+                   OnClick="Cancel">
+            Cancel
+        </MudButton>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   OnClick="Submit">
+            Add episode
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private EpisodeDialogResult _model = new();
+    private DateTime? _airingDate = DateTime.Today;
+    private IBrowserFile? _audioFile;
+    private string? _errorMessage;
+
+    private void OnAudioSelected(IBrowserFile file)
+    {
+        _audioFile = file;
+        _model.AudioFileName = file.Name;
+        _model.AudioFileSize = file.Size;
+        _model.AudioContentType = file.ContentType;
+    }
+
+    private void Submit()
+    {
+        _errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(_model.Title))
+        {
+            _errorMessage = "Title is required.";
+            return;
+        }
+
+        if (_airingDate is null)
+        {
+            _errorMessage = "Airing date is required.";
+            return;
+        }
+
+        _model.AiringDate = DateOnly.FromDateTime(_airingDate.Value);
+        _model.Duration = TimeSpan.Zero;
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    public class EpisodeDialogResult
+    {
+        public string Title { get; set; } = "";
+        public string? Description { get; set; }
+        public TimeSpan Duration { get; set; } = TimeSpan.Zero;
+        public DateOnly AiringDate { get; set; }
+
+        public Guid? TagId { get; set; }
+        public string? TagName { get; set; }
+
+        public string? AudioFileName { get; set; }
+        public long? AudioFileSize { get; set; }
+        public string? AudioContentType { get; set; }
+    }
+}

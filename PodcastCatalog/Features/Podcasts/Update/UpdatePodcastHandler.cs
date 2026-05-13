@@ -37,33 +37,33 @@ namespace PodcastCatalog.Features.Podcasts.Update
 
             // Hent den eksisterende podcast
             var existingPodcast = await _podcastRepository.GetByIdAsync(request.Id);
-            if (existingPodcast == null)
-            {
-                throw new KeyNotFoundException($"Podcast with ID {request.Id} not found.");
-            }
+            //if (existingPodcast == null)
+            //{
+            //    throw new KeyNotFoundException($"Podcast with ID {request.Id} not found.");
+            //}
 
-            // Opdater podcasten
-            existingPodcast.Update(request.Title, request.Description);
-            existingPodcast.ChangeLanguage(request.LanguageId);
+            //// Opdater podcasten
+            //existingPodcast.Update(request.Title, request.Description);
+            //existingPodcast.ChangeLanguage(request.LanguageId);
 
-            foreach (var c in request.Contributors)
-            {
-                var contributor = await _contributorRepository.GetByIdAsync(c.ContributorId);
-                var role = await _roleRepository.GetByIdAsync(c.ContributorRoleId);
+            //foreach (var c in request.Contributors)
+            //{
+            //    var contributor = await _contributorRepository.GetByIdAsync(c.ContributorId);
+            //    var role = await _roleRepository.GetByIdAsync(c.ContributorRoleId);
 
-                existingPodcast.UpsertContribution(
-                    contributor,
-                    role,
-                    c.HasRights);
-            }
+            //    existingPodcast.UpsertContribution(
+            //        contributor,
+            //        role,
+            //        c.HasRights);
+            //}
 
-            foreach (var contribution in existingPodcast.Contributions.ToList())
-            {
-                if (!request.Contributors.Any(c => c.ContributorId == contribution.ContributorId))
-                {
-                    existingPodcast.RemoveContribution(contribution.Id);
-                }
-            }
+            //foreach (var contribution in existingPodcast.Contributions.ToList())
+            //{
+            //    if (!request.Contributors.Any(c => c.ContributorId == contribution.ContributorId))
+            //    {
+            //        existingPodcast.RemoveContribution(contribution.Id);
+            //    }
+            //}
 
             await _podcastRepository.UpdateAsync(existingPodcast);
 

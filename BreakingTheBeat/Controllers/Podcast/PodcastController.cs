@@ -25,23 +25,42 @@ namespace Gateway.Controllers.Podcast
         }
         // POST: api/podcasts/podcast
         [HttpPost]
-        public async Task<IActionResult> CreatePodcast(
-            [FromBody] NewPodcastRequest request,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> CreatePodcast( [FromBody] NewPodcastRequest request,CancellationToken cancellationToken)
         {
-            var contributions = request.Contributions.Select(c => new CreateContributionDTO
-            {
-                ContributorId = c.ContributorId,
-                ContributorRoleId = c.ContributorRoleId,
-                HasRights = c.HasRights
-            }).ToList();
+            //TODO
+            var contributions = request.Contributions?
+                .Select(c => new CreateContributionDTO
+                {
+                    ContributorId = c.ContributorId,
+                    ContributorRoleId = c.ContributorRoleId,
+                    HasRights = c.HasRights
+                })
+                .ToList() ?? new List<CreateContributionDTO>();
+
+            var seasons = request.Seasons?
+                 .Select(s => new CreateSeasonDTO
+                 {
+                     Title = s.Title,
+                     SeasonNumber = s.SeasonNumber,
+                     Episodes = s.Episodes.Select(e => new CreateEpisodeDTO
+                     {
+                         Title = e.Title,
+                         Description = e.Description,
+                         Duration = e.Duration,
+                         AiringDate = e.AiringDate,
+                         TagId = e.TagId,
+                         Status = e.Status
+                     }).ToList()
+                 })
+                 .ToList() ?? new List<CreateSeasonDTO>();
 
             var command = new CreatePodcastCommand(
                 request.Title,
                 request.Description,
                 request.CategoryId,
                 request.LanguageId,
-                contributions
+                contributions,
+                seasons
             );
 
             var result = await _mediator.Send(command, cancellationToken);

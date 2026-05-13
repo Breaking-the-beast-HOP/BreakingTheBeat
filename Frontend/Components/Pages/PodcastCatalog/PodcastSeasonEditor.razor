@@ -1,0 +1,169 @@
+﻿@using MudBlazor
+
+<MudPaper Class="pa-4" Elevation="5">
+    <MudStack Row="true"
+              Justify="Justify.SpaceBetween"
+              AlignItems="AlignItems.Center"
+              Class="mb-3">
+
+        <div>
+            <MudText Typo="Typo.h6">Seasons</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Create seasons and manage episodes under each season.
+            </MudText>
+        </div>
+
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Warning"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="@(() => AddSeasonRequested.InvokeAsync())">
+            Add season
+        </MudButton>
+    </MudStack>
+
+    @if (IsLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (Seasons is null || !Seasons.Any())
+    {
+        <MudAlert Severity="Severity.Info" Dense="true">
+            No seasons created yet.
+        </MudAlert>
+    }
+    else
+    {
+        @foreach (var season in Seasons.OrderBy(s => s.SeasonNumber))
+        {
+            <MudPaper Class="mb-4" Outlined="true">
+
+                <MudStack Row="true"
+                          Justify="Justify.SpaceBetween"
+                          AlignItems="AlignItems.Center"
+                          Class="pa-3">
+
+                    <div>
+                        <MudText Typo="Typo.h6">
+                            Season @season.SeasonNumber
+                        </MudText>
+
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            @(string.IsNullOrWhiteSpace(season.Title)
+                                ? "Untitled season"
+                                : season.Title)
+                        </MudText>
+                    </div>
+
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   OnClick="@(() => RemoveSeasonRequested.InvokeAsync(season))" />
+                </MudStack>
+
+                <MudDivider />
+
+                @if (!season.Episodes.Any())
+                {
+                    <div class="pa-3">
+                        <MudAlert Severity="Severity.Info" Dense="true">
+                            No episodes in this season yet.
+                        </MudAlert>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var episode in season.Episodes.OrderBy(e => e.AiringDate))
+                    {
+                        <MudStack Row="true"
+                                  AlignItems="AlignItems.Center"
+                                  Spacing="2"
+                                  Class="pa-3">
+
+                            <MudIcon Icon="@Icons.Material.Filled.Podcasts"
+                                     Color="Color.Warning" />
+
+                            <MudStack Spacing="0" Class="flex-grow-1">
+                                <MudText Typo="Typo.body2">
+                                    @episode.Title
+                                </MudText>
+
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @episode.AiringDate.ToString("dd-MM-yyyy")
+                                    @if (!string.IsNullOrWhiteSpace(episode.TagName))
+                                    {
+                                        <span> · @episode.TagName</span>
+                                    }
+                                </MudText>
+                            </MudStack>
+
+                            <MudText Typo="Typo.body2">
+                                @FormatDuration(episode.Duration)
+                            </MudText>
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           OnClick="@(() => RemoveEpisodeRequested.InvokeAsync(episode))" />
+                        </MudStack>
+
+                        <MudDivider />
+                    }
+                }
+
+                <MudStack Row="true"
+                          Justify="Justify.FlexEnd"
+                          Class="pa-3">
+
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="@(() => AddEpisodeRequested.InvokeAsync(season))">
+                        Add episode
+                    </MudButton>
+                </MudStack>
+
+            </MudPaper>
+        }
+    }
+</MudPaper>
+
+@code {
+    [Parameter] public List<SeasonDto> Seasons { get; set; } = [];
+    [Parameter] public bool IsLoading { get; set; }
+
+    [Parameter] public EventCallback AddSeasonRequested { get; set; }
+    [Parameter] public EventCallback<SeasonDto> RemoveSeasonRequested { get; set; }
+
+    [Parameter] public EventCallback<SeasonDto> AddEpisodeRequested { get; set; }
+    [Parameter] public EventCallback<EpisodeDto> RemoveEpisodeRequested { get; set; }
+
+    private static string FormatDuration(TimeSpan duration)
+    {
+        if (duration == TimeSpan.Zero)
+            return "00:00";
+
+        return duration.TotalHours >= 1
+            ? duration.ToString(@"hh\:mm\:ss")
+            : duration.ToString(@"mm\:ss");
+    }
+
+    public class SeasonDto
+    {
+        public Guid Id { get; set; }
+        public int SeasonNumber { get; set; }
+        public string Title { get; set; } = "";
+        public string? Description { get; set; }
+        public List<EpisodeDto> Episodes { get; set; } = [];
+    }
+
+    public class EpisodeDto
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = "";
+        public string? Description { get; set; }
+        public TimeSpan Duration { get; set; } = TimeSpan.Zero;
+        public DateOnly AiringDate { get; set; }
+        public Guid? TagId { get; set; }
+        public string? TagName { get; set; }
+    }
+}

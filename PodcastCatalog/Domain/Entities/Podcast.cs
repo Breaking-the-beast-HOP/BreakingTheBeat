@@ -2,50 +2,74 @@
 {
     public class Podcast
     {
-        public Podcast() { } // For EF Core
-        private readonly List<Season> _seasons = new();
-        private readonly List<Contribution> _contributions = new();
-
         public Guid Id { get; private set; }
+
         public string Title { get; private set; } = null!;
         public string? Description { get; private set; }
 
-        public Guid LanguageId { get; private set; }
-        public Language Language { get; private set; }
-
-        public IReadOnlyList<Season> Seasons => _seasons.AsReadOnly();
-        public IReadOnlyList<Contribution> Contributions => _contributions.AsReadOnly();
-
         public Guid CategoryId { get; private set; }
-        public Category Category { get; private set; }
+        public Category Category { get; private set; } = null!;
 
-        public Podcast(string title, string description) : this(Guid.NewGuid(), title, description, Guid.Parse("11111111-1111-1111-1111-111111111111"), Guid.Parse("11111111-1111-1111-1111-111111111111")) { }
-        public Podcast(Guid id, string title, string description, Guid categoryId, Guid languageId)
-        {
-            Id = id;
-            CategoryId = categoryId;
-            LanguageId = languageId;
-            Update(title, description);
-        }
+        public Guid LanguageId { get; private set; }
+        public Language Language { get; private set; } = null!;
 
-        public void Update(string title, string description)
+        private readonly List<Season> _seasons = new();
+        public IReadOnlyCollection<Season> Seasons => _seasons.AsReadOnly();
+
+        private readonly List<Contribution> _contributions = new();
+        public IReadOnlyCollection<Contribution> Contributions => _contributions.AsReadOnly();
+
+        private Podcast() { } // EF Core
+
+        public static Podcast Create(
+            string title,
+            string? description,
+            Guid categoryId,
+            Guid languageId)
         {
             if (string.IsNullOrWhiteSpace(title))
-                throw new ArgumentException("Title is required");
-            if (string.IsNullOrWhiteSpace(description))
-                throw new ArgumentException("Description is required");
+                throw new ArgumentException("Title is required.");
 
-            Title = title;
-            Description = description;
+            if (categoryId == Guid.Empty)
+                throw new ArgumentException("CategoryId is required.");
+
+            if (languageId == Guid.Empty)
+                throw new ArgumentException("LanguageId is required.");
+
+            return new Podcast
+            {
+                Id = Guid.NewGuid(),
+                Title = title,
+                Description = description,
+                CategoryId = categoryId,
+                LanguageId = languageId
+            };
         }
 
-        // Aggregate behavior
+        public Season AddSeason(string? title, int seasonNumber)
+        {
+            if (seasonNumber <= 0)
+                throw new ArgumentException("Season number must be greater than zero.");
+
+            if (_seasons.Any(s => s.SeasonNumber == seasonNumber))
+                throw new InvalidOperationException("Season number must be unique.");
+
+            var season = Season.Create(Id, title, seasonNumber);
+            _seasons.Add(season);
+
+            return season;
+        }
+
         public void AddSeason(Season season)
         {
-            if (season == null)
+            if (season is null)
                 throw new ArgumentNullException(nameof(season));
+
             if (_seasons.Any(s => s.Id == season.Id))
                 return;
+
+            if (_seasons.Any(s => s.SeasonNumber == season.SeasonNumber))
+                throw new InvalidOperationException("Season number must be unique.");
 
             _seasons.Add(season);
         }
@@ -55,65 +79,91 @@
             _seasons.RemoveAll(s => s.Id == seasonId);
         }
 
-        public Podcast ChangeLanguage(Guid languageId)
+        public void UpdateDetails(
+            string? title,
+            string? description,
+            Guid? categoryId,
+            Guid? languageId)
         {
-            LanguageId = languageId;
-            return this;
+            if (!string.IsNullOrWhiteSpace(title))
+                Title = title;
+
+            Description = description;
+
+            if (categoryId.HasValue)
+            {
+                if (categoryId.Value == Guid.Empty)
+                    throw new ArgumentException("CategoryId is required.");
+
+                CategoryId = categoryId.Value;
+            }
+
+            if (languageId.HasValue)
+            {
+                if (languageId.Value == Guid.Empty)
+                    throw new ArgumentException("LanguageId is required.");
+
+                LanguageId = languageId.Value;
+            }
         }
 
-        public void AddCategory(Category category)
+        public void AddContribution(Guid contributorId, Guid roleId, bool hasRights = false)
         {
-            if (category == null)
-                throw new ArgumentNullException(nameof(category));
-            Category = category;
-            CategoryId = category.Id;
-        }
+            if (contributorId == Guid.Empty)
+                throw new ArgumentException("ContributorId is required.");
 
-        public void AddContribution(Contribution contribution)
-        {
-            if (contribution == null)
-                throw new ArgumentNullException(nameof(contribution));
-            if (_contributions.Any(h => h.Id == contribution.Id))
+            if (roleId == Guid.Empty)
+                throw new ArgumentException("RoleId is required.");
+
+            if (_contributions.Any(c =>
+                c.ContributorId == contributorId &&
+                c.ContributorRoleId == roleId))
+            {
                 return;
+            }
+
+            var contribution = Contribution.ForPodcast(Id, contributorId, roleId);
+            contribution.SetRights(hasRights);
 
             _contributions.Add(contribution);
         }
 
-        public void UpsertContribution(
-            Contributor contributor,
-            ContributorRole role,
-            bool hasRights)
+        public void UpdateContributions(
+            List<(Guid ContributorId, Guid ContributorRoleId, bool HasRights)> contributions)
         {
-            var existing = _contributions
-                .FirstOrDefault(c => c.ContributorId == contributor.Id);
+            contributions ??= new();
 
-            if (existing != null)
+            _contributions.RemoveAll(existing =>
+                !contributions.Any(incoming =>
+                    incoming.ContributorId == existing.ContributorId &&
+                    incoming.ContributorRoleId == existing.ContributorRoleId));
+
+            foreach (var incoming in contributions)
             {
-                existing.ChangeRole(role);
-                existing.SetRights(hasRights);
-                return;
-            }
+                if (incoming.ContributorId == Guid.Empty)
+                    throw new ArgumentException("ContributorId is required.");
 
-            var newContribution = new Contribution(
-                Guid.NewGuid(),
-                contributor,
-                role,
-                this);
+                if (incoming.ContributorRoleId == Guid.Empty)
+                    throw new ArgumentException("ContributorRoleId is required.");
 
-            newContribution.SetRights(hasRights);
-            _contributions.Add(newContribution);
-        }
+                var existing = _contributions.FirstOrDefault(c =>
+                    c.ContributorId == incoming.ContributorId &&
+                    c.ContributorRoleId == incoming.ContributorRoleId);
 
-        public void RemoveContribution(Guid contributionId)
-        {
-            _contributions.RemoveAll(c => c.Id == contributionId);
-        }
-        public void RemoveMissingContributions(List<Guid> contributorIds)
-        {
-            var toRemove = _contributions.Where(c => !contributorIds.Contains(c.ContributorId)).ToList();
-            foreach (var contribution in toRemove)
-            {
-                _contributions.Remove(contribution);
+                if (existing is not null)
+                {
+                    existing.SetRights(incoming.HasRights);
+                    continue;
+                }
+
+                var contribution = Contribution.ForPodcast(
+                    Id,
+                    incoming.ContributorId,
+                    incoming.ContributorRoleId);
+
+                contribution.SetRights(incoming.HasRights);
+
+                _contributions.Add(contribution);
             }
         }
     }

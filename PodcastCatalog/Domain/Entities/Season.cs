@@ -2,51 +2,63 @@
 {
     public class Season
     {
-        public Season() { } // For EF Core
-
         private readonly List<Episode> _episodes = new();
-        public Guid Id { get; private set; } // Ændret fra `public Guid Id { get; }` til `private set` for at tillade EF Core at sætte Id
-        public string Name { get; private set; }
-        public DateOnly ProductionYear { get; private set; }
 
-        public IReadOnlyList<Episode> Episodes => _episodes.AsReadOnly();
+        public Guid Id { get; private set; }
 
-        // Database Relationships
-        public Guid PodcastId { get; private set; } // Ændret fra `public int PodcastId { get; set; }` til `private set`
+        public string? Title { get; private set; }
+        public int SeasonNumber { get; private set; }
+        public DateOnly? ReleaseDate { get; private set; }
+
+        public IReadOnlyCollection<Episode> Episodes => _episodes.AsReadOnly();
+
+        public Guid PodcastId { get; private set; }
         public Podcast Podcast { get; private set; } = null!;
 
-        public Season(string name, DateOnly productionYear, Guid podcastId, Podcast podcast) :
-            this(Guid.NewGuid(), name, productionYear, podcastId, podcast)
-        { }
+        private Season() { } // EF Core
 
-        public Season(Guid id, string name, DateOnly productionYear, Guid podcastId, Podcast podcast)
+        public static Season Create(Guid podcastId,string? title,int seasonNumber,DateOnly? releaseDate = null)
         {
-            Id = id;
-            Update(name, productionYear);
-            PodcastId = podcastId;
-            Podcast = podcast ?? throw new ArgumentNullException(nameof(podcast));
+            if (podcastId == Guid.Empty)
+                throw new ArgumentException("PodcastId is required.");
+
+            if (seasonNumber <= 0)
+                throw new ArgumentException("Season number must be greater than zero.");
+
+            if (releaseDate == null)
+                releaseDate = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            return new Season
+            {
+                Id = Guid.NewGuid(),
+                PodcastId = podcastId,
+                Title = title,
+                SeasonNumber = seasonNumber,
+                ReleaseDate = releaseDate
+            };
         }
 
-        public void Update(string name, DateOnly productionYear)
+        public Episode AddEpisode(
+            string? title,
+            string? description,
+            TimeSpan? duration,
+            DateTime? airingDate,
+            Guid? tagId)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Season name required");
+            var nextEpisodeNumber = _episodes.Any()
+                ? _episodes.Max(e => e.EpisodeNumber) + 1
+                : 1;
 
-            Name = name;
-            ProductionYear = productionYear;
-        }
+            var episode = Episode.Create(
+                seasonId: Id,
+                title: title,
+                description: description,
+                duration: duration,
+                airingDate: airingDate,
+                tagId: tagId,
+                episodeNumber: nextEpisodeNumber
+            );
 
-        // Opdateret CreateEpisode-metode
-        public Episode CreateEpisode(string title, string description, TimeSpan duration, DateOnly airingDate)
-        {
-            var episode = new Episode(
-                title,
-                description,
-                duration,
-                airingDate,
-                this);
-
-            episode.SetSeason(this); // Sæt Season manuelt
             _episodes.Add(episode);
 
             return episode;
@@ -54,11 +66,14 @@
 
         public void AddEpisode(Episode episode)
         {
-            if (episode == null)
+            if (episode is null)
                 throw new ArgumentNullException(nameof(episode));
 
             if (_episodes.Any(e => e.Id == episode.Id))
                 return;
+
+            if (_episodes.Any(e => e.EpisodeNumber == episode.EpisodeNumber))
+                throw new InvalidOperationException("Episode number must be unique within a season.");
 
             _episodes.Add(episode);
         }
@@ -68,9 +83,23 @@
             _episodes.RemoveAll(e => e.Id == episodeId);
         }
 
-        public Episode GetEpisode(Guid episodeId)
+        public Episode? GetEpisode(Guid episodeId)
         {
             return _episodes.FirstOrDefault(e => e.Id == episodeId);
+        }
+
+        public void UpdateDetails(string? title, int? seasonNumber, DateOnly? releaseDate)
+        {
+            Title = title;
+
+            if (seasonNumber.HasValue)
+            {
+                if (seasonNumber.Value <= 0)
+                    throw new ArgumentException("Season number must be greater than zero.");
+
+                SeasonNumber = seasonNumber.Value;
+            }
+            ReleaseDate = releaseDate;
         }
     }
 }
