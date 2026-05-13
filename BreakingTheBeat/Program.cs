@@ -1,10 +1,14 @@
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using FluentValidation;
+using Gateway.Middleware;
 using Gateway.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MusicCatalog.Features.Contributor;
 using MusicCatalog.Features.Contributor.Create;
@@ -40,9 +44,11 @@ namespace Gateway
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+
 
             // 1. Connection strings
             var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatDb");
@@ -92,6 +98,8 @@ namespace Gateway
                 });
 
             builder.Services.AddAuthorization();
+
+            builder.Services.AddScoped<ILoggingService, LoggingService>();
 
             // 4. Repositories (music)
             builder.Services.AddScoped<ILanguageRepository, MusicCatalog.Infrastructure.Repositories.LanguageRepository>();
@@ -151,30 +159,51 @@ namespace Gateway
 
             var app = builder.Build();
 
+            using var scope = app.Services.CreateScope();
+            var loggingService = scope.ServiceProvider.GetService<ILoggingService>();
+
+            // Logging if Connectionstrings are loaded correctly
+            if (musicCatalogConnectionString != null)
+                await LogStartupAsync(loggingService,
+                    $"musicCatalogConnectionString: " +
+                    $"{SanitizeConnectionString(musicCatalogConnectionString)}");
+            else await LogStartupErrorAsync(loggingService,
+                "musicCatalogDb not loaded");
+
+            if (podcastCatalogConnectionString != null)
+                await LogStartupAsync(loggingService,
+                    $"podcastCatalogConnectionString: " +
+                    $"{SanitizeConnectionString(podcastCatalogConnectionString)}");
+            else await LogStartupErrorAsync(loggingService,
+                "podcastCatalogDb not loaded");
+
+            if (userManagementConnectionString != null)
+                await LogStartupAsync(loggingService,
+                    $"{SanitizeConnectionString(userManagementConnectionString)}");
+            else await LogStartupErrorAsync(loggingService, "userManagementDb not loaded");
+
+
             // Seed / migrate podcast database
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
+            //try
+            //{
+            //    var podcastContext = services.GetRequiredService<PodcastCatalogDbContext>();
 
-                try
-                {
-                    var podcastContext = services.GetRequiredService<PodcastCatalogDbContext>();
-
-                    podcastContext.Database.Migrate();
-                    DbInitializer.Initialize(podcastContext);
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding the database.");
-                }
-            }
+            //    podcastContext.Database.Migrate();
+            //    DbInitializer.Initialize(podcastContext);
+            //}
+            //catch (Exception ex)
+            //{
+            //    LogStartupErrorAsync(loggingService, "An error occurred while seeding the database.", ex);
+            //}
 
             // Pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
             }
+
+            await LogStartupAsync(loggingService, $"Application started in {app.Environment.EnvironmentName}");
+
 
             // Logging
             app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -188,6 +217,63 @@ namespace Gateway
             app.MapControllers();
 
             app.Run();
+        }
+
+        private static async Task LogStartupAsync(
+            ILoggingService loggingService,
+            string message)
+        {
+            await loggingService.LogAsync(new LogEntity
+            {
+                RequestId = "SYSTEM",
+                Timestamp = DateTime.UtcNow,
+                LogLevel = Middleware.LogLevel.Info,
+                Message = message,
+                RequestName = "ApplicationStartup"
+            });
+        }
+
+        private static async Task LogStartupErrorAsync(
+            ILoggingService loggingService,
+            string message)
+        {
+            await loggingService.LogAsync(new LogEntity
+            {
+                RequestId = "SYSTEM",
+                Timestamp = DateTime.UtcNow,
+                LogLevel = Middleware.LogLevel.Warning,
+                Message = message,
+                RequestName = "ApplicationStartup"
+            });
+        }
+        private static async Task LogStartupErrorAsync(
+            ILoggingService loggingService,
+            string message, Exception ex)
+        {
+            await loggingService.LogAsync(new LogEntity
+            {
+                RequestId = "SYSTEM",
+                Timestamp = DateTime.UtcNow,
+                LogLevel = Middleware.LogLevel.Warning,
+                Message = message,
+                RequestName = "ApplicationStartup",
+                RequestData = ex.ToString()
+            });
+        }
+
+        private static string SanitizeConnectionString(string connectionString)
+        {
+            var parts = connectionString.Split(';');
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (parts[i].StartsWith("Password=", StringComparison.OrdinalIgnoreCase))
+                {
+                    parts[i] = "Password=****";
+                }
+            }
+
+            return string.Join(';', parts);
         }
     }
 }

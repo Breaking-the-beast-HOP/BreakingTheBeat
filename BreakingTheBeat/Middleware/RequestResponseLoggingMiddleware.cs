@@ -16,7 +16,10 @@ namespace Gateway.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            LogRequest(context);
+            var requestId = Guid.NewGuid().ToString();
+            context.Items["requestId"] = requestId;
+
+            LogRequest(context, requestId);
 
             var originalBodyStream = context.Response.Body;
             using (var responseBody = new MemoryStream())
@@ -25,7 +28,7 @@ namespace Gateway.Middleware
 
                 await _next(context);
 
-                LogResponse(context);
+                LogResponse(context, requestId);
 
                 responseBody.Seek(0, SeekOrigin.Begin);
 
@@ -35,26 +38,46 @@ namespace Gateway.Middleware
             }
         }
 
-        private void LogRequest(HttpContext context)
+        private void LogRequest(HttpContext context, string requestId)
         {
+            var log = new LogEntity()
+            {
+                RequestId = requestId,
+                Timestamp = DateTime.UtcNow,
+                LogLevel = LogLevel.Info,
+                Message = "Incomming Request",
+                Path = context.Request.Path,
+                RequestName = context.Request.Method
+            };
             _logger.LogInformation(
-                "Timestamp: {Timestamp}, Type: {Type}, Message: {Message}, Path: {Path}, Method: {Method}",
-                DateTime.UtcNow,
-                "Info",
-                "Incomming Request",
-                context.Request.Path,
-                context.Request.Method);
+                $"RequestId: {log.RequestId}, " +
+                $"Timestamp: {log.Timestamp}, " +
+                $"Type: {log.LogLevel}, " +
+                $"Message: {log.Message}, " +
+                $"Path: {log.Path}, " +
+                $"Method: {log.Method}"
+                );
         }
 
-        private void LogResponse(HttpContext context)
+        private void LogResponse(HttpContext context, string requestId)
         {
+            var log = new LogEntity()
+            {
+                RequestId = requestId,
+                Timestamp = DateTime.UtcNow,
+                LogLevel = LogLevel.Info,
+                Message = $"Outgoing Response - Status {context.Response.StatusCode}.",
+                Path = context.Request.Path,
+                RequestName = context.Request.Method
+            };
             _logger.LogInformation(
-                "Timestamp: {Timestamp}, Type: {Type}, Message: {Message}, Path: {Path}, Method: {Method}",
-                DateTime.UtcNow,
-                "INFO",
-                $"Outgoing Response - Status {context.Response.StatusCode}",
-                context.Request.Path,
-                context.Request.Method);
+                $"RequestId: {log.RequestId}, " +
+                $"Timestamp: {log.Timestamp}, " +
+                $"Type: {log.LogLevel}, " +
+                $"Message: {log.Message}, " +
+                $"Path: {log.Path}, " +
+                $"Method: {log.Method}"
+                );
         }
     }
 }

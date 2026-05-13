@@ -6,11 +6,14 @@ namespace Gateway.Middleware
     : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly ILogger<ExceptionHandlingBehavior<TRequest, TResponse>> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ExceptionHandlingBehavior(
-            ILogger<ExceptionHandlingBehavior<TRequest, TResponse>> logger)
+            ILogger<ExceptionHandlingBehavior<TRequest, TResponse>> logger,
+            IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<TResponse> Handle(
@@ -26,8 +29,14 @@ namespace Gateway.Middleware
             {
                 var requestName = typeof(TRequest).Name;
 
-                var exception = new LogEntity()
+                var requestId = _httpContextAccessor
+                    .HttpContext?
+                    .Items["requestId"]?
+                    .ToString();
+
+                var log = new LogEntity()
                 {
+                    RequestId = requestId,
                     Timestamp = DateTime.UtcNow,
                     LogLevel = LogLevel.Error,
                     Message = ex.Message,
@@ -35,11 +44,12 @@ namespace Gateway.Middleware
                 };
 
                 _logger.LogError(
-                    "Timestamp: {Timestamp}, Level: {Level}, Message: {Message}, Request: {Request}",
-                    exception.Timestamp,
-                    exception.LogLevel,
-                    exception.Message,
-                    exception.RequestName);
+                    $"RequestId: {log.RequestId}, " +
+                    $"Timestamp: {log.Timestamp}, " +
+                    $"Level: {log.LogLevel}, " +
+                    $"Message: {log.Message}, " +
+                    $"Request: {log.RequestName}"
+                    );
 
                 throw;
             }

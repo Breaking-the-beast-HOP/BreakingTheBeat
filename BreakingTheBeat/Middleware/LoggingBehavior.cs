@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
 using MediatR;
-using Microsoft.IdentityModel.Protocols;
 
 namespace Gateway.Middleware;
 
@@ -9,11 +8,14 @@ public class LoggingBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
 {
     private readonly ILogger<LoggingBehavior<TRequest, TResponse>> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public LoggingBehavior(
-        ILogger<LoggingBehavior<TRequest, TResponse>> logger)
+        ILogger<LoggingBehavior<TRequest, TResponse>> logger,
+        IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<TResponse> Handle(
@@ -23,6 +25,10 @@ public class LoggingBehavior<TRequest, TResponse>
     {
         var requestName = typeof(TRequest).Name;
 
+        var requestId = _httpContextAccessor
+            .HttpContext?
+            .Items["requestId"]?
+            .ToString();
 
         var requestData = JsonSerializer.Serialize(request);
         if (requestName.Contains("Login"))
@@ -30,12 +36,8 @@ public class LoggingBehavior<TRequest, TResponse>
             requestData = "Sensitive data omitted";
         }
 
-        _logger.LogInformation(
-            "Timestamp: {Timestamp}, Level: {Level}, Message: {Message}, RequestData: {RequestData}",
-            DateTime.UtcNow,
-            "Information",
-            $"Handling {requestName}",
-            requestData);
+        LogRequest(requestName, requestData, requestId);
+
 
         var stopwatch = Stopwatch.StartNew();
 
@@ -43,12 +45,47 @@ public class LoggingBehavior<TRequest, TResponse>
 
         stopwatch.Stop();
 
-        _logger.LogInformation(
-            "Timestamp: {Timestamp}, Level: {Level}, Message: {Message}",
-            DateTime.UtcNow,
-            "Information",
-            $"Handled {requestName} in {stopwatch.ElapsedMilliseconds}ms");
+        LogResponse(requestName, stopwatch.Elapsed.ToString(), requestId);
+
 
         return response;
     }
+
+    private void LogRequest(string? requestName, string? requestData, string requestId)
+    {
+        var log = new LogEntity
+        {
+            RequestId = requestId,
+            Timestamp = DateTime.UtcNow,
+            LogLevel = LogLevel.Info,
+            Message = $"Handling {requestName}",
+            RequestData = requestData
+        };
+        _logger.LogInformation(
+            $"RequestId: {log.RequestId}, " +
+            $"Timestamp: {log.Timestamp}, " +
+            $"Level: {log.LogLevel}, " +
+            $"Message: {log.Message}, " +
+            $"RequestData: {log.RequestData}"
+            );
+    }
+
+    private void LogResponse(string requestName, string stopwatch, string requestId)
+    {
+        var log = new LogEntity
+        {
+            RequestId = requestId,
+            Timestamp = DateTime.UtcNow,
+            LogLevel = LogLevel.Info,
+            Message = $"Handled {requestName} in {stopwatch}ms"
+        };
+        _logger.LogInformation(
+        $"RequestId: {log.RequestId}, " +
+        $"Timestamp: {log.Timestamp}, " +
+        $"Level: {log.LogLevel}, " +
+        $"Message: {log.Message}"
+        );
+    }
+
+
 }

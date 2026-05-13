@@ -1,6 +1,6 @@
 ﻿namespace Gateway.Middleware
 {
-    public class ILoggingService
+    public interface ILoggingService
     {
         Task LogAsync(LogEntity log);
     }

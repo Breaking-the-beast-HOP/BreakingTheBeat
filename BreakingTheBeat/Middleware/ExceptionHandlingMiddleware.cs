@@ -43,13 +43,23 @@ namespace Gateway.Middleware
 
         private void LogException(HttpContext context, Exception ex)
         {
+            var log = new LogEntity
+            {
+                RequestId = context.Items["requestId"]?.ToString(),
+                Timestamp = DateTime.UtcNow,
+                LogLevel = LogLevel.Error,
+                Message = ex.Message,
+                Path = context.Request.Path,
+                Method = context.Request.Method,
+            };
             _logger.LogError(
-                "Timestamp: {Timestamp}, Level: {Level}, Message: {Message}, Path: {Path}, Method: {Method}",
-                DateTime.UtcNow,
-                "Error",
-                ex.Message,
-                context.Request.Path,
-                context.Request.Method);
+                $"RequestId: {log.RequestId}, " +
+                $"Timestamp: {log.Timestamp}, " +
+                $"Level: {log.LogLevel}, " +
+                $"Message: {log.Message}, " +
+                $"Path: {log.Path}, " +
+                $"Method: {log.Method}"
+                );
         }
     }
 }
