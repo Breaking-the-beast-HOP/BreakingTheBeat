@@ -3,6 +3,8 @@ using Gateway.Contracts.Podcast.Contribution;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PodcastCatalog.Features.Podcasts.Episodes.AddToPodcast;
+using PodcastCatalog.Features.Podcasts.Episodes.RemoveFromPodcast;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Create;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Delete;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Get;
@@ -187,37 +189,34 @@ namespace Gateway.Controllers.Podcast
             return deleted ? NoContent() : NotFound();
         }
 
-        //[HttpPost("seasons/{seasonId:guid}/episodes")]
-        //public async Task<IActionResult> CreateEpisode(
-        //    Guid seasonId,
-        //    [FromBody] CreatePodcastEpisodeRequest request,
-        //    CancellationToken cancellationToken)
-        //{
-        //    var result = await _mediator.Send(
-        //        new CreatePodcastEpisodeCommand(
-        //            SeasonId: seasonId,
-        //            Title: request.Title,
-        //            Description: request.Description,
-        //            EpisodeNumber: request.EpisodeNumber,
-        //            Duration: request.Duration,
-        //            AiringDate: request.AiringDate,
-        //            TagId: request.TagId
-        //        ),
-        //        cancellationToken);
+        [HttpPost("seasons/{seasonId:guid}/episodes")]
+        public async Task<IActionResult> CreateEpisode(Guid seasonId,[FromBody] CreatePodcastEpisodeRequest request,CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(
+                new CreatePodcastEpisodeCommand(
+                    SeasonId: seasonId,
+                    Title: request.Title,
+                    Description: request.Description,
+                    EpisodeNumber: request.EpisodeNumber,
+                    Duration: request.Duration,
+                    AiringDate: request.AiringDate,
+                    TagId: request.TagId
+                ),
+                cancellationToken);
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
-        //[HttpDelete("episodes/{episodeId:guid}")]
-        //public async Task<IActionResult> DeleteEpisode(
-        //    Guid episodeId,
-        //    CancellationToken cancellationToken)
-        //{
-        //    var deleted = await _mediator.Send(
-        //        new DeletePodcastEpisodeCommand(episodeId),
-        //        cancellationToken);
+        [HttpDelete("episodes/{episodeId:guid}")]
+        public async Task<IActionResult> DeleteEpisode(
+            Guid episodeId,
+            CancellationToken cancellationToken)
+        {
+            var deleted = await _mediator.Send(
+                new DeletePodcastEpisodeCommand(episodeId),
+                cancellationToken);
 
-        //    return deleted ? NoContent() : NotFound();
-        //}
+            return deleted ? NoContent() : NotFound();
+        }
     }
 }

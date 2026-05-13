@@ -271,8 +271,7 @@
             EpisodeNumber = nextEpisodeNumber
         };
 
-        var response = await Http.PostAsJsonAsync($"api/podcasts/seasons/{season.Id}/episodes",
-            request);
+        var response = await Http.PostAsJsonAsync( $"api/podcasts/podcast/seasons/{season.Id}/episodes",request);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -287,8 +286,7 @@
 
     private async Task DeleteEpisode(PodcastSeasonsPanel.EpisodeDto episode)
     {
-        var response = await Http.DeleteAsync(
-            $"api/podcasts/episodes/{episode.Id}");
+        var response = await Http.DeleteAsync($"api/podcasts/podcast/episodes/{episode.Id}");
 
         if (!response.IsSuccessStatusCode)
         {

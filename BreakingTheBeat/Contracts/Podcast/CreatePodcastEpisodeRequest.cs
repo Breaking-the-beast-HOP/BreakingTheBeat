@@ -9,7 +9,7 @@
 
         public TimeSpan? Duration { get; set; }
 
-        public DateOnly AiringDate { get; set; }
+        public DateTime AiringDate { get; set; }
 
         public Guid? TagId { get; set; }
     }

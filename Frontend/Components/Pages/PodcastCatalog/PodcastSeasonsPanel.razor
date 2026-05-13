@@ -48,10 +48,13 @@
                                     </MudChip>
                                 }
 
-                                <MudIconButton Icon="@Icons.Material.Filled.Add"
-                                               Color="Color.Warning"
-                                               Size="Size.Small"
-                                               OnClick="@(() => AddEpisodeRequested.InvokeAsync(season))" />
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Warning"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           Size="Size.Small"
+                                           OnClick="@(() => AddEpisodeRequested.InvokeAsync(season))">
+                                    Add episode
+                                </MudButton>
 
                                 <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                                Color="Color.Error"
