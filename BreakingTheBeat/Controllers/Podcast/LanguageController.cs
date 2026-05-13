@@ -1,8 +1,6 @@
-﻿using Gateway.Contracts.Podcast;
-using Gateway.Contracts.Podcast.Language;
+﻿using Gateway.Contracts.Podcast.Language;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PodcastCatalog.Features.Languages.GetAll;
 

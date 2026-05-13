@@ -179,7 +179,7 @@ namespace Gateway
                     var podcastContext = services.GetRequiredService<PodcastCatalogDbContext>();
 
                     podcastContext.Database.Migrate();
-                    DbInitializer.Initialize(podcastContext);
+                    //DbInitializer.Initialize(podcastContext);
                 }
                 catch (Exception ex)
                 {

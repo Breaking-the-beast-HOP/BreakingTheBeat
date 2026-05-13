@@ -273,22 +273,25 @@
     {
         try
         {
-            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") ?? new();
+            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") 
+                                ?? new();
 
-            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category")
-                          ?? GetFallbackCategories();
+            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category") 
+                                ?? new();
+
             _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>("api/podcasts/ContributorRole")
-                                ?? _contributionRoles;
+                                ?? new();
+
             _contributors = await Http.GetFromJsonAsync<List<Contributor>>("api/podcasts/Contributor")
-                                ?? _contributors;
+                                ?? new();
         }
         catch
         {
-            _categories = GetFallbackCategories();
+            // _categories = GetFallbackCategories();
         }
         finally
         {
-            EnsurePlaceholderExists();
+            // EnsurePlaceholderExists();
 
             _selectedCategory = null;
             _selectedLanguage = null;
@@ -449,36 +452,36 @@
         }
     }
 
-    private void EnsurePlaceholderExists()
-    {
-        if (!_categories.Any(c => c.Id == PlaceholderId))
-        {
-            _categories.Insert(0, new PodcastCategoryDto
-            {
-                Id = PlaceholderId,
-                Name = "Placeholder"
-            });
-        }
+    // private void EnsurePlaceholderExists() // why? 
+    // {
+    //     if (!_categories.Any(c => c.Id == PlaceholderId))
+    //     {
+    //         _categories.Insert(0, new PodcastCategoryDto
+    //         {
+    //             Id = PlaceholderId,
+    //             Name = "Placeholder"
+    //         });
+    //     }
 
-        if (!_languages.Any(l => l.Id == PlaceholderId))
-        {
-            _languages.Insert(0, new LanguageDto
-            {
-                Id = PlaceholderId,
-                Name = "Placeholder",
-                ISO = "xx"
-            });
-        }
-    }
+    //     if (!_languages.Any(l => l.Id == PlaceholderId))
+    //     {
+    //         _languages.Insert(0, new LanguageDto
+    //         {
+    //             Id = PlaceholderId,
+    //             Name = "Placeholder",
+    //             ISO = "xx"
+    //         });
+    //     }
+    // }
 
 
-    private static List<PodcastCategoryDto> GetFallbackCategories()
-    {
-        return new()
-        {
-            new PodcastCategoryDto { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "Placeholder" }
-        };
-    }
+    // private static List<PodcastCategoryDto> GetFallbackCategories()
+    // {
+    //     return new()
+    //     {
+    //         new PodcastCategoryDto { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "Placeholder" }
+    //     };
+    // }
 
     public class PodcastModel
     {
@@ -486,9 +489,9 @@
         public string? Description { get; set; }
         public Guid? CategoryId { get; set; }
         public Guid? LanguageId { get; set; }
-
-        public List<ContributionRequest> Contributions { get; set; } = new();
+        public List<ContributionRequest> Contributions { get; set; } = [];
     }
+
     public class ContributionRequest
     {
         public Guid ContributorId { get; set; }
@@ -501,7 +504,6 @@
     {
         public Guid? ContributorId { get; set; }
         public string? ContributorName { get; set; }
-
         public Guid? ContributorRoleId { get; set; }
         public bool HasRights { get; set; }
     }
@@ -517,7 +519,7 @@
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
-        public string? Description { get; set; } = "";
+        public string? Description { get; set; }
     }
 
     public class LanguageDto
