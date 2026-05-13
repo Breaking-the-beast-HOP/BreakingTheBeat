@@ -404,11 +404,11 @@
                 ContributorName = r.ContributorName
             }).ToList();
 
-        if(!_model.Contributions.Any())
-        {
-            _errorMessage = "At least one contribution is required.";
-            return;
-        }
+        // if(!_model.Contributions.Any()) //TEMP for testing without it 
+        // {
+        //     _errorMessage = "At least one contribution is required.";
+        //     return;
+        // }
 
         if (_model.Contributions.Any(c => c.ContributorId == null || c.ContributorRoleId == null))
         {
