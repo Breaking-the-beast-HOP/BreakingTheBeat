@@ -1,13 +1,14 @@
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using FluentValidation;
+using Gateway.Logging.Behaviors;
+using Gateway.Logging.Data;
+using Gateway.Logging.Entities;
 using Gateway.Logging.Middleware;
+using Gateway.Logging.Services;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MusicCatalog.Features.Contributor;
 using MusicCatalog.Features.Contributor.Create;
@@ -58,6 +59,8 @@ namespace Gateway
             var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb")
                 ?? throw new InvalidOperationException("Connection string 'UserManagementDb' not found.");
 
+            var LoggingDbConnectionString = builder.Configuration.GetConnectionString("LoggingDb");
+
             // 2. DbContexts
             builder.Services.AddDbContext<MusicCatalogDbContext>(options =>
                 options.UseNpgsql(musicCatalogConnectionString));
@@ -69,8 +72,7 @@ namespace Gateway
                 options.UseNpgsql(userManagementConnectionString));
 
             builder.Services.AddDbContext<LoggingDbContext>(options =>
-                options.UseNpgsql(
-                    builder.Configuration.GetConnectionString("LoggingDb")));
+                options.UseNpgsql(LoggingDbConnectionString));
 
             // 3. Identity
             builder.Services
@@ -162,51 +164,12 @@ namespace Gateway
 
             var app = builder.Build();
 
-            using var scope = app.Services.CreateScope();
-            var loggingService = scope.ServiceProvider.GetService<ILoggingService>();
-
-            // Logging if Connectionstrings are loaded correctly
-            if (musicCatalogConnectionString != null)
-                await LogStartupAsync(loggingService,
-                    $"musicCatalogConnectionString: " +
-                    $"{SanitizeConnectionString(musicCatalogConnectionString)}");
-            else await LogStartupErrorAsync(loggingService,
-                "musicCatalogDb not loaded");
-
-            if (podcastCatalogConnectionString != null)
-                await LogStartupAsync(loggingService,
-                    $"podcastCatalogConnectionString: " +
-                    $"{SanitizeConnectionString(podcastCatalogConnectionString)}");
-            else await LogStartupErrorAsync(loggingService,
-                "podcastCatalogDb not loaded");
-
-            if (userManagementConnectionString != null)
-                await LogStartupAsync(loggingService,
-                    $"{SanitizeConnectionString(userManagementConnectionString)}");
-            else await LogStartupErrorAsync(loggingService, "userManagementDb not loaded");
-
-
-            // Seed / migrate podcast database
-            //try
-            //{
-            //    var podcastContext = services.GetRequiredService<PodcastCatalogDbContext>();
-
-            //    podcastContext.Database.Migrate();
-            //    DbInitializer.Initialize(podcastContext);
-            //}
-            //catch (Exception ex)
-            //{
-            //    LogStartupErrorAsync(loggingService, "An error occurred while seeding the database.", ex);
-            //}
 
             // Pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
             }
-
-            await LogStartupAsync(loggingService, $"Application started in {app.Environment.EnvironmentName}");
-
 
             // Logging
             app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -220,47 +183,78 @@ namespace Gateway
             app.MapControllers();
 
             app.Run();
+
+            // logging
+            await LogStartupAsync(app.Services, $"Application started in {app.Environment.EnvironmentName}");
+
+            // Logging if Connectionstrings are loaded correctly
+            if (musicCatalogConnectionString != null)
+                await LogStartupAsync(app.Services,
+                    $"musicCatalogConnectionString: " +
+                    $"{SanitizeConnectionString(musicCatalogConnectionString)}");
+            else await LogStartupErrorAsync(app.Services,
+                "musicCatalogDb not loaded");
+
+            if (podcastCatalogConnectionString != null)
+                await LogStartupAsync(app.Services,
+                    $"podcastCatalogConnectionString: " +
+                    $"{SanitizeConnectionString(podcastCatalogConnectionString)}");
+            else await LogStartupErrorAsync(app.Services,
+                "podcastCatalogDb not loaded");
+
+            if (userManagementConnectionString != null)
+                await LogStartupAsync(app.Services,
+                    $"{SanitizeConnectionString(userManagementConnectionString)}");
+            else await LogStartupErrorAsync(app.Services, "userManagementDb not loaded");
         }
 
         private static async Task LogStartupAsync(
-            ILoggingService loggingService,
+            IServiceProvider services,
             string message)
         {
+            using var scope = services.CreateScope();
+
+            var loggingService = scope.ServiceProvider.GetService<ILoggingService>();
+
             await loggingService.LogAsync(new LogEntity
             {
                 RequestId = "SYSTEM",
-                Timestamp = DateTime.UtcNow,
-                LogLevel = Logging.Middleware.LogLevel.Info,
+                LogLevel = Logging.Entities.ApplicationLogLevel.Info,
                 Message = message,
                 RequestName = "ApplicationStartup"
             });
         }
 
         private static async Task LogStartupErrorAsync(
-            ILoggingService loggingService,
+            IServiceProvider services,
             string message)
         {
+            using var scope = services.CreateScope();
+            var loggingService = scope.ServiceProvider.GetService<ILoggingService>();
+
             await loggingService.LogAsync(new LogEntity
             {
                 RequestId = "SYSTEM",
-                Timestamp = DateTime.UtcNow,
-                LogLevel = Logging.Middleware.LogLevel.Warning,
+                LogLevel = Logging.Entities.ApplicationLogLevel.Warning,
                 Message = message,
                 RequestName = "ApplicationStartup"
             });
         }
         private static async Task LogStartupErrorAsync(
-            ILoggingService loggingService,
+            IServiceProvider services,
             string message, Exception ex)
         {
+            using var scope = services.CreateScope();
+
+            var loggingService = scope.ServiceProvider.GetService<ILoggingService>();
+
             await loggingService.LogAsync(new LogEntity
             {
                 RequestId = "SYSTEM",
-                Timestamp = DateTime.UtcNow,
-                LogLevel = Logging.Middleware.LogLevel.Warning,
+                LogLevel = Logging.Entities.ApplicationLogLevel.Warning,
                 Message = message,
                 RequestName = "ApplicationStartup",
-                RequestData = ex.ToString()
+                Exception = ex.ToString()
             });
         }
 

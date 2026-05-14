@@ -1,13 +1,13 @@
-﻿namespace Gateway.Logging.Middleware
+﻿namespace Gateway.Logging.Entities
 {
     public class LogEntity
     {
         public int Id { get; set; }
-        public string RequestId { get; set; }
+        public string RequestId { get; set; } = string.Empty;
 
-        public DateTime Timestamp { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-        public LogLevel LogLevel { get; set; }
+        public ApplicationLogLevel LogLevel { get; set; }
 
         public string Message { get; set; } = string.Empty;
 
@@ -17,9 +17,10 @@
 
         public string? Method { get; set; }
         public string? RequestData { get; set; }
+        public string? Exception { get; set; }
     }
 
-    public enum LogLevel
+    public enum ApplicationLogLevel
     {
         System,
         Debug,

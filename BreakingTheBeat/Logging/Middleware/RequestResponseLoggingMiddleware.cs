@@ -1,4 +1,7 @@
 ﻿using System.Text;
+using System.Threading.Tasks;
+using Gateway.Logging.Entities;
+using Gateway.Logging.Services;
 
 namespace Gateway.Logging.Middleware
 {
@@ -19,7 +22,9 @@ namespace Gateway.Logging.Middleware
             var requestId = Guid.NewGuid().ToString();
             context.Items["requestId"] = requestId;
 
-            LogRequest(context, requestId);
+            var loggingService = context.RequestServices.GetRequiredService<ILoggingService>();
+
+            LogRequest(context, requestId, loggingService);
 
             var originalBodyStream = context.Response.Body;
             using (var responseBody = new MemoryStream())
@@ -28,7 +33,7 @@ namespace Gateway.Logging.Middleware
 
                 await _next(context);
 
-                LogResponse(context, requestId);
+                LogResponse(context, requestId, loggingService);
 
                 responseBody.Seek(0, SeekOrigin.Begin);
 
@@ -38,17 +43,17 @@ namespace Gateway.Logging.Middleware
             }
         }
 
-        private void LogRequest(HttpContext context, string requestId)
+        private async Task LogRequest(HttpContext context, string requestId, ILoggingService loggingService)
         {
             var log = new LogEntity()
             {
                 RequestId = requestId,
-                Timestamp = DateTime.UtcNow,
-                LogLevel = LogLevel.Info,
-                Message = "Incomming Request",
+                LogLevel = ApplicationLogLevel.Info,
+                Message = "Incoming Request",
                 Path = context.Request.Path,
-                RequestName = context.Request.Method
+                Method = context.Request.Method
             };
+            await loggingService.LogAsync(log);
             _logger.LogInformation(
                 $"RequestId: {log.RequestId}, " +
                 $"Timestamp: {log.Timestamp}, " +
@@ -59,17 +64,17 @@ namespace Gateway.Logging.Middleware
                 );
         }
 
-        private void LogResponse(HttpContext context, string requestId)
+        private async Task LogResponse(HttpContext context, string requestId, ILoggingService loggingService)
         {
             var log = new LogEntity()
             {
                 RequestId = requestId,
-                Timestamp = DateTime.UtcNow,
-                LogLevel = LogLevel.Info,
+                LogLevel = ApplicationLogLevel.Info,
                 Message = $"Outgoing Response - Status {context.Response.StatusCode}.",
                 Path = context.Request.Path,
-                RequestName = context.Request.Method
+                Method = context.Request.Method
             };
+            await loggingService.LogAsync(log);
             _logger.LogInformation(
                 $"RequestId: {log.RequestId}, " +
                 $"Timestamp: {log.Timestamp}, " +

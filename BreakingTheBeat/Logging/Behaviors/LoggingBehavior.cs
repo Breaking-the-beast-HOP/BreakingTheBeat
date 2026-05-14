@@ -1,21 +1,26 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
+using Gateway.Logging.Entities;
+using Gateway.Logging.Services;
 using MediatR;
 
-namespace Gateway.Logging.Middleware;
+namespace Gateway.Logging.Behaviors;
 
 public class LoggingBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
 {
     private readonly ILogger<LoggingBehavior<TRequest, TResponse>> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILoggingService _loggingService;
 
     public LoggingBehavior(
         ILogger<LoggingBehavior<TRequest, TResponse>> logger,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        ILoggingService loggingService)
     {
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
+        _loggingService = loggingService;
     }
 
     public async Task<TResponse> Handle(
@@ -31,12 +36,14 @@ public class LoggingBehavior<TRequest, TResponse>
             .ToString();
 
         var requestData = JsonSerializer.Serialize(request);
-        if (requestName.Contains("Login"))
+
+
+        if (SensitiveRequests.Any(x => requestName.Contains(x)))
         {
             requestData = "Sensitive data omitted";
         }
 
-        LogRequest(requestName, requestData, requestId);
+        await LogRequest(requestName, requestData, requestId);
 
 
         var stopwatch = Stopwatch.StartNew();
@@ -45,22 +52,23 @@ public class LoggingBehavior<TRequest, TResponse>
 
         stopwatch.Stop();
 
-        LogResponse(requestName, stopwatch.Elapsed.ToString(), requestId);
+        await LogResponse(requestName, stopwatch.ElapsedMilliseconds.ToString(), requestId);
 
 
         return response;
     }
 
-    private void LogRequest(string? requestName, string? requestData, string requestId)
+    private async Task LogRequest(string? requestName, string? requestData, string requestId)
     {
         var log = new LogEntity
         {
             RequestId = requestId,
-            Timestamp = DateTime.UtcNow,
-            LogLevel = LogLevel.Info,
+            LogLevel = ApplicationLogLevel.Info,
             Message = $"Handling {requestName}",
             RequestData = requestData
         };
+
+        await _loggingService.LogAsync(log);
         _logger.LogInformation(
             $"RequestId: {log.RequestId}, " +
             $"Timestamp: {log.Timestamp}, " +
@@ -70,15 +78,16 @@ public class LoggingBehavior<TRequest, TResponse>
             );
     }
 
-    private void LogResponse(string requestName, string stopwatch, string requestId)
+    private async Task LogResponse(string requestName, string stopwatch, string requestId)
     {
         var log = new LogEntity
         {
             RequestId = requestId,
-            Timestamp = DateTime.UtcNow,
-            LogLevel = LogLevel.Info,
+            LogLevel = ApplicationLogLevel.Info,
             Message = $"Handled {requestName} in {stopwatch}ms"
         };
+
+        await _loggingService.LogAsync(log);
         _logger.LogInformation(
         $"RequestId: {log.RequestId}, " +
         $"Timestamp: {log.Timestamp}, " +
@@ -86,6 +95,14 @@ public class LoggingBehavior<TRequest, TResponse>
         $"Message: {log.Message}"
         );
     }
+
+    private static readonly string[] SensitiveRequests =
+        [
+            "Login",
+            "Register",
+            "Token",
+            "Password"
+        ];
 
 
 }

@@ -1,19 +1,24 @@
-﻿using MediatR;
+﻿using Gateway.Logging.Entities;
+using Gateway.Logging.Services;
+using MediatR;
 
-namespace Gateway.Logging.Middleware
+namespace Gateway.Logging.Behaviors
 {
     public class ExceptionHandlingBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly ILogger<ExceptionHandlingBehavior<TRequest, TResponse>> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILoggingService _loggingService;
 
         public ExceptionHandlingBehavior(
             ILogger<ExceptionHandlingBehavior<TRequest, TResponse>> logger,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ILoggingService loggingService)
         {
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _loggingService = loggingService;
         }
 
         public async Task<TResponse> Handle(
@@ -36,19 +41,21 @@ namespace Gateway.Logging.Middleware
 
                 var log = new LogEntity()
                 {
-                    RequestId = requestId,
-                    Timestamp = DateTime.UtcNow,
-                    LogLevel = LogLevel.Error,
-                    Message = ex.Message,
-                    RequestName = requestName
+                    RequestId = requestId ?? "UNKNOWN",
+                    LogLevel = ApplicationLogLevel.Error,
+                    RequestName = requestName,
+                    Exception = ex.ToString(),
+                    Message = $"Error in {requestName}: {ex.Message}"
                 };
 
+                await _loggingService.LogAsync(log);
                 _logger.LogError(
                     $"RequestId: {log.RequestId}, " +
                     $"Timestamp: {log.Timestamp}, " +
                     $"Level: {log.LogLevel}, " +
                     $"Message: {log.Message}, " +
-                    $"Request: {log.RequestName}"
+                    $"Request: {log.RequestName}, " +
+                    $"Exception: {log.Exception}"
                     );
 
                 throw;

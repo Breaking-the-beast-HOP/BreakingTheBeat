@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
+using Gateway.Logging.Entities;
+using Gateway.Logging.Services;
 
 namespace Gateway.Logging.Middleware
 {
@@ -24,7 +26,11 @@ namespace Gateway.Logging.Middleware
             }
             catch (Exception ex)
             {
-                LogException(context, ex);
+
+                // Resolv ILoggingService fra HttpContext.RequestServices
+                var loggingService = context.RequestServices.GetRequiredService<ILoggingService>();
+
+                await LogException(context, ex, loggingService);
 
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
@@ -41,22 +47,23 @@ namespace Gateway.Logging.Middleware
             }
         }
 
-        private void LogException(HttpContext context, Exception ex)
+        private async Task LogException(HttpContext context, Exception ex, ILoggingService loggingService)
         {
             var log = new LogEntity
             {
-                RequestId = context.Items["requestId"]?.ToString(),
-                Timestamp = DateTime.UtcNow,
-                LogLevel = LogLevel.Error,
-                Message = ex.Message,
+                RequestId = context.Items["requestId"]?.ToString() ?? "UNKNOWN",
+                LogLevel = ApplicationLogLevel.Error,
+                Exception = ex.ToString(),
                 Path = context.Request.Path,
                 Method = context.Request.Method,
+                Message = $"An unexpected error occurred with code: {context.Response.StatusCode}"
             };
+            await loggingService.LogAsync(log);
             _logger.LogError(
                 $"RequestId: {log.RequestId}, " +
                 $"Timestamp: {log.Timestamp}, " +
                 $"Level: {log.LogLevel}, " +
-                $"Message: {log.Message}, " +
+                $"Exception: {log.Exception}, " +
                 $"Path: {log.Path}, " +
                 $"Method: {log.Method}"
                 );
