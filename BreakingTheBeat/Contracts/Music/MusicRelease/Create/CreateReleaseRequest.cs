@@ -6,6 +6,7 @@
         public string? Version { get; set; }
         public string? EAN { get; set; }
         public DateTime? ReleaseDate { get; set; }
+        public string Status { get; set; }
 
         public Guid? GenreId { get; set; }
         public Guid? LanguageId { get; set; }

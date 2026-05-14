@@ -8,6 +8,7 @@
         public string? Version { get; private set; }
         public string? EAN { get; private set; }
         public DateTime? ReleaseDate { get; private set; }
+        public ReleaseStatus Status { get; private set; }
 
         public Guid GenreId { get; private set; }
         public Genre Genre { get; private set; }
@@ -23,7 +24,7 @@
 
         private Release() { }
 
-        public static Release Create(string title, string? version, string? ean, DateTime? releaseDate, Guid genreId, Guid languageId)
+        public static Release Create(string title, string? version, string? ean, DateTime? releaseDate, Guid genreId, Guid languageId, string? status= "draft")
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title is required.");
@@ -166,5 +167,13 @@
                 }
             }
         }
+    }
+    public enum ReleaseStatus
+    {
+        Draft,
+        ReadyForQc,
+        InQc,
+        Approved,
+        Rejected
     }
 }

@@ -19,7 +19,8 @@ namespace MusicCatalog.Features.Release.Create
                 request.EAN,
                 request.ReleaseDate,
                 request.GenreId,
-                request.LanguageId
+                request.LanguageId,
+                request.Status
             );
 
             foreach (var volumeRequest in request.Volumes.OrderBy(v => v.VolumeNumber))

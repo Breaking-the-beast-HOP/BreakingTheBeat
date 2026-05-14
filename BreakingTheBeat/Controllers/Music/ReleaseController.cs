@@ -29,51 +29,43 @@ namespace Gateway.Controllers.Music
         [Authorize(Roles = "Admin,Content Creator")]
         public async Task<IActionResult> CreateRelease([FromBody] CreateReleaseRequest request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(request.Title))
-                return BadRequest("Title is required.");
-
-            if (request.GenreId is null || request.GenreId == Guid.Empty)
-                return BadRequest("Genre is required.");
-
-            if (request.LanguageId is null || request.LanguageId == Guid.Empty)
-                return BadRequest("Language is required.");
-
-            if (request.Volumes is null || !request.Volumes.Any())
-                return BadRequest("At least one volume is required.");
-
-            if (request.Volumes.Any(v => v.Tracks is null || !v.Tracks.Any()))
-                return BadRequest("Each volume must contain at least one track.");
-
-            if (request.Volumes
-                .SelectMany(v => v.Tracks)
-                .Any(t => t.TrackId == Guid.Empty))
-            {
-                return BadRequest("All track rows must have a selected track.");
-            }
+            if (request is null)
+                return BadRequest("Request body is required.");
 
             var command = new CreateReleaseCommand(
                 request.Title,
                 request.Version,
                 request.EAN,
+                request.Status,
                 request.ReleaseDate,
-                request.GenreId.Value,
-                request.LanguageId.Value,
-                request.Volumes.Select(v => new CreateReleaseVolumeInput(
+                request.GenreId,
+                request.LanguageId,
+                request.Volumes?.Select(v => new CreateReleaseVolumeInput(
                     v.VolumeNumber,
-                    v.Tracks.Select(t => new CreateReleaseTrackInput(
+                    v.Tracks?.Select(t => new CreateReleaseTrackInput(
                         t.TrackNumber,
                         t.TrackId
-                    )).ToList()
-                )).ToList(),
-                request.Contributions.Select(c => new CreateReleaseContributionInput(
+                    )).ToList() ?? new()
+                )).ToList() ?? new(),
+                request.Contributions?.Select(c => new CreateReleaseContributionInput(
                     c.ContributorId,
                     c.RoleIds
-                )).ToList()
+                )).ToList() ?? new()
             );
 
-            var result = await _mediator.Send(command, cancellationToken);
-
-            return Ok(result);
+            try
+            {
+                var result = await _mediator.Send(command, cancellationToken);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]

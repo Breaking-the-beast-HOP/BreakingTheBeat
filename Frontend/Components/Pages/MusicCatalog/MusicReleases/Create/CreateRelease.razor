@@ -29,11 +29,19 @@
                     </MudButton>
 
                     <MudButton Variant="Variant.Filled"
-                               Color="Color.Warning"
+                               Color="Color.Default"
                                StartIcon="@Icons.Material.Filled.Save"
-                               OnClick="SaveRelease"
+                               OnClick="SaveDraft"
                                Disabled="@(_isSaving || _isLoadingLookups)">
-                        @(_isSaving ? "Saving..." : "Save")
+                        @(_isSaving ? "Saving..." : "Save draft")
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.Send"
+                               OnClick="SubmitToQc"
+                               Disabled="@(_isSaving || _isLoadingLookups)">
+                        Submit to QC
                     </MudButton>
                 </MudStack>
             </MudStack>

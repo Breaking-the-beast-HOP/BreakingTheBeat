@@ -1,4 +1,5 @@
 ﻿using Frontend.Components.Pages.MusicCatalog.SharedModels;
+using static Frontend.Components.Pages.MusicCatalog.MusicReleases.Create.CreateRelease;
 
 namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Models;
 
@@ -9,12 +10,14 @@ public class ReleaseModel
     public string? Version { get; set; }
     public string? EAN { get; set; }
     public DateTime? ReleaseDate { get; set; }
+    public ReleaseStatusDto Status { get; set; } = ReleaseStatusDto.Draft;
 
     public Guid? GenreId { get; set; }
     public Guid? LanguageId { get; set; }
 
     public List<ReleaseVolumeModel> Volumes { get; set; } = new();
     public List<ContributionRequest> Contributions { get; set; } = new();
+    
 }
 
 public class ReleaseVolumeModel
