@@ -3,8 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
-using Gateway.Middleware;
-using Gateway.Middleware;
+using Gateway.Logging.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +67,10 @@ namespace Gateway
 
             builder.Services.AddDbContext<UserManagementDbContext>(options =>
                 options.UseNpgsql(userManagementConnectionString));
+
+            builder.Services.AddDbContext<LoggingDbContext>(options =>
+                options.UseNpgsql(
+                    builder.Configuration.GetConnectionString("LoggingDb")));
 
             // 3. Identity
             builder.Services
@@ -227,7 +230,7 @@ namespace Gateway
             {
                 RequestId = "SYSTEM",
                 Timestamp = DateTime.UtcNow,
-                LogLevel = Middleware.LogLevel.Info,
+                LogLevel = Logging.Middleware.LogLevel.Info,
                 Message = message,
                 RequestName = "ApplicationStartup"
             });
@@ -241,7 +244,7 @@ namespace Gateway
             {
                 RequestId = "SYSTEM",
                 Timestamp = DateTime.UtcNow,
-                LogLevel = Middleware.LogLevel.Warning,
+                LogLevel = Logging.Middleware.LogLevel.Warning,
                 Message = message,
                 RequestName = "ApplicationStartup"
             });
@@ -254,7 +257,7 @@ namespace Gateway
             {
                 RequestId = "SYSTEM",
                 Timestamp = DateTime.UtcNow,
-                LogLevel = Middleware.LogLevel.Warning,
+                LogLevel = Logging.Middleware.LogLevel.Warning,
                 Message = message,
                 RequestName = "ApplicationStartup",
                 RequestData = ex.ToString()

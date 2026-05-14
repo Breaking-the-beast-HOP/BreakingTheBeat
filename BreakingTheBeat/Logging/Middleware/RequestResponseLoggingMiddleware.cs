@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Gateway.Middleware
+namespace Gateway.Logging.Middleware
 {
     public class RequestResponseLoggingMiddleware
     {

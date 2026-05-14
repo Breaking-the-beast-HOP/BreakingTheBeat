@@ -1,7 +1,8 @@
-﻿namespace Gateway.Middleware
+﻿namespace Gateway.Logging.Middleware
 {
     public class LogEntity
     {
+        public int Id { get; set; }
         public string RequestId { get; set; }
 
         public DateTime Timestamp { get; set; }
@@ -20,7 +21,7 @@
 
     public enum LogLevel
     {
-        Startup,
+        System,
         Debug,
         Info,
         Warning,

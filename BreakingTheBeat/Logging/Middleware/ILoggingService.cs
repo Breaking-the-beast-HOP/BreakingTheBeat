@@ -1,4 +1,4 @@
-﻿namespace Gateway.Middleware
+﻿namespace Gateway.Logging.Middleware
 {
     public interface ILoggingService
     {

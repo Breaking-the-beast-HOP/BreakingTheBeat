@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Gateway.Middleware
+namespace Gateway.Logging.Middleware
 {
     public class ExceptionHandlingBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>

@@ -2,7 +2,7 @@
 using System.Text.Json;
 using MediatR;
 
-namespace Gateway.Middleware;
+namespace Gateway.Logging.Middleware;
 
 public class LoggingBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
