@@ -2,13 +2,12 @@ using System.Security.Claims;
 using System.Text;
 using FluentValidation;
 using Gateway.Logging.Behaviors;
-using Gateway.Logging.Data;
 using Gateway.Logging.Entities;
 using Gateway.Logging.Middleware;
-using Gateway.Logging.Services;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using MusicCatalog.Features.Contributor;
 using MusicCatalog.Features.Contributor.Create;
@@ -29,9 +28,10 @@ using PodcastCatalog.Features.Podcasts.Create;
 using PodcastCatalog.Features.Podcasts.Get;
 using PodcastCatalog.Features.Podcasts.GetAll;
 using PodcastCatalog.Features.Podcasts.Update;
-using PodcastCatalog.Infrastructure;
 using PodcastCatalog.Infrastructure.Data;
 using PodcastCatalog.Infrastructure.Repositories;
+using Serilog;
+using Serilog.Sinks.PostgreSQL;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
 using UserManagement.Domain.Entities;
@@ -48,7 +48,38 @@ namespace Gateway
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
+                .WriteTo.Console()
+                .WriteTo.PostgreSQL(
+                    connectionString: builder.Configuration.GetConnectionString("LoggingDb"),
+                    tableName: "GatewayLogs",
+                    needAutoCreateTable: true,
+                    columnOptions: new Dictionary<string, ColumnWriterBase>
+                    {
+                        ["message"] = new RenderedMessageColumnWriter(),
+                        ["message_template"] = new MessageTemplateColumnWriter(),
+                        ["level"] = new LevelColumnWriter(),
+                        ["timestamp"] = new TimestampColumnWriter(),
+                        ["exception"] = new ExceptionColumnWriter(),
+                        ["log_event"] = new LogEventSerializedColumnWriter(),
+                        ["properties"] = new PropertiesColumnWriter()
+                    })
+                .CreateLogger();
 
+            builder.Host.UseSerilog();
+            builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
+            builder.Services.AddHttpContextAccessor();
+
+            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+            var jwtAudience = builder.Configuration["Jwt:Audience"];
+            var jwtKey = builder.Configuration["Jwt:Key"];
+
+            Log.Information(
+                "JWT configuration loaded | Issuer: {Issuer} | Audience: {Audience} | KeyConfigured: {KeyConfigured} | KeyLength: {KeyLength}",
+                jwtIssuer,
+                jwtAudience,
+                !string.IsNullOrWhiteSpace(jwtKey),
+                jwtKey?.Length ?? 0);
 
             // 1. Connection strings
             var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatDb");
@@ -58,8 +89,6 @@ namespace Gateway
 
             var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb")
                 ?? throw new InvalidOperationException("Connection string 'UserManagementDb' not found.");
-
-            var LoggingDbConnectionString = builder.Configuration.GetConnectionString("LoggingDb");
 
             // 2. DbContexts
             builder.Services.AddDbContext<MusicCatalogDbContext>(options =>
@@ -71,8 +100,6 @@ namespace Gateway
             builder.Services.AddDbContext<UserManagementDbContext>(options =>
                 options.UseNpgsql(userManagementConnectionString));
 
-            builder.Services.AddDbContext<LoggingDbContext>(options =>
-                options.UseNpgsql(LoggingDbConnectionString));
 
             // 3. Identity
             builder.Services
@@ -103,8 +130,6 @@ namespace Gateway
                 });
 
             builder.Services.AddAuthorization();
-
-            builder.Services.AddScoped<ILoggingService, LoggingService>();
 
             // 4. Repositories (music)
             builder.Services.AddScoped<ILanguageRepository, MusicCatalog.Infrastructure.Repositories.LanguageRepository>();
@@ -164,6 +189,7 @@ namespace Gateway
 
             var app = builder.Build();
 
+            app.UseSerilogRequestLogging();
 
             // Pipeline
             if (app.Environment.IsDevelopment())
@@ -182,81 +208,65 @@ namespace Gateway
 
             app.MapControllers();
 
-            app.Run();
+            // Startup logs
+            Log.Information(
+                "Application started in {Environment}",
+                app.Environment.EnvironmentName);
 
-            // logging
-            await LogStartupAsync(app.Services, $"Application started in {app.Environment.EnvironmentName}");
-
-            // Logging if Connectionstrings are loaded correctly
-            if (musicCatalogConnectionString != null)
-                await LogStartupAsync(app.Services,
-                    $"musicCatalogConnectionString: " +
-                    $"{SanitizeConnectionString(musicCatalogConnectionString)}");
-            else await LogStartupErrorAsync(app.Services,
-                "musicCatalogDb not loaded");
-
-            if (podcastCatalogConnectionString != null)
-                await LogStartupAsync(app.Services,
-                    $"podcastCatalogConnectionString: " +
-                    $"{SanitizeConnectionString(podcastCatalogConnectionString)}");
-            else await LogStartupErrorAsync(app.Services,
-                "podcastCatalogDb not loaded");
-
-            if (userManagementConnectionString != null)
-                await LogStartupAsync(app.Services,
-                    $"{SanitizeConnectionString(userManagementConnectionString)}");
-            else await LogStartupErrorAsync(app.Services, "userManagementDb not loaded");
-        }
-
-        private static async Task LogStartupAsync(
-            IServiceProvider services,
-            string message)
-        {
-            using var scope = services.CreateScope();
-
-            var loggingService = scope.ServiceProvider.GetService<ILoggingService>();
-
-            await loggingService.LogAsync(new LogEntity
+            if (musicCatalogConnectionString is null)
             {
-                RequestId = "SYSTEM",
-                LogLevel = Logging.Entities.ApplicationLogLevel.Info,
-                Message = message,
-                RequestName = "ApplicationStartup"
-            });
-        }
-
-        private static async Task LogStartupErrorAsync(
-            IServiceProvider services,
-            string message)
-        {
-            using var scope = services.CreateScope();
-            var loggingService = scope.ServiceProvider.GetService<ILoggingService>();
-
-            await loggingService.LogAsync(new LogEntity
+                Log.Warning("MusicCatalog connection string not loaded");
+            }
+            else
             {
-                RequestId = "SYSTEM",
-                LogLevel = Logging.Entities.ApplicationLogLevel.Warning,
-                Message = message,
-                RequestName = "ApplicationStartup"
-            });
-        }
-        private static async Task LogStartupErrorAsync(
-            IServiceProvider services,
-            string message, Exception ex)
-        {
-            using var scope = services.CreateScope();
+                Log.Information(
+                    "MusicCatalog connection loaded: {ConnectionString}",
+                    SanitizeConnectionString(musicCatalogConnectionString!));
+            }
 
-            var loggingService = scope.ServiceProvider.GetService<ILoggingService>();
 
-            await loggingService.LogAsync(new LogEntity
+            if (podcastCatalogConnectionString is null)
             {
-                RequestId = "SYSTEM",
-                LogLevel = Logging.Entities.ApplicationLogLevel.Warning,
-                Message = message,
-                RequestName = "ApplicationStartup",
-                Exception = ex.ToString()
-            });
+                Log.Warning("PodcastCatalog connection string not loaded");
+            }
+            else
+            {
+                Log.Information(
+                    "PodcastCatalog connection loaded: {ConnectionString}",
+                    SanitizeConnectionString(podcastCatalogConnectionString));
+            }
+
+            if (userManagementConnectionString is null)
+            {
+                Log.Warning("UserManagement connection string not loaded");
+            }
+            else
+            {
+                Log.Information(
+                    "UserManagement connection loaded: {ConnectionString}",
+                    SanitizeConnectionString(userManagementConnectionString));
+            }
+
+            try
+            {
+                Log.Information("Starting web application");
+
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Application terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+
+
         }
+
+        // logging
+
 
         private static string SanitizeConnectionString(string connectionString)
         {

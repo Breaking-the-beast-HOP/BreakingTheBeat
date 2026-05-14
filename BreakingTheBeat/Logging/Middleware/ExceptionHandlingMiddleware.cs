@@ -1,72 +1,45 @@
 ﻿using System.Net;
 using System.Text.Json;
-using Gateway.Logging.Entities;
-using Gateway.Logging.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
-namespace Gateway.Logging.Middleware
+namespace Gateway.Logging.Middleware;
+
+public class ExceptionHandlingMiddleware
 {
-    public class ExceptionHandlingMiddleware
+    private readonly RequestDelegate _next;
+    private readonly ILogger _logger;
+
+    public ExceptionHandlingMiddleware(
+        RequestDelegate next,
+        ILogger logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+        _next = next;
+        _logger = logger.ForContext<ExceptionHandlingMiddleware>();
+    }
 
-        public ExceptionHandlingMiddleware(
-            RequestDelegate next,
-            ILogger<ExceptionHandlingMiddleware> logger)
+    public async Task InvokeAsync(HttpContext context)
+    {
+        try
         {
-            _next = next;
-            _logger = logger;
+            await _next(context);
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        catch (Exception ex)
         {
-            try
-            {
-                await _next(context);
-            }
-            catch (Exception ex)
-            {
+            var requestId = context.Items["requestId"]?.ToString() ?? "UNKNOWN";
 
-                // Resolv ILoggingService fra HttpContext.RequestServices
-                var loggingService = context.RequestServices.GetRequiredService<ILoggingService>();
+            _logger.ForContext("RequestId", requestId)
+                .ForContext("Path", context.Request.Path)
+                .ForContext("StatusCode", StatusCodes.Status500InternalServerError)
+                .Error(ex, "Unhandled exception");
 
-                await LogException(context, ex, loggingService);
 
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.ContentType = "application/json";
 
-                context.Response.ContentType = "application/json";
-
-                var response = new
-                {
-                    Message = "An unexpected error occured."
-                };
-
-                var json = JsonSerializer.Serialize(response);
-
-                await context.Response.WriteAsync(json);
-            }
-        }
-
-        private async Task LogException(HttpContext context, Exception ex, ILoggingService loggingService)
-        {
-            var log = new LogEntity
-            {
-                RequestId = context.Items["requestId"]?.ToString() ?? "UNKNOWN",
-                LogLevel = ApplicationLogLevel.Error,
-                Exception = ex.ToString(),
-                Path = context.Request.Path,
-                Method = context.Request.Method,
-                Message = $"An unexpected error occurred with code: {context.Response.StatusCode}"
-            };
-            await loggingService.LogAsync(log);
-            _logger.LogError(
-                $"RequestId: {log.RequestId}, " +
-                $"Timestamp: {log.Timestamp}, " +
-                $"Level: {log.LogLevel}, " +
-                $"Exception: {log.Exception}, " +
-                $"Path: {log.Path}, " +
-                $"Method: {log.Method}"
-                );
+            var response = new { Message = "An unexpected error occurred." };
+            var json = JsonSerializer.Serialize(response);
+            await context.Response.WriteAsync(json);
         }
     }
 }

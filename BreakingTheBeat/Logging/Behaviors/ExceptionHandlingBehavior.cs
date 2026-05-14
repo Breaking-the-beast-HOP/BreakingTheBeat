@@ -1,65 +1,45 @@
-﻿using Gateway.Logging.Entities;
-using Gateway.Logging.Services;
-using MediatR;
+﻿using MediatR;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
-namespace Gateway.Logging.Behaviors
+namespace Gateway.Logging.Behaviors;
+
+public class ExceptionHandlingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
 {
-    public class ExceptionHandlingBehavior<TRequest, TResponse>
-    : IPipelineBehavior<TRequest, TResponse>
+    private readonly ILogger _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public ExceptionHandlingBehavior(
+        ILogger logger,
+        IHttpContextAccessor httpContextAccessor)
     {
-        private readonly ILogger<ExceptionHandlingBehavior<TRequest, TResponse>> _logger;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILoggingService _loggingService;
+        _logger = logger.ForContext<ExceptionHandlingBehavior<TRequest, TResponse>>();
+        _httpContextAccessor = httpContextAccessor;
+    }
 
-        public ExceptionHandlingBehavior(
-            ILogger<ExceptionHandlingBehavior<TRequest, TResponse>> logger,
-            IHttpContextAccessor httpContextAccessor,
-            ILoggingService loggingService)
+    public async Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken)
+    {
+        try
         {
-            _logger = logger;
-            _httpContextAccessor = httpContextAccessor;
-            _loggingService = loggingService;
+            return await next();
         }
-
-        public async Task<TResponse> Handle(
-            TRequest request,
-            RequestHandlerDelegate<TResponse> next,
-            CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            try
-            {
-                return await next();
-            }
-            catch (Exception ex)
-            {
-                var requestName = typeof(TRequest).Name;
+            var httpContext = _httpContextAccessor.HttpContext;
 
-                var requestId = _httpContextAccessor
-                    .HttpContext?
-                    .Items["requestId"]?
-                    .ToString();
+            var requestName = typeof(TRequest).Name;
 
-                var log = new LogEntity()
-                {
-                    RequestId = requestId ?? "UNKNOWN",
-                    LogLevel = ApplicationLogLevel.Error,
-                    RequestName = requestName,
-                    Exception = ex.ToString(),
-                    Message = $"Error in {requestName}: {ex.Message}"
-                };
+            var requestId = httpContext?.Items["requestId"]?.ToString() ?? "UNKNOWN";
 
-                await _loggingService.LogAsync(log);
-                _logger.LogError(
-                    $"RequestId: {log.RequestId}, " +
-                    $"Timestamp: {log.Timestamp}, " +
-                    $"Level: {log.LogLevel}, " +
-                    $"Message: {log.Message}, " +
-                    $"Request: {log.RequestName}, " +
-                    $"Exception: {log.Exception}"
-                    );
+            _logger
+                .ForContext("RequestId", requestId)
+                .ForContext("RequestName", requestName)
+                .Error(ex, "Unhandled MediatR exception");
 
-                throw;
-            }
+            throw;
         }
     }
 }
