@@ -1,6 +1,6 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@inject LoggingDbContext DbContext
+@inject IDbContextFactory<LoggingDbContext> DbFactory
 @using Monitoring.Models
 @using Microsoft.EntityFrameworkCore
 @using System.Globalization
@@ -165,15 +165,37 @@
     private Gatewaylog? selectedLog;
     private string sortField = "Timestamp";
     private bool sortAscending = false;
+    private PeriodicTimer? _timer;
+    private CancellationTokenSource _cts = new();
+    private DateTime? lastLoadedTimestamp;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
+
+        _timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+        _ = Task.Run(async () =>
+        {
+            while (await _timer.WaitForNextTickAsync(_cts.Token))
+            {
+                await InvokeAsync(async () =>
+                {
+                    await LoadNewLogs();
+                    StateHasChanged();
+                });
+            }
+        });
     }
+
 
     private async Task LoadData()
     {
-        var query = DbContext.Gatewaylogs.AsQueryable();
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+
+        var query = db.Gatewaylogs.AsQueryable();
+
 
         // Filtrering
         if (startDate.HasValue && endDate.HasValue)
@@ -197,6 +219,11 @@
 
         recentLogs = await query.Take(100).ToListAsync();
 
+        if (recentLogs.Any())
+        {
+            lastLoadedTimestamp = recentLogs.Max(l => l.Timestamp);
+        }
+
         // Hent log-counts pr. niveau (0-5)
         var levels = new[] { 0, 1, 2, 3, 4, 5 };
         foreach (var level in levels)
@@ -207,6 +234,33 @@
 
         totalLogs = await query.CountAsync();
     }
+
+    private async Task LoadNewLogs()
+    {
+        if (!lastLoadedTimestamp.HasValue)
+        {
+            await LoadData();
+            return;
+        }
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+
+        var newLogs = await db.Gatewaylogs
+            .Where(l => l.Timestamp > lastLoadedTimestamp)
+            .OrderByDescending(l => l.Timestamp)
+            .ToListAsync();
+
+        if (newLogs.Any())
+        {
+            recentLogs.InsertRange(0, newLogs);
+
+            if (recentLogs.Count > 100)
+                recentLogs = recentLogs.Take(100).ToList();
+
+            lastLoadedTimestamp = newLogs.Max(l => l.Timestamp);
+        }
+    }
+
 
     private void ShowFullLog(Gatewaylog log)
     {
@@ -260,6 +314,12 @@
         if (string.IsNullOrEmpty(text) || text.Length <= maxLength)
             return text ?? string.Empty;
         return text[..maxLength] + "...";
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _timer?.Dispose();
     }
 
     private string GetLevelName(int? level)

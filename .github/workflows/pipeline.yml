@@ -16,13 +16,18 @@ jobs:
             - name: Setup .NET Core
               uses: actions/setup-dotnet@v4
               with:
-                dotnet-version: 9.0.x
+                dotnet-version: 9.0.312
+
+            - name: Setup NuGet
+              uses: NuGet/setup-nuget@v1
+              with:
+                nuget-version: 'latest'
 
             - name: Cache NuGet packages
               uses: actions/cache@v4
               with:
                 path: ~/.nuget/packages
-                key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+                key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
                 restore-keys: |
                         ${{ runner.os }}-nuget-
 
@@ -45,7 +50,23 @@ jobs:
       steps:
         - name: Checkout
           uses: actions/checkout@v4
-      
+        
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 9.0.312
+        
+        - name: Setup NuGet
+          uses: NuGet/setup-nuget@v1
+          with:
+            nuget-version: 'latest'
+
+        - name: Clear NuGet cache
+          run: dotnet nuget locals all --clear
+        
+        - name: Restore
+          run: dotnet restore --no-cache
+
         - name: Run Gitleaks
           uses: gitleaks/gitleaks-action@v1
           with: 

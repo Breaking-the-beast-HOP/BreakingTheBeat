@@ -10,8 +10,14 @@ var connectionString = builder.Configuration.GetConnectionString("LoggingDb");
 if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("Connection string 'LoggingDb' not found in secrets");
 
-builder.Services.AddDbContext<LoggingDbContext>(options =>
-    options.UseNpgsql(connectionString));
+//builder.Services.AddDbContext<LoggingDbContext>(options =>
+//    options.UseNpgsql(connectionString));
+
+builder.Services.AddDbContextFactory<LoggingDbContext>(options =>
+{
+    options.UseNpgsql(connectionString);
+});
+
 
 builder.Services.AddTransient<NpgsqlConnection>(options =>
     new NpgsqlConnection(connectionString));

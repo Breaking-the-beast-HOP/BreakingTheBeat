@@ -20,7 +20,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
+	
+	<!-- Der er en vulnerability i pakken, men den anvendes kun til udvikling. -->
+    <!-- Brug den hvis du har behov, men pipeline fejler hvis den pushes -->
+	<!--<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12">
+		<PrivateAssets>All</PrivateAssets>
+	</PackageReference>-->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.15" />
