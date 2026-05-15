@@ -91,14 +91,15 @@
                 ?? [];
 
             _awaitingQc = items.Select(x => new QcReleaseDto(
-                x.Title,
-                "Unknown artist",
-                "Release",
-                x.EAN ?? "-",
-                "Awaiting QC",
-                x.ReceivedAtUtc,
-                null
-            )).ToList();
+                     x.ReleaseId,
+                     x.Title,
+                     "Unknown artist",
+                     "Release",
+                     x.EAN ?? "-",
+                     "Awaiting QC",
+                     x.ReceivedAtUtc,
+                     null
+                 )).ToList();
         }
         catch (Exception)
         {
@@ -111,15 +112,15 @@
     }
 
     private readonly List<QcReleaseDto> _readyForRecheck =
-    [
-        new("Afterglow", "Mira Sound", "Single", "4234567890123", "Ready for re-check", DateTime.Today.AddDays(-4), "Cover image updated and explicit flag corrected."),
-        new("Static Heart", "Low City", "Album", "5234567890123", "Ready for re-check", DateTime.Today.AddDays(-6), "Track metadata corrected.")
-    ];
+[
+    new(Guid.NewGuid(), "Afterglow", "Mira Sound", "Single", "4234567890123", "Ready for re-check", DateTime.Today.AddDays(-4), "Cover image updated and explicit flag corrected."),
+    new(Guid.NewGuid(), "Static Heart", "Low City", "Album", "5234567890123", "Ready for re-check", DateTime.Today.AddDays(-6), "Track metadata corrected.")
+];
 
     private readonly List<QcReleaseDto> _returnedForFixes =
     [
-        new("Golden Room", "Noah Reed", "EP", "6234567890123", "Returned for fixes", DateTime.Today.AddDays(-8), "EAN mismatch and missing contributor roles."),
-        new("Late Night Drive", "Ava North", "Single", "7234567890123", "Returned for fixes", DateTime.Today.AddDays(-10), "Artwork resolution too low.")
+        new(Guid.NewGuid(), "Golden Room", "Noah Reed", "EP", "6234567890123", "Returned for fixes", DateTime.Today.AddDays(-8), "EAN mismatch and missing contributor roles."),
+    new(Guid.NewGuid(), "Late Night Drive", "Ava North", "Single", "7234567890123", "Returned for fixes", DateTime.Today.AddDays(-10), "Artwork resolution too low.")
     ];
 
     public record ReleaseQcQueueItemResponse(

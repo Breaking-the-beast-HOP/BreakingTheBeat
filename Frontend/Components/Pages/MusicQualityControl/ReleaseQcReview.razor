@@ -1,0 +1,494 @@
+﻿@page "/music-qc/releases/{ReleaseId:guid}"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Quality controller,Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using System.Net.Http.Json
+@using MudBlazor
+@using Frontend.Components.Shared
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Release QC Review</PageTitle>
+
+<MudStack Spacing="3">
+
+    <MudPaper Class="pa-4" Elevation="5">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <div>
+                <MudText Typo="Typo.h4">@(_release?.Title ?? "Release QC Review")</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Review release metadata, assets, tracks and contributors.
+                </MudText>
+            </div>
+
+            <MudStack Row="true" Spacing="2">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Default"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Href="/music-qc">
+                    Back
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Success"
+                           StartIcon="@Icons.Material.Filled.CheckCircle"
+                           Disabled="@(!CanApprove)"
+                           OnClick="ApproveRelease">
+                    Approve
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.ReportProblem"
+                           OnClick="ReturnForFixes">
+                    Return for fixes
+                </MudButton>
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
+    }
+    else if (_release is null)
+    {
+        <MudAlert Severity="Severity.Warning">Release not found.</MudAlert>
+    }
+    else
+    {
+        <MudGrid Spacing="3">
+
+            <MudItem xs="12" md="7">
+                <MudStack Spacing="3">
+
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Release metadata</MudText>
+
+                        <QcReviewRow Label="Title"
+                                     Value="@(_release.Title ?? "-")"
+                                     IsApproved="@_review.TitleApproved"
+                                     IsApprovedChanged="@(value => _review.TitleApproved = value)"
+                                     Comment="@_review.TitleComment"
+                                     CommentChanged="@(value => _review.TitleComment = value)" />
+
+                        <QcReviewRow Label="Version"
+                                     Value="@(string.IsNullOrWhiteSpace(_release.Version) ? "-" : _release.Version)"
+                                     IsApproved="@_review.VersionApproved"
+                                     IsApprovedChanged="@(value => _review.VersionApproved = value)"
+                                     Comment="@_review.VersionComment"
+                                     CommentChanged="@(value => _review.VersionComment = value)" />
+
+                        <QcReviewRow Label="EAN"
+                                     Value="@(string.IsNullOrWhiteSpace(_release.EAN) ? "-" : _release.EAN)"
+                                     IsApproved="@_review.EanApproved"
+                                     IsApprovedChanged="@(value => _review.EanApproved = value)"
+                                     Comment="@_review.EanComment"
+                                     CommentChanged="@(value => _review.EanComment = value)" />
+
+                        <QcReviewRow Label="Release date"
+                                     Value="@FormatDateOnly(_release.ReleaseDate)"
+                                     IsApproved="@_review.ReleaseDateApproved"
+                                     IsApprovedChanged="@(value => _review.ReleaseDateApproved = value)"
+                                     Comment="@_review.ReleaseDateComment"
+                                     CommentChanged="@(value => _review.ReleaseDateComment = value)" />
+
+                        <QcReviewRow Label="Metadata language"
+                                     Value="@(_release.LanguageName ?? "-")"
+                                     IsApproved="@_review.LanguageApproved"
+                                     IsApprovedChanged="@(value => _review.LanguageApproved = value)"
+                                     Comment="@_review.LanguageComment"
+                                     CommentChanged="@(value => _review.LanguageComment = value)" />
+
+                        <QcReviewRow Label="Genre"
+                                     Value="@(_release.GenreName ?? "-")"
+                                     IsApproved="@_review.GenreApproved"
+                                     IsApprovedChanged="@(value => _review.GenreApproved = value)"
+                                     Comment="@_review.GenreComment"
+                                     CommentChanged="@(value => _review.GenreComment = value)" />
+                    </MudPaper>
+
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Contributors QC</MudText>
+
+                        <QcSectionReview Title="Contributors"
+                                         IsApproved="@_review.ContributorsApproved"
+                                         IsApprovedChanged="@(value => _review.ContributorsApproved = value)"
+                                         Comment="@_review.ContributorsComment"
+                                         CommentChanged="@(value => _review.ContributorsComment = value)" />
+
+                        <ContributionDisplay Title="Contributors"
+                                             EmptyText="No contributors registered."
+                                             Contributions="_contributionItems" />
+                    </MudPaper>
+
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Tracks and volumes QC</MudText>
+
+                        <QcSectionReview Title="Tracks and volume structure"
+                                         IsApproved="@_review.TracksApproved"
+                                         IsApprovedChanged="@(value => _review.TracksApproved = value)"
+                                         Comment="@_review.TracksComment"
+                                         CommentChanged="@(value => _review.TracksComment = value)" />
+
+                        @if (_release.Volumes is null || !_release.Volumes.Any())
+                        {
+                            <MudAlert Severity="Severity.Info" Dense="true">
+                                No volumes registered.
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            @foreach (var volume in _release.Volumes.OrderBy(v => v.VolumeNumber))
+                            {
+                                <MudPaper Class="mb-4" Outlined="true">
+                                    <MudStack Row="true"
+                                              Justify="Justify.SpaceBetween"
+                                              AlignItems="AlignItems.Center"
+                                              Class="pa-3">
+
+                                        <MudText Typo="Typo.h6">Volume @volume.VolumeNumber</MudText>
+
+                                        <MudChip T="string" Variant="Variant.Outlined" Size="Size.Small">
+                                            @volume.Tracks.Count track(s)
+                                        </MudChip>
+                                    </MudStack>
+
+                                    <MudDivider />
+
+                                    @foreach (var track in volume.Tracks.OrderBy(t => t.TrackNumber))
+                                    {
+                                        <MudStack Row="true"
+                                                  AlignItems="AlignItems.Center"
+                                                  Spacing="2"
+                                                  Class="pa-3">
+
+                                            <MudText Typo="Typo.body2">@track.TrackNumber</MudText>
+
+                                            <MudIcon Icon="@Icons.Material.Filled.AudioFile"
+                                                     Size="Size.Small"
+                                                     Color="Color.Warning" />
+
+                                            <MudStack Spacing="0" Class="flex-grow-1">
+                                                <MudText Typo="Typo.subtitle2">
+                                                    @(track.Title ?? "-")
+                                                </MudText>
+
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    @DisplayTrackSubtitle(track)
+                                                </MudText>
+                                            </MudStack>
+
+                                            <MudText Typo="Typo.body2">
+                                                @FormatDuration(track.DurationSeconds)
+                                            </MudText>
+                                        </MudStack>
+
+                                        <MudDivider />
+                                    }
+                                </MudPaper>
+                            }
+                        }
+                    </MudPaper>
+
+                </MudStack>
+            </MudItem>
+
+            <MudItem xs="12" md="5">
+                <MudStack Spacing="3">
+
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Cover QC</MudText>
+
+                        <QcSectionReview Title="Cover asset"
+                                         IsApproved="@_review.CoverApproved"
+                                         IsApprovedChanged="@(value => _review.CoverApproved = value)"
+                                         Comment="@_review.CoverComment"
+                                         CommentChanged="@(value => _review.CoverComment = value)" />
+
+                        <MudPaper Class="dropzone pa-6 mt-3" Outlined="true">
+                            <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Image"
+                                         Size="Size.Large"
+                                         Color="Color.Warning" />
+
+                                <MudText Typo="Typo.subtitle1">Cover asset</MudText>
+
+                                <MudChip T="string"
+                                         Color="@(_release.HasCover ? Color.Success : Color.Default)"
+                                         Variant="Variant.Outlined">
+                                    @(_release.HasCover ? "Uploaded" : "Not uploaded")
+                                </MudChip>
+                            </MudStack>
+                        </MudPaper>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">Booklet QC</MudText>
+
+                        <QcSectionReview Title="Booklet asset"
+                                         IsApproved="@_review.BookletApproved"
+                                         IsApprovedChanged="@(value => _review.BookletApproved = value)"
+                                         Comment="@_review.BookletComment"
+                                         CommentChanged="@(value => _review.BookletComment = value)" />
+
+                        <MudPaper Class="dropzone pa-6 mt-3" Outlined="true">
+                            <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf"
+                                         Size="Size.Large"
+                                         Color="Color.Warning" />
+
+                                <MudText Typo="Typo.subtitle1">Booklet asset</MudText>
+
+                                <MudChip T="string"
+                                         Color="@(_release.HasBooklet ? Color.Success : Color.Default)"
+                                         Variant="Variant.Outlined">
+                                    @(_release.HasBooklet ? "Uploaded" : "Not uploaded")
+                                </MudChip>
+                            </MudStack>
+                        </MudPaper>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudText Typo="Typo.h6" Class="mb-3">QC Summary</MudText>
+
+                        <MudGrid Spacing="2">
+                            <MudItem xs="12" sm="6">
+                                <DetailRow Label="Volumes" Value="@_release.Volumes.Count.ToString()" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <DetailRow Label="Tracks" Value="@_release.Volumes.SelectMany(v => v.Tracks).Count().ToString()" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <DetailRow Label="Duration" Value="@FormatDuration(_release.Volumes.SelectMany(v => v.Tracks).Sum(t => t.DurationSeconds))" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <DetailRow Label="Contributors" Value="@_release.Contributions.Count.ToString()" />
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudDivider Class="my-3" />
+
+                        <MudText Typo="Typo.body2" Color="@(CanApprove ? Color.Success : Color.Error)">
+                            @(CanApprove
+                                ? "All QC sections are approved."
+                                : "One or more QC sections are not approved.")
+                        </MudText>
+                    </MudPaper>
+
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+    }
+</MudStack>
+
+@code {
+    [Parameter]
+    public Guid ReleaseId { get; set; }
+
+    private ReleaseDetailsDto? _release;
+    private bool _isLoading = true;
+    private string? _errorMessage;
+
+    private ReleaseQcReviewModel _review = new();
+
+    private List<ContributionDisplay.ContributionListItem> _contributionItems = [];
+
+    private bool CanApprove =>
+        _review.TitleApproved &&
+        _review.VersionApproved &&
+        _review.EanApproved &&
+        _review.ReleaseDateApproved &&
+        _review.LanguageApproved &&
+        _review.GenreApproved &&
+        _review.ContributorsApproved &&
+        _review.TracksApproved &&
+        _review.CoverApproved &&
+        _review.BookletApproved;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _release = await Http.GetFromJsonAsync<ReleaseDetailsDto>(
+                $"api/release/{ReleaseId}");
+
+            if (_release is null)
+            {
+                _errorMessage = "Release not found.";
+                return;
+            }
+
+            _contributionItems = _release.Contributions
+                    .Select(x => new ContributionDisplay.ContributionListItem
+                    {
+                        ContributorId = x.ContributorId,
+                        ContributorName = x.ContributorName,
+                        Roles = x.Roles
+                            .Select(r => new ContributionDisplay.ContributionListRole
+                            {
+                                Id = r.Id,
+                                Name = r.Name
+                            })
+                            .ToList()
+                    })
+                    .ToList();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task ApproveRelease()
+    {
+        if (!CanApprove)
+            return;
+
+        await Http.PostAsJsonAsync(
+            $"api/qc/releases/{ReleaseId}/approve",
+            _review);
+
+        Navigation.NavigateTo("/music-qc");
+    }
+
+    private async Task ReturnForFixes()
+    {
+        await Http.PostAsJsonAsync(
+            $"api/qc/releases/{ReleaseId}/return-for-fixes",
+            _review);
+
+        Navigation.NavigateTo("/music-qc");
+    }
+
+    private static string FormatDateOnly(DateTime? date)
+    {
+        return date.HasValue
+            ? date.Value.ToString("dd-MM-yyyy")
+            : "-";
+    }
+
+    private static string FormatDuration(int totalSeconds)
+    {
+        if (totalSeconds <= 0)
+            return "-";
+
+        var time = TimeSpan.FromSeconds(totalSeconds);
+
+        if (time.TotalHours >= 1)
+            return $"{(int)time.TotalHours}:{time.Minutes:D2}:{time.Seconds:D2}";
+
+        return $"{time.Minutes}:{time.Seconds:D2}";
+    }
+
+    private static string DisplayTrackSubtitle(ReleaseTrackDto track)
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(track.Version))
+            parts.Add(track.Version);
+
+        if (!string.IsNullOrWhiteSpace(track.ISRC))
+            parts.Add(track.ISRC);
+
+        return parts.Count == 0 ? "-" : string.Join(" · ", parts);
+    }
+
+    public class ReleaseQcReviewModel
+    {
+        public bool TitleApproved { get; set; } = true;
+        public string? TitleComment { get; set; }
+
+        public bool VersionApproved { get; set; } = true;
+        public string? VersionComment { get; set; }
+
+        public bool EanApproved { get; set; } = true;
+        public string? EanComment { get; set; }
+
+        public bool ReleaseDateApproved { get; set; } = true;
+        public string? ReleaseDateComment { get; set; }
+
+        public bool LanguageApproved { get; set; } = true;
+        public string? LanguageComment { get; set; }
+
+        public bool GenreApproved { get; set; } = true;
+        public string? GenreComment { get; set; }
+
+        public bool ContributorsApproved { get; set; } = true;
+        public string? ContributorsComment { get; set; }
+
+        public bool TracksApproved { get; set; } = true;
+        public string? TracksComment { get; set; }
+
+        public bool CoverApproved { get; set; } = true;
+        public string? CoverComment { get; set; }
+
+        public bool BookletApproved { get; set; } = true;
+        public string? BookletComment { get; set; }
+    }
+
+    public class ReleaseDetailsDto
+    {
+        public Guid Id { get; set; }
+        public string? Title { get; set; }
+        public string? Version { get; set; }
+        public string? EAN { get; set; }
+        public DateTime? ReleaseDate { get; set; }
+
+        public Guid? GenreId { get; set; }
+        public string? GenreName { get; set; }
+
+        public Guid? LanguageId { get; set; }
+        public string? LanguageName { get; set; }
+
+        public bool HasCover { get; set; }
+        public bool HasBooklet { get; set; }
+
+        public List<ReleaseVolumeDto> Volumes { get; set; } = [];
+        public List<ContributionDto> Contributions { get; set; } = [];
+    }
+
+    public class ReleaseVolumeDto
+    {
+        public Guid Id { get; set; }
+        public int VolumeNumber { get; set; }
+        public List<ReleaseTrackDto> Tracks { get; set; } = [];
+    }
+
+    public class ReleaseTrackDto
+    {
+        public Guid TrackId { get; set; }
+        public int TrackNumber { get; set; }
+
+        public string? Title { get; set; }
+        public string? Version { get; set; }
+        public string? ISRC { get; set; }
+        public int DurationSeconds { get; set; }
+    }
+
+    public class ContributionDto
+    {
+        public Guid ContributorId { get; set; }
+        public string ContributorName { get; set; } = string.Empty;
+        public List<ContributionRoleDto> Roles { get; set; } = [];
+    }
+
+    public class ContributionRoleDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+}
