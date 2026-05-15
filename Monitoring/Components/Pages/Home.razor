@@ -1,0 +1,368 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@inject IDbContextFactory<LoggingDbContext> DbFactory
+@using Monitoring.Models
+@using Microsoft.EntityFrameworkCore
+@using System.Globalization
+@using System.Text.Json
+@using System.Text.Json.Nodes
+
+<h1>Logging Dashboard</h1>
+
+<!-- Filtrering -->
+<div class="row mb-3">
+    <div class="col-md-3">
+        <label for="startDate" class="form-label">Startdato:</label>
+        <input type="date" class="form-control" id="startDate" @bind="startDate" />
+    </div>
+    <div class="col-md-3">
+        <label for="endDate" class="form-label">Slutdato:</label>
+        <input type="date" class="form-control" id="endDate" @bind="endDate" />
+    </div>
+    <div class="col-md-3">
+        <label for="levelFilter" class="form-label">Log Niveau:</label>
+        <InputSelect class="form-select" @bind-Value="selectedLevel">
+            <option value="">Alle niveauer</option>
+            <option value="0">Verbose</option>
+            <option value="1">Debug</option>
+            <option value="2">Information</option>
+            <option value="3">Warning</option>
+            <option value="4">Error</option>
+            <option value="5">Fatal</option>
+        </InputSelect>
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button class="btn btn-primary" @onclick="LoadData">Opdater</button>
+    </div>
+</div>
+
+<!-- Oversigt (Log Counts) -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Logs</h5>
+                <p class="card-text fs-3">@totalLogs</p>
+            </div>
+        </div>
+    </div>
+    @foreach (var level in logCountsByLevel)
+    {
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@GetLevelName(int.Parse(level.Key))</h5>
+                    <p class="card-text fs-4">@level.Value</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Logs Tabel (Sorterbar) -->
+<div class="row">
+    <div class="col-12">
+        <h3>
+            Logs
+            <button class="btn btn-sm btn-outline-secondary ms-2" @onclick='() => SortBy("Timestamp")'>
+                Sorter efter Timestamp @(sortField == "Timestamp" ? (sortAscending ? "↑" : "↓") : "")
+            </button>
+
+            <button class="btn btn-sm btn-outline-secondary ms-2" @onclick='() => SortBy("Level")'>
+                Sorter efter Level @(sortField == "Level" ? (sortAscending ? "↑" : "↓") : "")
+            </button>
+
+            <button class="btn btn-sm btn-outline-secondary ms-2" @onclick='() => SortBy("Message")'>
+                Sorter efter Message @(sortField == "Message" ? (sortAscending ? "↑" : "↓") : "")
+            </button>
+        </h3>
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Level</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in recentLogs)
+                    {
+                        <tr @onclick="() => ShowFullLog(log)" style="cursor: pointer;">
+                            <td>@log.Timestamp?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)</td>
+                            <td>
+                                <span class="badge @GetBadgeClass(log.Level)">@GetLevelName(log.Level)</span>
+                            </td>
+                            <td>@Truncate(log.Message, 100)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal til fuld log-visning (Alle felter) -->
+@if (selectedLog != null)
+{
+    <div class="modal" style="display: block; background-color: rgba(0,0,0,0.5);" @onclick="CloseModal">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable" @onclick:stopPropagation>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <span class="badge @GetBadgeClass(selectedLog.Level) me-2">@GetLevelName(selectedLog.Level)</span>
+                        Log fra @selectedLog.Timestamp?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Message:</h6>
+                            <p>@selectedLog.Message</p>
+                            <hr />
+
+                            <h6>MessageTemplate:</h6>
+                            <pre>@selectedLog.MessageTemplate</pre>
+                            <hr />
+
+                            <h6>Level:</h6>
+                            <p>@GetLevelName(selectedLog.Level)</p>
+                            <hr />
+
+                            <h6>Timestamp:</h6>
+                            <p>@selectedLog.Timestamp?.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture)</p>
+                            <hr />
+
+                            <h6>Exception:</h6>
+                            <pre>@selectedLog.Exception</pre>
+                            <hr />
+
+                            <h6>LogEvent:</h6>
+                                <pre class="json-pre">@FormatJson(selectedLog.LogEvent)</pre>  ← Ændret
+                            <hr />
+
+                            <h6>Properties:</h6>
+                                <pre class="json-pre">@FormatJson(selectedLog.Properties)</pre>  ← Ændret
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Luk</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private DateTime? startDate = DateTime.Today.AddDays(-7);
+    private DateTime? endDate = DateTime.Today;
+    private int? selectedLevel;
+    private List<Gatewaylog> recentLogs = new();
+    private Dictionary<string, int> logCountsByLevel = new();
+    private int totalLogs;
+    private Gatewaylog? selectedLog;
+    private string sortField = "Timestamp";
+    private bool sortAscending = false;
+    private PeriodicTimer? _timer;
+    private CancellationTokenSource _cts = new();
+    private DateTime? lastLoadedTimestamp;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+
+        _timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+        _ = Task.Run(async () =>
+        {
+            while (await _timer.WaitForNextTickAsync(_cts.Token))
+            {
+                await InvokeAsync(async () =>
+                {
+                    await LoadNewLogs();
+                    StateHasChanged();
+                });
+            }
+        });
+    }
+
+
+    private async Task LoadData()
+    {
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+
+        var query = db.Gatewaylogs.AsQueryable();
+
+
+        // Filtrering
+        if (startDate.HasValue && endDate.HasValue)
+        {
+            query = query.Where(l => l.Timestamp >= startDate.Value && l.Timestamp <= endDate.Value);
+        }
+
+        if (selectedLevel.HasValue)
+        {
+            query = query.Where(l => l.Level == selectedLevel.Value);
+        }
+
+        // Sortering
+        query = sortField switch
+        {
+            "Timestamp" => sortAscending ? query.OrderBy(l => l.Timestamp) : query.OrderByDescending(l => l.Timestamp),
+            "Level" => sortAscending ? query.OrderBy(l => l.Level) : query.OrderByDescending(l => l.Level),
+            "Message" => sortAscending ? query.OrderBy(l => l.Message) : query.OrderByDescending(l => l.Message),
+            _ => query.OrderByDescending(l => l.Timestamp)
+        };
+
+        recentLogs = await query.Take(100).ToListAsync();
+
+        if (recentLogs.Any())
+        {
+            lastLoadedTimestamp = recentLogs.Max(l => l.Timestamp);
+        }
+
+        // Hent log-counts pr. niveau (0-5)
+        var levels = new[] { 0, 1, 2, 3, 4, 5 };
+        foreach (var level in levels)
+        {
+            var count = await query.CountAsync(l => l.Level == level);
+            logCountsByLevel[level.ToString()] = count;
+        }
+
+        totalLogs = await query.CountAsync();
+    }
+
+    private async Task LoadNewLogs()
+    {
+        if (!lastLoadedTimestamp.HasValue)
+        {
+            await LoadData();
+            return;
+        }
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+
+        var newLogs = await db.Gatewaylogs
+            .Where(l => l.Timestamp > lastLoadedTimestamp)
+            .OrderByDescending(l => l.Timestamp)
+            .ToListAsync();
+
+        if (newLogs.Any())
+        {
+            recentLogs.InsertRange(0, newLogs);
+
+            if (recentLogs.Count > 100)
+                recentLogs = recentLogs.Take(100).ToList();
+
+            lastLoadedTimestamp = newLogs.Max(l => l.Timestamp);
+        }
+    }
+
+
+    private void ShowFullLog(Gatewaylog log)
+    {
+        selectedLog = log;
+    }
+
+    private void CloseModal()
+    {
+        selectedLog = null;
+    }
+
+    // Formater JSON (hvis gyldigt) eller returner rå string
+    private string FormatJson(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            return "N/A";
+
+        try
+        {
+            // Parse og formatér JSON
+            var jsonNode = JsonNode.Parse(json);
+            return jsonNode?.ToJsonString(new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            }) ?? json;
+        }
+        catch
+        {
+            // Hvis parsing fejer, returner den rå string
+            return json;
+        }
+    }
+
+    private async Task SortBy(string field)
+    {
+        if (sortField == field)
+        {
+            sortAscending = !sortAscending; // Skift retning
+        }
+        else
+        {
+            sortField = field;
+            sortAscending = false; // Default: Descending
+        }
+        await LoadData(); // Genindlæs data med ny sortering
+    }
+
+    private string Truncate(string? text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text) || text.Length <= maxLength)
+            return text ?? string.Empty;
+        return text[..maxLength] + "...";
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _timer?.Dispose();
+    }
+
+    private string GetLevelName(int? level)
+    {
+        return level switch
+        {
+            0 => "Verbose",
+            1 => "Debug",
+            2 => "Information",
+            3 => "Warning",
+            4 => "Error",
+            5 => "Fatal",
+            _ => "Unknown"
+        };
+    }
+
+    private string GetBadgeClass(int? level)
+    {
+        return level switch
+        {
+            0 => "bg-light text-dark", // Verbose
+            1 => "bg-secondary",        // Debug
+            2 => "bg-info",             // Information
+            3 => "bg-warning",          // Warning
+            4 => "bg-danger",           // Error
+            5 => "bg-dark",             // Fatal
+            _ => "bg-primary"           // Unknown
+        };
+    }
+}
+
+<!-- JSON Syntax Highlighting -->
+<style>
+    .json-pre {
+        background-color: #2d3748;
+        color: #e2e8f0;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 14px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+</style>
