@@ -104,6 +104,18 @@ jobs:
             severity: CRITICAL,HIGH  
             ignore-unfixed: true
 
+        - name: Scan Monitoring-image (no-push)
+          run: docker build -t monitoring-test -f ./Monitoring/Dockerfile ./Monitoring
+
+        - name: Scan monitoring-image with Trivy
+          uses: aquasecurity/trivy-action@master
+          with:
+            image-ref: monitoring-test
+            format: table
+            exit-code: 1
+            severity: CRITICAL,HIGH
+            ignore-unfixed: true
+
     docker-build-push:
       name: Docker Build and Push
       needs: [linting, container-scans]
@@ -140,6 +152,14 @@ jobs:
             file: ./Frontend/Dockerfile
             push: true
             tags: ghcr.io/breaking-the-beast-hop/breakingthebeat-frontend:latest
+
+        - name: Build and push Monitoring Docker image
+          uses: docker/build-push-action@v5
+          with:
+            context: ./Monitoring
+            file: .Monitoring/Dockerfile
+            push: true
+            tags: ghcr.io/breaking-the-beast-hop/breakingthebeat-monitoring:latest
 
     deploy-to-server:
       name: Deploy to server
