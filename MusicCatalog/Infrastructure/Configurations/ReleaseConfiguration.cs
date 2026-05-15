@@ -28,6 +28,12 @@ namespace MusicCatalog.Infrastructure.Configurations
                 .HasColumnName("EAN")
                 .HasMaxLength(50);
 
+            builder.Property(r => r.Status)
+                .HasColumnName("Status")
+                .HasConversion<string>()
+                .HasMaxLength(50)
+                .IsRequired();
+
             builder.Property(r => r.ReleaseDate)
                 .HasColumnName("ReleaseDate")
                 .HasColumnType("timestamp without time zone");

@@ -16,8 +16,7 @@ namespace MusicCatalog.Infrastructure.Repositories
 
         public async Task<Release> AddAsync(Release entity)
         {
-            _context.Releases.Add(entity);
-            await _context.SaveChangesAsync();
+            await _context.Releases.AddAsync(entity);
 
             return entity;
         }
@@ -65,7 +64,6 @@ namespace MusicCatalog.Infrastructure.Repositories
 
             _context.Entry(existingRelease).CurrentValues.SetValues(entity);
 
-            await _context.SaveChangesAsync();
             return true;
         }
     }

@@ -205,15 +205,15 @@ namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Create
 
         private Task SaveDraft()
         {
-            return SaveRelease("Draft", validateForQc: false);
+            return SaveRelease(ReleaseStatusDto.Draft, validateForQc: false);
         }
 
         private Task SubmitToQc()
         {
-            return SaveRelease("ReadyForQc", validateForQc: true);
+            return SaveRelease(ReleaseStatusDto.ReadyForQc, validateForQc: true);
         }
 
-        private async Task SaveRelease(string status, bool validateForQc)
+        private async Task SaveRelease(ReleaseStatusDto status, bool validateForQc)
         {
             _errorMessage = null;
 
@@ -256,7 +256,6 @@ namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Create
                 if (response.IsSuccessStatusCode)
                 {
                     _createdReleaseId = await response.Content.ReadFromJsonAsync<Guid>();
-                    _lastSavedStatus = status;
                     _showSuccessDialog = true;
                 }
                 else
@@ -361,16 +360,6 @@ namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Create
             _showSuccessDialog = false;
             _errorMessage = null;
         }
-
-        public enum ReleaseStatusDto
-        {
-            Draft,
-            ReadyForQc,
-            InQc,
-            Approved,
-            Rejected
-        }
-
     }
 }
 

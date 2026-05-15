@@ -84,3 +84,13 @@ public class ReleaseTrackDto
     public string? ISRC { get; set; }
     public int DurationSeconds { get; set; }
 }
+
+public enum ReleaseStatusDto
+{
+    Draft,
+    ReadyForQc,
+    InQc,
+    Approved,
+    Rejected,
+    Distributed
+}

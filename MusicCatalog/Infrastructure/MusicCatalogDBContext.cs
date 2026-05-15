@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicCatalog.Domain;
 using MusicCatalog.Domain.Entities;
 
 namespace MusicCatalog.Infrastructure
@@ -15,6 +16,7 @@ namespace MusicCatalog.Infrastructure
         public DbSet<ContributorRole> ContributorRoles => Set<ContributorRole>();
         public DbSet<Contribution> Contributions => Set<Contribution>();
         public DbSet<Release> Releases => Set<Release>();
+        public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

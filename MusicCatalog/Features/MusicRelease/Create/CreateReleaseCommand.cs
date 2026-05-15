@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using MusicCatalog.Domain.Entities;
+using MusicCatalog.Domain.Enums;
 
 namespace MusicCatalog.Features.Release.Create;
 
@@ -6,10 +8,10 @@ public record CreateReleaseCommand(
     string Title,
     string? Version,
     string? EAN,
-    string? Status,
+    ReleaseStatus Status,
     DateTime? ReleaseDate,
-    Guid? GenreId,
-    Guid? LanguageId,
+    Guid GenreId,
+    Guid LanguageId,
     List<CreateReleaseVolumeInput> Volumes,
     List<CreateReleaseContributionInput> Contributions
 ) : IRequest<Guid>;

@@ -5,6 +5,7 @@ using Gateway.Infrastructure.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MusicCatalog.Features;
 using MusicCatalog.Features.Contributor;
 using MusicCatalog.Features.Contributor.Create;
 using MusicCatalog.Features.ContributorRole;
@@ -19,6 +20,7 @@ using MusicCatalog.Features.Track;
 using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Infrastructure;
 using MusicCatalog.Infrastructure.Repositories;
+using MusicCatalog.Infrastructure.UnitOfWorks;
 using PodcastCatalog.Domain.Entities;
 using PodcastCatalog.Features.Podcasts.Interfaces;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Create;
@@ -28,6 +30,7 @@ using PodcastCatalog.Features.Podcasts.PodcastCore.Update;
 using PodcastCatalog.Infrastructure.Data;
 using PodcastCatalog.Infrastructure.Repositories;
 using SharedKernel;
+using SharedKernel.Interfaces;
 using SharedKernel.Interfaces.Base;
 using UserManagement.Domain.Entities;
 using UserManagement.Features.User.GetAll;
@@ -126,6 +129,8 @@ namespace Gateway
             builder.Services.AddScoped<IContributorRepository, MusicCatalog.Infrastructure.Repositories.ContributorRepository>();
             builder.Services.AddScoped<IContributorRoleRepository, ContributionRoleRepository>();
             builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
+            builder.Services.AddScoped<IOutBoxRepository, OutboxRepository>();
+            builder.Services.AddScoped<IUnitOfWork, MusicCatalogUnitOfWork>();
 
             // 5. Repositories (podcast)
             builder.Services.AddScoped<IPodcastRepository, PodcastRepository>();
