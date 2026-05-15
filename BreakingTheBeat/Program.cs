@@ -37,6 +37,9 @@ using UserManagement.Features.User.GetAll;
 using UserManagement.Features.User.Register;
 using UserManagement.Infrastructure.Auth;
 using UserManagement.Infrastructure.Persistence;
+using MusicQualityControl.Features;
+using MusicQualityControl.Features.SubmitReleaseToQc;
+using MusicQualityControl.Infrastructure;
 
 namespace Gateway
 {
@@ -92,6 +95,19 @@ namespace Gateway
                 options.AddInterceptors(interceptor);
             });
 
+            builder.Services.AddDbContext<MusicQualityControlDbContext>((sp, options) =>
+            {
+                var interceptor = sp.GetRequiredService<PostgresRoleInterceptor>();
+
+                var connectionString =
+                    builder.Configuration.GetConnectionString("MusicQualityControlDb")
+                    ?? throw new InvalidOperationException(
+                        "Connection string 'MusicQualityControlDb' not found.");
+
+                options.UseNpgsql(connectionString);
+                options.AddInterceptors(interceptor);
+            });
+
             // 3. Identity
             builder.Services
                 .AddIdentity<ApplicationUser, IdentityRole<Guid>>()
@@ -132,6 +148,9 @@ namespace Gateway
             builder.Services.AddScoped<IOutBoxRepository, OutboxRepository>();
             builder.Services.AddScoped<IUnitOfWork, MusicCatalogUnitOfWork>();
 
+            // MUSIC QC
+            builder.Services.AddScoped<IReleaseQcQueueItemRepository, ReleaseQcQueueItemRepository>();
+
             // 5. Repositories (podcast)
             builder.Services.AddScoped<IPodcastRepository, PodcastRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
@@ -164,6 +183,9 @@ namespace Gateway
                 // UserManagement
                 cfg.RegisterServicesFromAssembly(typeof(RegisterUserCommand).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetUsersQuery).Assembly);
+
+                // Music QC
+                cfg.RegisterServicesFromAssembly(typeof(SubmitReleaseToQcCommand).Assembly);
             });
 
             // 8. Controllers

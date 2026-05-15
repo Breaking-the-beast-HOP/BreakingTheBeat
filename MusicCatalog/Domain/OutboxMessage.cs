@@ -21,5 +21,16 @@
                 Payload = payload
             };
         }
+
+        public void MarkAsProcessed()
+        {
+            ProcessedOnUtc = DateTime.UtcNow;
+            Error = null;
+        }
+
+        public void MarkAsFailed(string error)
+        {
+            Error = error;
+        }
     }
 }
