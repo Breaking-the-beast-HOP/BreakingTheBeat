@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.ContributorRole;
 
 namespace Gateway.Controllers.Music
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class ContributorRoleController : ControllerBase
     {
@@ -16,6 +18,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<IActionResult> GetContributorRoles(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new MusicCatalog.Features.ContributorRole.GetAll.GetContributorRolesQuery(), cancellationToken);

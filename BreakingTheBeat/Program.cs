@@ -1,13 +1,12 @@
 using System.Security.Claims;
 using System.Text;
 using FluentValidation;
+using Gateway.Infrastructure.Auth;
 using Gateway.Logging.Behaviors;
-using Gateway.Logging.Entities;
 using Gateway.Logging.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using MusicCatalog.Features.Contributor;
 using MusicCatalog.Features.Contributor.Create;
@@ -24,10 +23,11 @@ using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Infrastructure;
 using MusicCatalog.Infrastructure.Repositories;
 using PodcastCatalog.Domain.Entities;
-using PodcastCatalog.Features.Podcasts.Create;
-using PodcastCatalog.Features.Podcasts.Get;
-using PodcastCatalog.Features.Podcasts.GetAll;
-using PodcastCatalog.Features.Podcasts.Update;
+using PodcastCatalog.Features.Podcasts.Interfaces;
+using PodcastCatalog.Features.Podcasts.PodcastCore.Create;
+using PodcastCatalog.Features.Podcasts.PodcastCore.Get;
+using PodcastCatalog.Features.Podcasts.PodcastCore.GetAll;
+using PodcastCatalog.Features.Podcasts.PodcastCore.Update;
 using PodcastCatalog.Infrastructure.Data;
 using PodcastCatalog.Infrastructure.Repositories;
 using Serilog;
@@ -48,7 +48,11 @@ namespace Gateway
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
+            builder.Services.AddHttpContextAccessor();
+
+            // Serilog
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
                 .WriteTo.Console()
                 .WriteTo.PostgreSQL(
                     connectionString: builder.Configuration.GetConnectionString("LoggingDb"),
@@ -67,38 +71,55 @@ namespace Gateway
                 .CreateLogger();
 
             builder.Host.UseSerilog();
+
+            var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatalogDb");
+            var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatalogDb");
+            var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb");
+
             builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
-            builder.Services.AddHttpContextAccessor();
 
-            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-            var jwtAudience = builder.Configuration["Jwt:Audience"];
-            var jwtKey = builder.Configuration["Jwt:Key"];
-
-            Log.Information(
-                "JWT configuration loaded | Issuer: {Issuer} | Audience: {Audience} | KeyConfigured: {KeyConfigured} | KeyLength: {KeyLength}",
-                jwtIssuer,
-                jwtAudience,
-                !string.IsNullOrWhiteSpace(jwtKey),
-                jwtKey?.Length ?? 0);
-
-            // 1. Connection strings
-            var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatDb");
-
-            var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatDb")
-                ?? throw new InvalidOperationException("Connection string 'PodcastCatDb' not found.");
-
-            var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb")
-                ?? throw new InvalidOperationException("Connection string 'UserManagementDb' not found.");
+            builder.Services.AddScoped<PostgresRoleService>();
+            builder.Services.AddScoped<PostgresRoleInterceptor>();
 
             // 2. DbContexts
-            builder.Services.AddDbContext<MusicCatalogDbContext>(options =>
-                options.UseNpgsql(musicCatalogConnectionString));
+            builder.Services.AddDbContext<MusicCatalogDbContext>((sp, options) =>
+            {
+                var interceptor = sp.GetRequiredService<PostgresRoleInterceptor>();
 
-            builder.Services.AddDbContext<PodcastCatalogDbContext>(options =>
-                options.UseNpgsql(podcastCatalogConnectionString));
+                var connectionString =
+                    builder.Configuration.GetConnectionString("MusicCatalogDb")
+                    ?? throw new InvalidOperationException(
+                        "Connection string 'MusicCatalogDb' not found.");
 
-            builder.Services.AddDbContext<UserManagementDbContext>(options =>
-                options.UseNpgsql(userManagementConnectionString));
+                options.UseNpgsql(connectionString);
+                options.AddInterceptors(interceptor);
+            });
+
+            builder.Services.AddDbContext<PodcastCatalogDbContext>((sp, options) =>
+            {
+                var interceptor = sp.GetRequiredService<PostgresRoleInterceptor>();
+
+                var connectionString =
+                    builder.Configuration.GetConnectionString("PodcastCatalogDb")
+                    ?? throw new InvalidOperationException(
+                        "Connection string 'PodcastCatalogDb' not found.");
+
+                options.UseNpgsql(connectionString);
+                options.AddInterceptors(interceptor);
+            });
+
+            builder.Services.AddDbContext<UserManagementDbContext>((sp, options) =>
+            {
+                var interceptor = sp.GetRequiredService<PostgresRoleInterceptor>();
+
+                var connectionString =
+                    builder.Configuration.GetConnectionString("UserManagementDb")
+                    ?? throw new InvalidOperationException(
+                        "Connection string 'UserManagementDb' not found.");
+
+                options.UseNpgsql(connectionString);
+                options.AddInterceptors(interceptor);
+            });
 
 
             // 3. Identity
@@ -140,7 +161,7 @@ namespace Gateway
             builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
 
             // 5. Repositories (podcast)
-            builder.Services.AddScoped<ICrudRepository<Podcast>, PodcastRepository>();
+            builder.Services.AddScoped<IPodcastRepository, PodcastRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
             builder.Services.AddScoped<IReadRepository<Category>, CategoryRepository>();
             builder.Services.AddScoped<IReadRepository<ContributorRole>, ContributorRoleRepository>();
@@ -191,6 +212,8 @@ namespace Gateway
 
             app.UseSerilogRequestLogging();
 
+
+
             // Pipeline
             if (app.Environment.IsDevelopment())
             {
@@ -202,6 +225,23 @@ namespace Gateway
             app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
             app.UseHttpsRedirection();
+
+            // Seed / migrate podcast database
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                try
+                {
+                    var podcastContext = services.GetRequiredService<PodcastCatalogDbContext>();
+                    podcastContext.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding the database.");
+                }
+            }
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -246,6 +286,7 @@ namespace Gateway
                     "UserManagement connection loaded: {ConnectionString}",
                     SanitizeConnectionString(userManagementConnectionString));
             }
+
 
             try
             {

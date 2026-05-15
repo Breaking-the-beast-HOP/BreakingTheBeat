@@ -1,5 +1,6 @@
 ﻿using Gateway.Contracts.Music.Contributor;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Contributor.Create;
 using MusicCatalog.Features.Contributor.Delete;
@@ -9,6 +10,7 @@ using MusicCatalog.Features.Contributor.GetById;
 namespace Gateway.Controllers.Music
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class ContributorController : ControllerBase
     {
@@ -22,6 +24,7 @@ namespace Gateway.Controllers.Music
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Content Creator")]
         public async Task<IActionResult> CreateContributor([FromBody] ContributorRequest request, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new CreateContributorCommand(request.LegalName, request.DisplayName, request.IPI, request.ISNI), cancellationToken);
@@ -30,6 +33,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet(Name = "GetContributors")]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<ActionResult<List<ContributorResponse>>> Get(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetContributorsQuery(), cancellationToken);
@@ -37,6 +41,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<ActionResult<ContributorDetailsResponse>> Get(Guid id, CancellationToken cancellationToken)
         {
             var contributor = await _mediator.Send(new GetContributorByIdQuery(id), cancellationToken);
@@ -74,6 +79,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin,Content Creator")]
         public async Task<IActionResult> DeleteContributor(Guid id, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new DeleteContributorCommand(id), cancellationToken);

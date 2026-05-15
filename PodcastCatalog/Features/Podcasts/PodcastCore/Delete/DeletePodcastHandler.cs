@@ -6,16 +6,17 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using PodcastCatalog.Domain.Entities;
+using PodcastCatalog.Features.Podcasts.Interfaces;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
 
-namespace PodcastCatalog.Features.Podcasts.Delete
+namespace PodcastCatalog.Features.Podcasts.PodcastCore.Delete
 {
     public class DeletePodcastHandler : IRequestHandler<DeletePodcastCommand, Unit>
     {
-        private readonly ICrudRepository<Podcast> _podcastRepository;
+        private readonly IPodcastRepository _podcastRepository;
         private readonly IValidator<DeletePodcastCommand> _validator;
-        public DeletePodcastHandler(ICrudRepository<Podcast> podcastRepository, IValidator<DeletePodcastCommand> validator)
+        public DeletePodcastHandler(IPodcastRepository podcastRepository, IValidator<DeletePodcastCommand> validator)
         {
             _podcastRepository = podcastRepository;
             _validator = validator;

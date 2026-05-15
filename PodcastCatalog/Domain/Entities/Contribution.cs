@@ -48,6 +48,33 @@
         public Contribution(Guid id, Contributor contributor, ContributorRole role, Episode episode)
             : this(id, contributor, role, null, episode)
         {
+
+        }
+
+        private Contribution(Guid contributorId, Guid contributorRoleId, Guid? episodeId, Guid? podcastId)
+        {
+            if (episodeId is null && podcastId is null)
+                throw new ArgumentException("Contribution must belong to either a track or a release.");
+
+            if (episodeId is not null && podcastId is not null)
+                throw new ArgumentException("Contribution cannot belong to both track and release.");
+
+            Id = Guid.NewGuid();
+
+            ContributorId = contributorId;
+            ContributorRoleId = contributorRoleId;
+            EpisodeId = episodeId;
+            PodcastId = podcastId;
+        }
+
+        public static Contribution ForEpisode(Guid episodeId, Guid contributorId, Guid roleId)
+        {
+            return new Contribution(contributorId, roleId, episodeId, null);
+        }
+
+        public static Contribution ForPodcast(Guid podcastId, Guid contributorId, Guid roleId)
+        {
+            return new Contribution(contributorId, roleId, null, podcastId);
         }
 
         public void ChangeRole(ContributorRole role)

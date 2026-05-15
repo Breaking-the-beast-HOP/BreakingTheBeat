@@ -1,13 +1,13 @@
-﻿using Gateway.Contracts.Podcast;
-using Gateway.Contracts.Podcast.Language;
+﻿using Gateway.Contracts.Podcast.Language;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PodcastCatalog.Features.Languages.GetAll;
 
 namespace Gateway.Controllers.Podcast
 {
     [Route("api/podcasts/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class LanguageController : ControllerBase
     {

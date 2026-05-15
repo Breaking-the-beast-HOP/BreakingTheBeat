@@ -3,6 +3,7 @@ using Gateway.Contracts.Music.MusicRelease.Get;
 using Gateway.Contracts.Music.MusicRelease.GetAll;
 using Gateway.Contracts.Music.MusicRelease.Update;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Release.Create;
 using MusicCatalog.Features.Release.GetAll;
@@ -13,6 +14,7 @@ namespace Gateway.Controllers.Music
 {
 
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     public class ReleaseController : ControllerBase
     {
@@ -24,6 +26,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Content Creator")]
         public async Task<IActionResult> CreateRelease([FromBody] CreateReleaseRequest request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(request.Title))
@@ -74,6 +77,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<ActionResult<List<ReleaseResponse>>> GetAllReleases(CancellationToken cancellationToken)
         {
             var releases = await _mediator.Send(
@@ -95,6 +99,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<ActionResult<ReleaseDetailsResponse>> GetReleaseById(Guid id, CancellationToken cancellationToken)
         {
             var release = await _mediator.Send(new GetReleaseByIdQuery(id), cancellationToken);
@@ -106,6 +111,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin,Content Creator")]
         public async Task<IActionResult> UpdateRelease(Guid id, [FromBody] UpdateReleaseRequest request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(request.Title))

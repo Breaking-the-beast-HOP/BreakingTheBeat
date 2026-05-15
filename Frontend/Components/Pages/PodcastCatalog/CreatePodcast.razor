@@ -3,6 +3,7 @@
 @using MudBlazor
 @inject HttpClient Http
 @inject NavigationManager nav
+@inject IDialogService DialogService
 
 <PageTitle>Create Podcast</PageTitle>
 
@@ -242,12 +243,24 @@
                 </MudStack>
             </MudItem>
 
+            <MudItem xs="12">
+                <PodcastSeasonEditor Seasons="_seasons"
+                                     IsLoading="_isLoadingSeasons"
+                                     AddSeasonRequested="AddSeason"
+                                     RemoveSeasonRequested="RemoveSeason"
+                                     AddEpisodeRequested="AddEpisode"
+                                     RemoveEpisodeRequested="RemoveEpisode" />
+            </MudItem>
+
         </MudGrid>
 
     </MudStack>
 </MudContainer>
 
 @code {
+    private bool _isLoadingSeasons;
+    private List<PodcastSeasonEditor.SeasonDto> _seasons = [];
+
     private PodcastModel _model = new();
 
     private static readonly Guid PlaceholderId =
@@ -273,22 +286,25 @@
     {
         try
         {
-            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") ?? new();
+            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") 
+                                ?? new();
 
-            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category")
-                          ?? GetFallbackCategories();
-            _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>("api/podcasts/ContributorRole")
-                                ?? _contributionRoles;
-            _contributors = await Http.GetFromJsonAsync<List<Contributor>>("api/podcasts/Contributor")
-                                ?? _contributors;
+            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category") 
+                                ?? new();
+
+            // _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>("api/podcasts/ContributorRole")
+            //                     ?? new();
+
+            // _contributors = await Http.GetFromJsonAsync<List<Contributor>>("api/podcasts/Contributor")
+            //                     ?? new();
         }
         catch
         {
-            _categories = GetFallbackCategories();
+            // _categories = GetFallbackCategories();
         }
         finally
         {
-            EnsurePlaceholderExists();
+            // EnsurePlaceholderExists();
 
             _selectedCategory = null;
             _selectedLanguage = null;
@@ -369,6 +385,76 @@
             _contributionRows.RemoveAt(index);
     }
 
+    private void AddSeason()
+    {
+        var nextSeasonNumber = _seasons.Any()
+            ? _seasons.Max(s => s.SeasonNumber) + 1
+            : 1;
+
+        _seasons.Add(new PodcastSeasonEditor.SeasonDto
+        {
+            Id = Guid.NewGuid(),
+            SeasonNumber = nextSeasonNumber,
+            Title = $"Season {nextSeasonNumber}",
+            Episodes = []
+        });
+    }
+
+    private void RemoveSeason(PodcastSeasonEditor.SeasonDto season)
+    {
+        _seasons.Remove(season);
+
+        for (var i = 0; i < _seasons.Count; i++)
+        {
+            _seasons[i].SeasonNumber = i + 1;
+        }
+    }
+
+    private async Task AddEpisode(PodcastSeasonEditor.SeasonDto season)
+    {
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true,
+            CloseButton = true
+        };
+
+        var dialog = await DialogService.ShowAsync<EpisodeDialog>(
+            "Add Episode",
+            new DialogParameters(),
+            options);
+
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled)
+            return;
+
+        if (result.Data is not EpisodeDialog.EpisodeDialogResult episode)
+            return;
+
+        season.Episodes.Add(new PodcastSeasonEditor.EpisodeDto
+        {
+            Id = Guid.NewGuid(),
+            Title = episode.Title,
+            Description = episode.Description,
+            Duration = episode.Duration,
+            AiringDate = episode.AiringDate,
+            TagId = episode.TagId,
+            TagName = episode.TagName
+        });
+    }
+
+    private void RemoveEpisode(PodcastSeasonEditor.EpisodeDto episode)
+    {
+        var season = _seasons.FirstOrDefault(s =>
+            s.Episodes.Any(e => e.Id == episode.Id));
+
+        if (season is null)
+            return;
+
+        season.Episodes.Remove(episode);
+    }
+
     private async Task SavePodcast()
     {
         _errorMessage = null;
@@ -401,11 +487,11 @@
                 ContributorName = r.ContributorName
             }).ToList();
 
-        if(!_model.Contributions.Any())
-        {
-            _errorMessage = "At least one contribution is required.";
-            return;
-        }
+        // if(!_model.Contributions.Any()) //TEMP for testing without it 
+        // {
+        //     _errorMessage = "At least one contribution is required.";
+        //     return;
+        // }
 
         if (_model.Contributions.Any(c => c.ContributorId == null || c.ContributorRoleId == null))
         {
@@ -418,7 +504,33 @@
         {
             _isSaving = true;
 
-            var response = await Http.PostAsJsonAsync("api/podcasts/podcast", _model);
+            var request = new NewPodcastRequest
+            {
+                Title = _model.Title!,
+                Description = _model.Description,
+                CategoryId = _model.CategoryId!.Value,
+                LanguageId = _model.LanguageId!.Value,
+
+                // Contributors virker ikke endnu
+                Contributions = null,
+
+                Seasons = _seasons.Select(season => new NewPodcastSeasonRequest
+                {
+                    Title = season.Title,
+                    SeasonNumber = season.SeasonNumber,
+                    Episodes = season.Episodes.Select(episode => new NewPodcastEpisodeRequest
+                    {
+                        Title = episode.Title,
+                        Description = episode.Description,
+                        Duration = episode.Duration,
+                        AiringDate = episode.AiringDate,
+                        TagId = episode.TagId,
+                        Status = "Draft"
+                    }).ToList()
+                }).ToList()
+            };
+
+            var response = await Http.PostAsJsonAsync("api/podcasts/podcast", request);
 
             if (response.IsSuccessStatusCode)
             {
@@ -449,36 +561,6 @@
         }
     }
 
-    private void EnsurePlaceholderExists()
-    {
-        if (!_categories.Any(c => c.Id == PlaceholderId))
-        {
-            _categories.Insert(0, new PodcastCategoryDto
-            {
-                Id = PlaceholderId,
-                Name = "Placeholder"
-            });
-        }
-
-        if (!_languages.Any(l => l.Id == PlaceholderId))
-        {
-            _languages.Insert(0, new LanguageDto
-            {
-                Id = PlaceholderId,
-                Name = "Placeholder",
-                ISO = "xx"
-            });
-        }
-    }
-
-
-    private static List<PodcastCategoryDto> GetFallbackCategories()
-    {
-        return new()
-        {
-            new PodcastCategoryDto { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "Placeholder" }
-        };
-    }
 
     public class PodcastModel
     {
@@ -486,9 +568,9 @@
         public string? Description { get; set; }
         public Guid? CategoryId { get; set; }
         public Guid? LanguageId { get; set; }
-
-        public List<ContributionRequest> Contributions { get; set; } = new();
+        public List<ContributionRequest> Contributions { get; set; } = [];
     }
+
     public class ContributionRequest
     {
         public Guid ContributorId { get; set; }
@@ -501,7 +583,6 @@
     {
         public Guid? ContributorId { get; set; }
         public string? ContributorName { get; set; }
-
         public Guid? ContributorRoleId { get; set; }
         public bool HasRights { get; set; }
     }
@@ -517,7 +598,7 @@
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
-        public string? Description { get; set; } = "";
+        public string? Description { get; set; }
     }
 
     public class LanguageDto
@@ -531,5 +612,38 @@
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
+    }
+    public class NewPodcastRequest
+    {
+        public string Title { get; set; } = "";
+        public string? Description { get; set; }
+
+        public Guid CategoryId { get; set; }
+        public Guid LanguageId { get; set; }
+
+        public List<ContributionRequest>? Contributions { get; set; }
+
+        public List<NewPodcastSeasonRequest> Seasons { get; set; } = [];
+    }
+
+    public class NewPodcastSeasonRequest
+    {
+        public string? Title { get; set; }
+        public int SeasonNumber { get; set; }
+
+        public List<NewPodcastEpisodeRequest> Episodes { get; set; } = [];
+    }
+
+    public class NewPodcastEpisodeRequest
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+
+        public TimeSpan? Duration { get; set; }
+        public DateOnly? AiringDate { get; set; }
+
+        public Guid? TagId { get; set; }
+
+        public string Status { get; set; } = "Draft";
     }
 }

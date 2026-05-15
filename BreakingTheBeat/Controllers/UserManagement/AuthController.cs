@@ -1,5 +1,6 @@
 ﻿using Gateway.Contracts.UserManagement;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserManagement.Features.User.Login;
 using UserManagement.Features.User.Register;
@@ -18,6 +19,8 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Register([FromBody] RegisterUserRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Email))

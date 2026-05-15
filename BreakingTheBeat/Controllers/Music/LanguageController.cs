@@ -1,11 +1,13 @@
 ﻿using Gateway.Contracts.Music.Language;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Language.GetLanguages;
 
 namespace Gateway.Controllers.Music
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     public class LanguageController : ControllerBase
     {
@@ -17,6 +19,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet(Name = "GetLanguages")]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<ActionResult<List<LanguageResponse>>> Get(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetLanguagesQuery(), cancellationToken);

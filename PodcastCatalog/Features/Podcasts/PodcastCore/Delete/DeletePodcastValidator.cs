@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace PodcastCatalog.Features.Podcasts.Delete
+namespace PodcastCatalog.Features.Podcasts.PodcastCore.Delete
 {
     public class DeletePodcastValidator : AbstractValidator<DeletePodcastCommand>
     {
