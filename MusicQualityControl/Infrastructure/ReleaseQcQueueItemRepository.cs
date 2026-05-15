@@ -1,4 +1,5 @@
-﻿using MusicQualityControl.Domain.ReadModels;
+﻿using Microsoft.EntityFrameworkCore;
+using MusicQualityControl.Domain.ReadModels;
 using MusicQualityControl.Features;
 
 namespace MusicQualityControl.Infrastructure
@@ -19,9 +20,12 @@ namespace MusicQualityControl.Infrastructure
             return entity;
         }
 
-        public Task<List<ReleaseQcQueueItem>> GetAllAsync()
+        public async Task<List<ReleaseQcQueueItem>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.ReleaseQcQueueItems
+               .AsNoTracking()
+               .OrderBy(x => x.ReceivedAtUtc)
+               .ToListAsync();
         }
 
         public Task<ReleaseQcQueueItem?> GetByIdAsync(Guid id)

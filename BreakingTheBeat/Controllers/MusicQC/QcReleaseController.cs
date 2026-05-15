@@ -1,18 +1,21 @@
 ﻿using Gateway.Contracts.MusicQC;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MusicQualityControl.Features.GetQcQueue;
 using MusicQualityControl.Features.SubmitReleaseToQc;
 
 namespace Gateway.Controllers.MusicQC;
 
 [Route("api/qc/releases")]
+[Authorize(AuthenticationSchemes = "Bearer")]
 [ApiController]
-public class QcReleaseInboxController : ControllerBase
+public class QcReleaseController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IConfiguration _configuration;
 
-    public QcReleaseInboxController(IMediator mediator,IConfiguration configuration)
+    public QcReleaseController(IMediator mediator,IConfiguration configuration)
     {
         _mediator = mediator;
         _configuration = configuration;
@@ -37,5 +40,23 @@ public class QcReleaseInboxController : ControllerBase
         await _mediator.Send(command, cancellationToken);
 
         return Ok();
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "Admin,Quality controller")]
+    public async Task<IActionResult> GetQcQueue(CancellationToken cancellationToken)
+    {
+        var items = await _mediator.Send(new GetQcQueueQuery(), cancellationToken);
+
+        var result = items.Select(x => new ReleaseQcQueueItemResponse(
+            x.Id,
+            x.ReleaseId,
+            x.Title,
+            x.Version,
+            x.EAN,
+            x.ReceivedAtUtc
+        ));
+
+        return Ok(result);
     }
 }

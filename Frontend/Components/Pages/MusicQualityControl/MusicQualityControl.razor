@@ -4,6 +4,10 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using MudBlazor
+@using System.Net.Http.Json
+
+
+@inject HttpClient Http
 
 <PageTitle>Music QC</PageTitle>
 
@@ -73,14 +77,38 @@
 </MudStack>
 
 @code {
-    private int _pendingCount => _awaitingQc.Count + _readyForRecheck.Count;
+    private int _pendingCount => _awaitingQc.Count;
 
-    private readonly List<QcReleaseDto> _awaitingQc =
-    [
-        new("Midnight Waves", "The Northern Lights", "Album", "1234567890123", "Awaiting QC", DateTime.Today.AddDays(-2), null),
-        new("Broken Signals", "Echo Frame", "Single", "2234567890123", "Awaiting QC", DateTime.Today.AddDays(-1), null),
-        new("Ocean Memory", "Sofia Vale", "EP", "3234567890123", "Awaiting QC", DateTime.Today, null)
-    ];
+    private List<QcReleaseDto> _awaitingQc = [];
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var items = await Http.GetFromJsonAsync<List<ReleaseQcQueueItemResponse>>(
+                "api/qc/releases")
+                ?? [];
+
+            _awaitingQc = items.Select(x => new QcReleaseDto(
+                x.Title,
+                "Unknown artist",
+                "Release",
+                x.EAN ?? "-",
+                "Awaiting QC",
+                x.ReceivedAtUtc,
+                null
+            )).ToList();
+        }
+        catch (Exception)
+        {
+            // TODO: Error handling
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
 
     private readonly List<QcReleaseDto> _readyForRecheck =
     [
@@ -93,4 +121,13 @@
         new("Golden Room", "Noah Reed", "EP", "6234567890123", "Returned for fixes", DateTime.Today.AddDays(-8), "EAN mismatch and missing contributor roles."),
         new("Late Night Drive", "Ava North", "Single", "7234567890123", "Returned for fixes", DateTime.Today.AddDays(-10), "Artwork resolution too low.")
     ];
+
+    public record ReleaseQcQueueItemResponse(
+    Guid Id,
+    Guid ReleaseId,
+    string Title,
+    string? Version,
+    string? EAN,
+    DateTime ReceivedAtUtc
+);
 }

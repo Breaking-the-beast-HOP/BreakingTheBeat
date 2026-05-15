@@ -21,6 +21,10 @@ using MusicCatalog.Features.Track.Create;
 using MusicCatalog.Infrastructure;
 using MusicCatalog.Infrastructure.Repositories;
 using MusicCatalog.Infrastructure.UnitOfWorks;
+using MusicQualityControl.Features;
+using MusicQualityControl.Features.GetQcQueue;
+using MusicQualityControl.Features.SubmitReleaseToQc;
+using MusicQualityControl.Infrastructure;
 using PodcastCatalog.Domain.Entities;
 using PodcastCatalog.Features.Podcasts.Interfaces;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Create;
@@ -37,9 +41,6 @@ using UserManagement.Features.User.GetAll;
 using UserManagement.Features.User.Register;
 using UserManagement.Infrastructure.Auth;
 using UserManagement.Infrastructure.Persistence;
-using MusicQualityControl.Features;
-using MusicQualityControl.Features.SubmitReleaseToQc;
-using MusicQualityControl.Infrastructure;
 
 namespace Gateway
 {
@@ -151,6 +152,7 @@ namespace Gateway
             // MUSIC QC
             builder.Services.AddScoped<IReleaseQcQueueItemRepository, ReleaseQcQueueItemRepository>();
 
+
             // 5. Repositories (podcast)
             builder.Services.AddScoped<IPodcastRepository, PodcastRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
@@ -186,6 +188,7 @@ namespace Gateway
 
                 // Music QC
                 cfg.RegisterServicesFromAssembly(typeof(SubmitReleaseToQcCommand).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetQcQueueQuery).Assembly);
             });
 
             // 8. Controllers
