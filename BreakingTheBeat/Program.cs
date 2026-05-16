@@ -2,6 +2,9 @@ using System.Security.Claims;
 using System.Text;
 using FluentValidation;
 using Gateway.Infrastructure.Auth;
+using Gateway.Logging.Behaviors;
+using Gateway.Logging.Middleware;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -33,6 +36,8 @@ using PodcastCatalog.Features.Podcasts.PodcastCore.GetAll;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Update;
 using PodcastCatalog.Infrastructure.Data;
 using PodcastCatalog.Infrastructure.Repositories;
+using Serilog;
+using Serilog.Sinks.PostgreSQL;
 using SharedKernel;
 using SharedKernel.Interfaces;
 using SharedKernel.Interfaces.Base;
@@ -46,12 +51,39 @@ namespace Gateway
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // 1. Auth context + PostgreSQL role switching
             builder.Services.AddHttpContextAccessor();
+
+            // Serilog
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .WriteTo.PostgreSQL(
+                    connectionString: builder.Configuration.GetConnectionString("LoggingDb"),
+                    tableName: "GatewayLogs",
+                    needAutoCreateTable: true,
+                    columnOptions: new Dictionary<string, ColumnWriterBase>
+                    {
+                        ["message"] = new RenderedMessageColumnWriter(),
+                        ["message_template"] = new MessageTemplateColumnWriter(),
+                        ["level"] = new LevelColumnWriter(),
+                        ["timestamp"] = new TimestampColumnWriter(),
+                        ["exception"] = new ExceptionColumnWriter(),
+                        ["log_event"] = new LogEventSerializedColumnWriter(),
+                        ["properties"] = new PropertiesColumnWriter()
+                    })
+                .CreateLogger();
+
+            builder.Host.UseSerilog();
+
+            var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatalogDb");
+            var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatalogDb");
+            var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb");
+
+            builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
 
             builder.Services.AddScoped<PostgresRoleService>();
             builder.Services.AddScoped<PostgresRoleInterceptor>();
@@ -108,6 +140,7 @@ namespace Gateway
                 options.UseNpgsql(connectionString);
                 options.AddInterceptors(interceptor);
             });
+
 
             // 3. Identity
             builder.Services
@@ -191,6 +224,14 @@ namespace Gateway
                 cfg.RegisterServicesFromAssembly(typeof(GetQcQueueQuery).Assembly);
             });
 
+            // Logging MediatR
+            builder.Services.AddTransient(
+                typeof(IPipelineBehavior<,>),
+                typeof(LoggingBehavior<,>));
+            builder.Services.AddTransient(
+                typeof(IPipelineBehavior<,>),
+                typeof(ExceptionHandlingBehavior<,>));
+
             // 8. Controllers
             builder.Services.AddControllers();
 
@@ -198,6 +239,22 @@ namespace Gateway
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            app.UseSerilogRequestLogging();
+
+
+
+            // Pipeline
+            if (app.Environment.IsDevelopment())
+            {
+                app.MapOpenApi();
+            }
+
+            // Logging
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+            app.UseMiddleware<RequestResponseLoggingMiddleware>();
+
+            app.UseHttpsRedirection();
 
             // Seed / migrate podcast database
             using (var scope = app.Services.CreateScope())
@@ -207,9 +264,7 @@ namespace Gateway
                 try
                 {
                     var podcastContext = services.GetRequiredService<PodcastCatalogDbContext>();
-
                     podcastContext.Database.Migrate();
-                    //DbInitializer.Initialize(podcastContext);
                 }
                 catch (Exception ex)
                 {
@@ -218,20 +273,85 @@ namespace Gateway
                 }
             }
 
-            // Pipeline
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-            }
-
-            app.UseHttpsRedirection();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
 
-            app.Run();
+            // Startup logs
+            Log.Information(
+                "Application started in {Environment}",
+                app.Environment.EnvironmentName);
+
+            if (musicCatalogConnectionString is null)
+            {
+                Log.Warning("MusicCatalog connection string not loaded");
+            }
+            else
+            {
+                Log.Information(
+                    "MusicCatalog connection loaded: {ConnectionString}",
+                    SanitizeConnectionString(musicCatalogConnectionString!));
+            }
+
+
+            if (podcastCatalogConnectionString is null)
+            {
+                Log.Warning("PodcastCatalog connection string not loaded");
+            }
+            else
+            {
+                Log.Information(
+                    "PodcastCatalog connection loaded: {ConnectionString}",
+                    SanitizeConnectionString(podcastCatalogConnectionString));
+            }
+
+            if (userManagementConnectionString is null)
+            {
+                Log.Warning("UserManagement connection string not loaded");
+            }
+            else
+            {
+                Log.Information(
+                    "UserManagement connection loaded: {ConnectionString}",
+                    SanitizeConnectionString(userManagementConnectionString));
+            }
+
+
+            try
+            {
+                Log.Information("Starting web application");
+
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Application terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+
+
+        }
+
+        // logging
+
+
+        private static string SanitizeConnectionString(string connectionString)
+        {
+            var parts = connectionString.Split(';');
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (parts[i].StartsWith("Password=", StringComparison.OrdinalIgnoreCase))
+                {
+                    parts[i] = "Password=****";
+                }
+            }
+
+            return string.Join(';', parts);
         }
     }
 }

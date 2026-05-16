@@ -16,13 +16,18 @@ jobs:
             - name: Setup .NET Core
               uses: actions/setup-dotnet@v4
               with:
-                dotnet-version: 9.0.x
+                dotnet-version: 9.0.312
+
+            - name: Setup NuGet
+              uses: NuGet/setup-nuget@v1
+              with:
+                nuget-version: 'latest'
 
             - name: Cache NuGet packages
               uses: actions/cache@v4
               with:
                 path: ~/.nuget/packages
-                key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+                key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
                 restore-keys: |
                         ${{ runner.os }}-nuget-
 
@@ -45,7 +50,23 @@ jobs:
       steps:
         - name: Checkout
           uses: actions/checkout@v4
-      
+        
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 9.0.312
+        
+        - name: Setup NuGet
+          uses: NuGet/setup-nuget@v1
+          with:
+            nuget-version: 'latest'
+
+        - name: Clear NuGet cache
+          run: dotnet nuget locals all --clear
+        
+        - name: Restore
+          run: dotnet restore --no-cache
+
         - name: Run Gitleaks
           uses: gitleaks/gitleaks-action@v1
           with: 
@@ -104,6 +125,18 @@ jobs:
             severity: CRITICAL,HIGH  
             ignore-unfixed: true
 
+        - name: Scan Monitoring-image (no-push)
+          run: docker build -t monitoring-test -f ./Monitoring/Dockerfile ./Monitoring
+
+        - name: Scan monitoring-image with Trivy
+          uses: aquasecurity/trivy-action@master
+          with:
+            image-ref: monitoring-test
+            format: table
+            exit-code: 1
+            severity: CRITICAL,HIGH
+            ignore-unfixed: true
+
     docker-build-push:
       name: Docker Build and Push
       needs: [linting, container-scans]
@@ -140,6 +173,14 @@ jobs:
             file: ./Frontend/Dockerfile
             push: true
             tags: ghcr.io/breaking-the-beast-hop/breakingthebeat-frontend:latest
+
+        - name: Build and push Monitoring Docker image
+          uses: docker/build-push-action@v5
+          with:
+            context: ./Monitoring
+            file: ./Monitoring/Dockerfile
+            push: true
+            tags: ghcr.io/breaking-the-beast-hop/breakingthebeat-monitoring:latest
 
     deploy-to-server:
       name: Deploy to server
