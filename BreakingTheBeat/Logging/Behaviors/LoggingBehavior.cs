@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
 using MediatR;
 using Serilog;
@@ -28,9 +29,6 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
 
         var requestName = typeof(TRequest).Name;
 
-        var requestId = httpContext?.Items["requestId"]?.ToString()
-            ?? "UNKNOWN";
-
         var requestData = JsonSerializer.Serialize(request);
 
         if (SensitiveRequests.Any(x => requestName.Contains(x)))
@@ -39,19 +37,16 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
         }
 
         _logger
-            .ForContext("RequestId", requestId)
             .ForContext("RequestName", requestName)
-            .ForContext("RequestData", requestData)
-            .Information("Handling request");
+            .Information("Handling {@Request}", request);
 
         var stopwatch = Stopwatch.StartNew();
         var response = await next();
         stopwatch.Stop();
 
         _logger
-            .ForContext("RequestId", requestId)
             .ForContext("RequestName", requestName)
-            .ForContext("DurationMs", stopwatch.ElapsedMilliseconds)
+            .ForContext("DurationMs", stopwatch.ElapsedMilliseconds.ToString(CultureInfo.InvariantCulture))
             .Information("Handled request");
 
         return response;

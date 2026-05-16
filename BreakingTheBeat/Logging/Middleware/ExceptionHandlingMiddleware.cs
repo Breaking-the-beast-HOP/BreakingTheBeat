@@ -1,7 +1,4 @@
-﻿using System.Net;
-using System.Text.Json;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Serilog;
+﻿using System.Text.Json;
 using ILogger = Serilog.ILogger;
 
 namespace Gateway.Logging.Middleware;
@@ -27,9 +24,7 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            var requestId = context.Items["requestId"]?.ToString() ?? "UNKNOWN";
-
-            _logger.ForContext("RequestId", requestId)
+            _logger
                 .ForContext("Path", context.Request.Path)
                 .ForContext("StatusCode", StatusCodes.Status500InternalServerError)
                 .Error(ex, "Unhandled exception");

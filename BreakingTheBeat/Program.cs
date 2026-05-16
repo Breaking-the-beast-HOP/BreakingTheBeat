@@ -31,6 +31,7 @@ using PodcastCatalog.Features.Podcasts.PodcastCore.Update;
 using PodcastCatalog.Infrastructure.Data;
 using PodcastCatalog.Infrastructure.Repositories;
 using Serilog;
+using Serilog.Enrichers;
 using Serilog.Sinks.PostgreSQL;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
@@ -39,6 +40,8 @@ using UserManagement.Features.User.GetAll;
 using UserManagement.Features.User.Register;
 using UserManagement.Infrastructure.Auth;
 using UserManagement.Infrastructure.Persistence;
+using System.Diagnostics;
+using Serilog.Enrichers.Span;
 
 namespace Gateway
 {
@@ -53,6 +56,16 @@ namespace Gateway
             // Serilog
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
+
+                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+                .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+
+                .Enrich.FromLogContext()
+                .Enrich.WithProcessId()
+                .Enrich.WithThreadId()
+                .Enrich.WithSpan()
+
                 .WriteTo.Console()
                 .WriteTo.PostgreSQL(
                     connectionString: builder.Configuration.GetConnectionString("LoggingDb"),

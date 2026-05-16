@@ -1,4 +1,25 @@
+root = true
+
 [*.cs]
 indent_style = space
 indent_size = 4
+
 dotnet_sort_system_directives_first = true
+
+# Enforce style i CI
+dotnet_analyzer_diagnostic.severity = warning
+
+# Naming
+dotnet_naming_rule.interface_should_begin_with_i.severity = warning
+
+# Var usage
+csharp_style_var_for_built_in_types = true
+
+# Braces
+csharp_prefer_braces = true
+
+# Expression bodied members
+csharp_style_expression_bodied_methods = false
+
+[*.razor]
+indent_size = 4

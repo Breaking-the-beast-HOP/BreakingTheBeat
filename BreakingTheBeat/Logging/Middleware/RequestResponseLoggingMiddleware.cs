@@ -1,5 +1,6 @@
-﻿using Serilog;
+﻿
 using ILogger = Serilog.ILogger;
+using System.Diagnostics;
 
 namespace Gateway.Logging.Middleware;
 
@@ -18,12 +19,8 @@ public class RequestResponseLoggingMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        var requestId = Guid.NewGuid().ToString();
-
-        context.Items["requestId"] = requestId;
-
+        var traceId = Activity.Current?.TraceId.ToString();
         _logger
-            .ForContext("RequestId", requestId)
             .ForContext("Path", context.Request.Path)
             .ForContext("Method", context.Request.Method)
             .Information("Incoming request");
@@ -37,7 +34,6 @@ public class RequestResponseLoggingMiddleware
         await _next(context);
 
         _logger
-            .ForContext("RequestId", requestId)
             .ForContext("Path", context.Request.Path)
             .ForContext("Method", context.Request.Method)
             .ForContext("StatusCode", context.Response.StatusCode)
