@@ -40,7 +40,7 @@
                 return Task.FromResult("app_admin");
             }
 
-            if (user.IsInRole("Content Creator"))
+            if (user.IsInRole("Content creator"))
             {
                 return Task.FromResult("app_content_creator");
             }
