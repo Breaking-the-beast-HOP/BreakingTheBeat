@@ -1,6 +1,6 @@
 ﻿namespace MusicCatalogContext.Domain.Entities
 {
-    
+
     public class LabelContactPerson
     {
         public string? FullName { get; private set; }
@@ -55,5 +55,5 @@
                 null);
         }
     }
-    
+
 }

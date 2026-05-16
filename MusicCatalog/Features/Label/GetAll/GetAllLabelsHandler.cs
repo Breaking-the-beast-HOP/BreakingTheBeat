@@ -14,7 +14,7 @@ namespace MusicCatalogContext.Features.Labels.GetAll
             _context = context;
         }
 
-        public async Task<List<LabelDTO>> Handle( GetAllLabelsQuery request,CancellationToken cancellationToken)
+        public async Task<List<LabelDTO>> Handle(GetAllLabelsQuery request, CancellationToken cancellationToken)
         {
             return await _context.Labels
                 .AsNoTracking()

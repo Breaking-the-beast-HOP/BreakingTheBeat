@@ -8,7 +8,7 @@ namespace MusicCatalog.Features.Label.Create
 
         private readonly ILabelRepository _repository;
 
-        public CreateLabelHandler (ILabelRepository repository)
+        public CreateLabelHandler(ILabelRepository repository)
         {
             _repository = repository;
         }

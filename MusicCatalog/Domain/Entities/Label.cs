@@ -77,7 +77,7 @@ namespace MusicCatalogContext.Domain.Entities
             };
         }
 
-        public void SetContactPerson(string? fullName,string? email,string? phoneNumber,string? role,Guid? preferredLanguageId)
+        public void SetContactPerson(string? fullName, string? email, string? phoneNumber, string? role, Guid? preferredLanguageId)
         {
             if (preferredLanguageId.HasValue && preferredLanguageId.Value == Guid.Empty)
                 throw new ArgumentException("PreferredLanguageId is invalid.");

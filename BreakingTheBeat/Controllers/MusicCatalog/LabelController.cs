@@ -50,7 +50,7 @@ namespace Gateway.Controllers.MusicCatalog
         [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<ActionResult<List<LabelResponse>>> GetAll(CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send( new GetAllLabelsQuery(), cancellationToken);
+            var result = await _mediator.Send(new GetAllLabelsQuery(), cancellationToken);
 
             return Ok(result);
         }

@@ -2,7 +2,7 @@
 
 namespace MusicCatalogContext.Features.Countries.Get
 {
-    
+
     public class GetAllCountriesHandler : IRequestHandler<GetAllCountriesQuery, List<CountryDTO>>
     {
         private readonly ICountryRepository _repository;

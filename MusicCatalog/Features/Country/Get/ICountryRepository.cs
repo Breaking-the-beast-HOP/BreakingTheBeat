@@ -3,7 +3,7 @@ using SharedKernel.Interfaces.Base;
 
 namespace MusicCatalogContext.Features.Countries.Get
 {
-    public interface ICountryRepository: IReadRepository<Country>
+    public interface ICountryRepository : IReadRepository<Country>
     {
     }
 }
