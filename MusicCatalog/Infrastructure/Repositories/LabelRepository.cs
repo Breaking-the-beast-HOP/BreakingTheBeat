@@ -1,4 +1,5 @@
-﻿using MusicCatalog.Features.Label.Create;
+﻿using Microsoft.EntityFrameworkCore;
+using MusicCatalog.Features.Label.Create;
 using MusicCatalogContext.Domain.Entities;
 
 namespace MusicCatalogContext.Infrastructure.Repositories
@@ -24,14 +25,24 @@ namespace MusicCatalogContext.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<List<Label>> GetAllAsync()
+
+        public async Task<List<Label>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.Labels
+                .AsNoTracking()
+                .Include(x => x.Country)
+                .Include(x => x.PrimaryLanguage)
+                .OrderBy(x => x.Name)
+                .ToListAsync();
         }
 
-        public Task<Label?> GetByIdAsync(Guid id)
+        public async Task<Label?> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _context.Labels
+                .Include(x => x.Country)
+                .Include(x => x.PrimaryLanguage)
+                .Include(x => x.ContactPerson.PreferredLanguage)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public Task<bool> UpdateAsync(Label entity)

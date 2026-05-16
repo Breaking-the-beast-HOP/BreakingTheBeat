@@ -150,7 +150,7 @@
                             @if (!string.IsNullOrWhiteSpace(context.Website))
                             {
                                 <MudLink Href="@context.Website" Target="_blank">
-                                    Website
+                                    @context.Website
                                 </MudLink>
                             }
                             else
@@ -188,23 +188,11 @@
     private string _searchString = string.Empty;
     private string? _selectedCountry;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        _labels = new()
-                {
-                    new LabelListItemDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Demo Label",
-                        LabelCode = "DEMO",
-                        CountryName = "Denmark",
-                        Website = "https://example.com"
-                    }
-    };
+        _labels = await Http.GetFromJsonAsync<List<LabelListItemDto>>("api/Label") ?? new();
 
         _isLoading = false;
-
-        return Task.CompletedTask;
     }
 
     private IEnumerable<LabelListItemDto> FilteredLabels =>

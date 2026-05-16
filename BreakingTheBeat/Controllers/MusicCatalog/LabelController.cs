@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalog.Features.Label.Create;
+using MusicCatalogContext.Features.Label.GetAll;
 
 namespace Gateway.Controllers.MusicCatalog
 {
@@ -19,7 +20,7 @@ namespace Gateway.Controllers.MusicCatalog
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        [Authorize(Roles = "Admin,Content Creator")]
         public async Task<ActionResult<Guid>> Create([FromBody] CreateLabelRequest request, CancellationToken cancellationToken)
         {
             var command = new CreateLabelCommand(
@@ -43,6 +44,15 @@ namespace Gateway.Controllers.MusicCatalog
             var labelId = await _mediator.Send(command, cancellationToken);
 
             return Ok(labelId);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        public async Task<ActionResult<List<LabelResponse>>> GetAll(CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send( new GetAllLabelsQuery(), cancellationToken);
+
+            return Ok(result);
         }
     }
 }
