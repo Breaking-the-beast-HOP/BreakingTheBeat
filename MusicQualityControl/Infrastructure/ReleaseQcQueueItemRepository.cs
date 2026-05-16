@@ -15,7 +15,7 @@ namespace MusicQualityControl.Infrastructure
 
         public async Task<ReleaseQcQueueItem> AddAsync(ReleaseQcQueueItem entity)
         {
-            await  _context.ReleaseQcQueueItems.AddAsync(entity);
+            await _context.ReleaseQcQueueItems.AddAsync(entity);
             await _context.SaveChangesAsync();
             return entity;
         }

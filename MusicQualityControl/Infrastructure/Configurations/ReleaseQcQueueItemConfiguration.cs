@@ -4,7 +4,7 @@ using MusicQualityControl.Domain.ReadModels;
 
 namespace MusicQualityControl.Infrastructure.Configurations;
 
-public class ReleaseQcQueueItemConfiguration: IEntityTypeConfiguration<ReleaseQcQueueItem>
+public class ReleaseQcQueueItemConfiguration : IEntityTypeConfiguration<ReleaseQcQueueItem>
 {
     public void Configure(EntityTypeBuilder<ReleaseQcQueueItem> builder)
     {

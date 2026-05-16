@@ -6,7 +6,7 @@ namespace MusicQualityControl.Infrastructure;
 
 public class MusicQualityControlDbContext : DbContext
 {
-    public MusicQualityControlDbContext(DbContextOptions<MusicQualityControlDbContext> options): base(options)
+    public MusicQualityControlDbContext(DbContextOptions<MusicQualityControlDbContext> options) : base(options)
     {
     }
 

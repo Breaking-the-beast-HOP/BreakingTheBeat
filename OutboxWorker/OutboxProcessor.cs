@@ -12,7 +12,7 @@ public class OutboxProcessor
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<OutboxProcessor> _logger;
 
-    public OutboxProcessor( MusicCatalogDbContext context,IHttpClientFactory httpClientFactory,ILogger<OutboxProcessor> logger)
+    public OutboxProcessor(MusicCatalogDbContext context, IHttpClientFactory httpClientFactory, ILogger<OutboxProcessor> logger)
     {
         _context = context;
         _httpClientFactory = httpClientFactory;

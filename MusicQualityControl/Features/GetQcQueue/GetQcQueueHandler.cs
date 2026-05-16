@@ -13,7 +13,7 @@ public class GetQcQueueHandler : IRequestHandler<GetQcQueueQuery, List<ReleaseQc
         _repository = repository;
     }
 
-    public async Task<List<ReleaseQcQueueItem>> Handle(GetQcQueueQuery request,CancellationToken cancellationToken)
+    public async Task<List<ReleaseQcQueueItem>> Handle(GetQcQueueQuery request, CancellationToken cancellationToken)
     {
         return await _repository.GetAllAsync();
 

@@ -17,7 +17,7 @@ public class ReleaseModel
 
     public List<ReleaseVolumeModel> Volumes { get; set; } = new();
     public List<ContributionRequest> Contributions { get; set; } = new();
-    
+
 }
 
 public class ReleaseVolumeModel

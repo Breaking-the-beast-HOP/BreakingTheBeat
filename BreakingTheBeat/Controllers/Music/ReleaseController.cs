@@ -27,7 +27,7 @@ namespace Gateway.Controllers.Music
 
         [HttpPost]
         [Authorize(Roles = "Admin,Content Creator")]
-        public async Task<IActionResult> CreateRelease([FromBody] CreateReleaseRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateRelease([FromBody] CreateReleaseRequest request, CancellationToken cancellationToken)
         {
             if (request is null)
                 return BadRequest("Request body is required.");

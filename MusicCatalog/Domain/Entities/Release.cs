@@ -184,7 +184,7 @@ namespace MusicCatalog.Domain.Entities
 
         public void SubmitToQc()
         {
-            AddDomainEvent(new ReleaseSubmittedToQcEvent(Id,Title));
+            AddDomainEvent(new ReleaseSubmittedToQcEvent(Id, Title));
         }
     }
 }

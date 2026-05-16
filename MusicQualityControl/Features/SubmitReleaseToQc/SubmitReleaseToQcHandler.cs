@@ -12,7 +12,7 @@ public class SubmitReleaseToQcHandler : IRequestHandler<SubmitReleaseToQcCommand
         _repository = repository;
     }
 
-    public async Task Handle(SubmitReleaseToQcCommand request,CancellationToken cancellationToken)
+    public async Task Handle(SubmitReleaseToQcCommand request, CancellationToken cancellationToken)
     {
         var item = ReleaseQcQueueItem.Create(
             request.ReleaseId,

@@ -2,7 +2,7 @@
 
 namespace MusicCatalog.Features
 {
-    public interface IOutBoxRepository: ICreateRepository<Domain.OutboxMessage>
+    public interface IOutBoxRepository : ICreateRepository<Domain.OutboxMessage>
     {
     }
 }

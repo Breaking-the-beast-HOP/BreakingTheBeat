@@ -6,7 +6,7 @@ public class Worker : BackgroundService
     private readonly IConfiguration _configuration;
     private readonly ILogger<Worker> _logger;
 
-    public Worker( IServiceScopeFactory scopeFactory,IConfiguration configuration, ILogger<Worker> logger)
+    public Worker(IServiceScopeFactory scopeFactory, IConfiguration configuration, ILogger<Worker> logger)
     {
         _scopeFactory = scopeFactory;
         _configuration = configuration;

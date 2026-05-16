@@ -15,7 +15,7 @@ public class QcReleaseController : ControllerBase
     private readonly IMediator _mediator;
     private readonly IConfiguration _configuration;
 
-    public QcReleaseController(IMediator mediator,IConfiguration configuration)
+    public QcReleaseController(IMediator mediator, IConfiguration configuration)
     {
         _mediator = mediator;
         _configuration = configuration;

@@ -3,7 +3,7 @@ using SharedKernel.Interfaces.Base;
 
 namespace MusicQualityControl.Features
 {
-    public interface IReleaseQcQueueItemRepository:IReadRepository<ReleaseQcQueueItem>, ICreateRepository<ReleaseQcQueueItem>
+    public interface IReleaseQcQueueItemRepository : IReadRepository<ReleaseQcQueueItem>, ICreateRepository<ReleaseQcQueueItem>
     {
     }
 }
