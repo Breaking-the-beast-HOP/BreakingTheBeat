@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using MusicCatalog.Features.Language.Interfaces;
+using MusicCatalogContext.Features.Language.Interfaces;
 
-namespace MusicCatalog.Features.Language.GetLanguages
+namespace MusicCatalogContext.Features.Language.GetLanguages
 {
     public class GetLanguagesHandler : IRequestHandler<GetLanguagesQuery, List<LanguageDTO>>
     {

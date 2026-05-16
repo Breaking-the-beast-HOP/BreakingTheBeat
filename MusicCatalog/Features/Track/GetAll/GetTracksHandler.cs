@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MusicCatalog.Features.Genre;
-using MusicCatalog.Features.Genre.Interfaces;
+using MusicCatalogContext.Features.Genre;
+using MusicCatalogContext.Features.Genre.Interfaces;
 
-namespace MusicCatalog.Features.Track.Get
+namespace MusicCatalogContext.Features.Track.Get
 {
     public class GetTracksHandler : IRequestHandler<GetTracksQuery, List<TrackDTO>>
     {

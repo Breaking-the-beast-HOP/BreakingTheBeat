@@ -1,7 +1,7 @@
-﻿using MusicCatalog.Domain;
-using MusicCatalog.Features;
+﻿using MusicCatalogContext.Domain;
+using MusicCatalogContext.Features;
 
-namespace MusicCatalog.Infrastructure.Repositories
+namespace MusicCatalogContext.Infrastructure.Repositories
 {
     public class OutboxRepository : IOutBoxRepository
     {

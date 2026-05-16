@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using MediatR;
-using MusicCatalog.Domain;
-using MusicCatalog.Domain.Enums;
-using MusicCatalog.Infrastructure.Repositories;
+using MusicCatalogContext.Domain;
+using MusicCatalogContext.Domain.Enums;
+using MusicCatalogContext.Infrastructure.Repositories;
 using SharedKernel.Interfaces;
 
-namespace MusicCatalog.Features.Release.Create
+namespace MusicCatalogContext.Features.Release.Create
 {
     public class CreateReleaseHandler : IRequestHandler<CreateReleaseCommand, Guid>
     {

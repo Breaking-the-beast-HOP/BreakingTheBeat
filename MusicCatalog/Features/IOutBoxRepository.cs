@@ -1,6 +1,6 @@
 ﻿using SharedKernel.Interfaces.Base;
 
-namespace MusicCatalog.Features
+namespace MusicCatalogContext.Features
 {
     public interface IOutBoxRepository : ICreateRepository<Domain.OutboxMessage>
     {

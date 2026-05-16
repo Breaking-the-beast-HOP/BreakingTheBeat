@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using MusicCatalog.Features.Language.Interfaces;
+using MusicCatalogContext.Features.Language.Interfaces;
 
-namespace MusicCatalog.Features.Contributor.Get
+namespace MusicCatalogContext.Features.Contributor.Get
 {
     public class GetContributorsHandler : IRequestHandler<GetContributorsQuery, List<ContributorDTO>>
     {

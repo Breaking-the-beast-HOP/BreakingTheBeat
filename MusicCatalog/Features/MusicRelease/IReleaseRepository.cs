@@ -1,8 +1,8 @@
 ﻿using SharedKernel;
 
-namespace MusicCatalog.Features.Release
+namespace MusicCatalogContext.Features.Release
 {
-    public interface IReleaseRepository : ICrudRepository<MusicCatalog.Domain.Entities.Release>
+    public interface IReleaseRepository : ICrudRepository<MusicCatalogContext.Domain.Entities.Release>
     {
     }
 }

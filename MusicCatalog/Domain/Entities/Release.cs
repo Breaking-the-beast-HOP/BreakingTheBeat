@@ -1,8 +1,8 @@
 ﻿using MediatR;
-using MusicCatalog.Domain.Enums;
-using MusicCatalog.Domain.Events;
+using MusicCatalogContext.Domain.Enums;
+using MusicCatalogContext.Domain.Events;
 
-namespace MusicCatalog.Domain.Entities
+namespace MusicCatalogContext.Domain.Entities
 {
     public class Release
     {

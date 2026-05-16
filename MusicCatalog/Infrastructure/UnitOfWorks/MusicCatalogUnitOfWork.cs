@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using SharedKernel.Interfaces;
 
-namespace MusicCatalog.Infrastructure.UnitOfWorks
+namespace MusicCatalogContext.Infrastructure.UnitOfWorks
 {
     public class MusicCatalogUnitOfWork : IUnitOfWork
     {

@@ -1,4 +1,4 @@
-﻿namespace MusicCatalog.Features.Release.GetAll
+﻿namespace MusicCatalogContext.Features.Release.GetAll
 {
     public class ReleaseDto
     {

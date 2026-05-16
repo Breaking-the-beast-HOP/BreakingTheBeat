@@ -8,22 +8,23 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using MusicCatalog.Features;
-using MusicCatalog.Features.Contributor;
-using MusicCatalog.Features.Contributor.Create;
-using MusicCatalog.Features.ContributorRole;
-using MusicCatalog.Features.ContributorRole.GetAll;
-using MusicCatalog.Features.Genre;
-using MusicCatalog.Features.Genre.Interfaces;
-using MusicCatalog.Features.Language.GetLanguages;
-using MusicCatalog.Features.Language.Interfaces;
-using MusicCatalog.Features.Release;
-using MusicCatalog.Features.Release.Create;
-using MusicCatalog.Features.Track;
-using MusicCatalog.Features.Track.Create;
-using MusicCatalog.Infrastructure;
-using MusicCatalog.Infrastructure.Repositories;
-using MusicCatalog.Infrastructure.UnitOfWorks;
+using MusicCatalogContext.Features;
+using MusicCatalogContext.Features.Contributor;
+using MusicCatalogContext.Features.Contributor.Create;
+using MusicCatalogContext.Features.ContributorRole;
+using MusicCatalogContext.Features.ContributorRole.GetAll;
+using MusicCatalogContext.Features.Countries.Get;
+using MusicCatalogContext.Features.Genre;
+using MusicCatalogContext.Features.Genre.Interfaces;
+using MusicCatalogContext.Features.Language.GetLanguages;
+using MusicCatalogContext.Features.Language.Interfaces;
+using MusicCatalogContext.Features.Release;
+using MusicCatalogContext.Features.Release.Create;
+using MusicCatalogContext.Features.Track;
+using MusicCatalogContext.Features.Track.Create;
+using MusicCatalogContext.Infrastructure;
+using MusicCatalogContext.Infrastructure.Repositories;
+using MusicCatalogContext.Infrastructure.UnitOfWorks;
 using MusicQualityControl.Features;
 using MusicQualityControl.Features.GetQcQueue;
 using MusicQualityControl.Features.SubmitReleaseToQc;
@@ -173,14 +174,16 @@ namespace Gateway
             builder.Services.AddAuthorization();
 
             // 4. Repositories (music)
-            builder.Services.AddScoped<ILanguageRepository, MusicCatalog.Infrastructure.Repositories.LanguageRepository>();
+            builder.Services.AddScoped<ILanguageRepository, MusicCatalogContext.Infrastructure.Repositories.LanguageRepository>();
+            builder.Services.AddScoped<ICountryRepository, MusicCatalogContext.Infrastructure.Repositories.CountryRepository>();
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
-            builder.Services.AddScoped<IContributorRepository, MusicCatalog.Infrastructure.Repositories.ContributorRepository>();
+            builder.Services.AddScoped<IContributorRepository, MusicCatalogContext.Infrastructure.Repositories.ContributorRepository>();
             builder.Services.AddScoped<IContributorRoleRepository, ContributionRoleRepository>();
             builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
             builder.Services.AddScoped<IOutBoxRepository, OutboxRepository>();
             builder.Services.AddScoped<IUnitOfWork, MusicCatalogUnitOfWork>();
+
 
             // MUSIC QC
             builder.Services.AddScoped<IReleaseQcQueueItemRepository, ReleaseQcQueueItemRepository>();
@@ -201,13 +204,14 @@ namespace Gateway
             // 7. MediatR
             builder.Services.AddMediatR(cfg =>
             {
-                // Music
+                // Music Catalog
                 cfg.RegisterServicesFromAssembly(typeof(GetLanguagesQuery).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(CreateTrackCommand).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(CreateContributorCommand).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(CreateReleaseCommand).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetContributorRolesQuery).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetAllCountriesQuery).Assembly);
 
                 // Podcast
                 cfg.RegisterServicesFromAssembly(typeof(CreatePodcastHandler).Assembly);

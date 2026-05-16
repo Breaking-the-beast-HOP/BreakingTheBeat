@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicCatalog.Features.Track
+namespace MusicCatalogContext.Features.Track
 {
 
     public class TrackContributionRoleDTO

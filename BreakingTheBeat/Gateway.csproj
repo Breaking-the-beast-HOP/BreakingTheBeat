@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MusicCatalog\MusicCatalog.csproj" />
+    <ProjectReference Include="..\MusicCatalog\MusicCatalogContext.csproj" />
     <ProjectReference Include="..\MusicQualityControl\MusicQualityControl.csproj" />
     <ProjectReference Include="..\PodcastCatalog\PodcastCatalog.csproj" />
     <ProjectReference Include="..\UserManagement\UserManagement.csproj" />

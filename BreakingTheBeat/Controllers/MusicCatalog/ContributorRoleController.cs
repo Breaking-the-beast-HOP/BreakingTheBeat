@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Features.ContributorRole;
+using MusicCatalogContext.Features.ContributorRole.GetAll;
 
 namespace Gateway.Controllers.Music
 {
@@ -21,7 +21,7 @@ namespace Gateway.Controllers.Music
         [Authorize(Roles = "Admin,Content Creator,Quality controller")]
         public async Task<IActionResult> GetContributorRoles(CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new MusicCatalog.Features.ContributorRole.GetAll.GetContributorRolesQuery(), cancellationToken);
+            var result = await _mediator.Send(new GetContributorRolesQuery(), cancellationToken);
             return Ok(result);
         }
     }

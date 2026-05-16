@@ -1,0 +1,246 @@
+﻿@page "/labels"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
+
+@using Microsoft.AspNetCore.Authorization
+@using System.Net.Http.Json
+@using MudBlazor
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@namespace Frontend.Components.Pages.MusicCatalog.Labels
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
+
+    <MudStack Spacing="4">
+
+        <!-- Header -->
+        <MudPaper Class="pa-4" Elevation="5">
+            <MudStack Row="true"
+                      Justify="Justify.SpaceBetween"
+                      AlignItems="AlignItems.Center">
+
+                <div>
+                    <MudText Typo="Typo.h4">Labels</MudText>
+
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Manage music labels and contact information
+                    </MudText>
+                </div>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Warning"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           Href="/create-label">
+                    Create Label
+                </MudButton>
+
+            </MudStack>
+        </MudPaper>
+
+        <!-- Search / Filters -->
+        <MudPaper Class="pa-4" Elevation="5">
+            <MudGrid Spacing="3">
+                <MudItem xs="12" md="8">
+                    <MudTextField @bind-Value="_searchString"
+                                  Placeholder="Search labels..."
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+
+                <MudItem xs="12" md="4">
+                    <MudSelect @bind-Value="_selectedCountry"
+                               T="string"
+                               Label="Country"
+                               Variant="Variant.Outlined"
+                               Clearable="true">
+
+                        @foreach (var country in Countries)
+                        {
+                            <MudSelectItem Value="@country">
+                                @country
+                            </MudSelectItem>
+                        }
+
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        <!-- Labels List -->
+        <MudPaper Class="pa-4" Elevation="5">
+
+            @if (_isLoading)
+            {
+                <MudProgressCircular Indeterminate="true" Color="Color.Warning" />
+            }
+            else if (!FilteredLabels.Any())
+            {
+                <MudAlert Severity="Severity.Info" Dense="true">
+                    No labels found.
+                </MudAlert>
+            }
+            else
+            {
+                <MudTable Items="FilteredLabels"
+                          Hover="true"
+                          Dense="false"
+                          Elevation="0">
+
+                    <HeaderContent>
+                        <MudTh>Logo</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Country</MudTh>
+                        <MudTh>Code</MudTh>
+                        <MudTh>Website</MudTh>
+                        <MudTh Align="Align.Right">Actions</MudTh>
+                    </HeaderContent>
+
+                    <RowTemplate>
+                        <MudTd DataLabel="Logo">
+                            @if (!string.IsNullOrWhiteSpace(context.LogoUrl))
+                            {
+                                <MudAvatar Image="@context.LogoUrl"
+                                           Size="Size.Medium" />
+                            }
+                            else
+                            {
+                                <MudAvatar Size="Size.Medium"
+                                           Color="Color.Warning"
+                                           Variant="Variant.Outlined">
+                                    <MudIcon Icon="@Icons.Material.Filled.Image" />
+                                </MudAvatar>
+                            }
+                        </MudTd>
+
+                        <MudTd DataLabel="Name">
+                            <MudText Typo="Typo.subtitle1">
+                                @context.Name
+                            </MudText>
+                        </MudTd>
+
+                        <MudTd DataLabel="Country">
+                            @if (!string.IsNullOrWhiteSpace(context.CountryName))
+                            {
+                                <MudChip T="string"
+                                         Size="Size.Small"
+                                         Variant="Variant.Outlined">
+                                    @context.CountryName
+                                </MudChip>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    -
+                                </MudText>
+                            }
+                        </MudTd>
+
+                        <MudTd DataLabel="Code">
+                            <MudText Typo="Typo.body2">
+                                @(string.IsNullOrWhiteSpace(context.LabelCode) ? "-" : context.LabelCode)
+                            </MudText>
+                        </MudTd>
+
+                        <MudTd DataLabel="Website">
+                            @if (!string.IsNullOrWhiteSpace(context.Website))
+                            {
+                                <MudLink Href="@context.Website" Target="_blank">
+                                    Website
+                                </MudLink>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    -
+                                </MudText>
+                            }
+                        </MudTd>
+
+                        <MudTd DataLabel="Actions" Align="Align.Right">
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Warning"
+                                       StartIcon="@Icons.Material.Filled.Visibility"
+                                       OnClick="@(() => ViewLabel(context.Id))">
+                                View
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+
+                </MudTable>
+            }
+
+        </MudPaper>
+
+    </MudStack>
+
+</MudContainer>
+
+@code
+{
+    private List<LabelListItemDto> _labels = new();
+
+    private bool _isLoading = true;
+    private string _searchString = string.Empty;
+    private string? _selectedCountry;
+
+    protected override Task OnInitializedAsync()
+    {
+        _labels = new()
+                {
+                    new LabelListItemDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Demo Label",
+                        LabelCode = "DEMO",
+                        CountryName = "Denmark",
+                        Website = "https://example.com"
+                    }
+    };
+
+        _isLoading = false;
+
+        return Task.CompletedTask;
+    }
+
+    private IEnumerable<LabelListItemDto> FilteredLabels =>
+        _labels.Where(label =>
+            (string.IsNullOrWhiteSpace(_searchString) ||
+             label.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+             (label.LabelCode?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+             (label.CountryName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false)) &&
+
+            (string.IsNullOrWhiteSpace(_selectedCountry) ||
+             label.CountryName == _selectedCountry));
+
+    private IEnumerable<string> Countries =>
+        _labels
+            .Where(label => !string.IsNullOrWhiteSpace(label.CountryName))
+            .Select(label => label.CountryName!)
+            .Distinct()
+            .OrderBy(country => country);
+
+    private void ViewLabel(Guid id)
+    {
+        Navigation.NavigateTo($"/labels/{id}");
+    }
+
+    public class LabelListItemDto
+    {
+        public Guid Id { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public string? LabelCode { get; set; }
+
+        public string? CountryName { get; set; }
+
+        public string? Website { get; set; }
+
+        public string? LogoUrl { get; set; }
+    }
+}

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Infrastructure;
+using MusicCatalogContext.Infrastructure;
 using OutboxWorker;
 
 var builder = Host.CreateApplicationBuilder(args);

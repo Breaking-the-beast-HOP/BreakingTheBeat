@@ -1,4 +1,4 @@
-﻿namespace MusicCatalog.Domain
+﻿namespace MusicCatalogContext.Domain
 {
     public class OutboxMessage
     {

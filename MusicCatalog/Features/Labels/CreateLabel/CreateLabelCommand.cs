@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicCatalog.Features.Labels.CreateLabel
+namespace MusicCatalogContext.Features.Labels.CreateLabel
 {
     internal class CreateLabelCommand
     {

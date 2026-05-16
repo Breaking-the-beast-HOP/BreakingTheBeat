@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.Release.Update;
+namespace MusicCatalogContext.Features.Release.Update;
 
 public record UpdateReleaseCommand(
     Guid Id,

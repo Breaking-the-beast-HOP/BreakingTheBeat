@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MusicCatalog.Features.Genre.Interfaces;
-using MusicCatalog.Features.Language.GetLanguages;
-using MusicCatalog.Features.Language.Interfaces;
+using MusicCatalogContext.Features.Genre.Interfaces;
+using MusicCatalogContext.Features.Language.GetLanguages;
+using MusicCatalogContext.Features.Language.Interfaces;
 
-namespace MusicCatalog.Features.Genre
+namespace MusicCatalogContext.Features.Genre
 {
     public class GetGenreHandler : IRequestHandler<GetGenresQuery, List<GenreDTO>>
     {

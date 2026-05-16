@@ -1,4 +1,4 @@
-﻿namespace MusicCatalog.Domain.Enums
+﻿namespace MusicCatalogContext.Domain.Enums
 {
     public enum ReleaseStatus
     {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MusicCatalog.Domain.Entities;
+using MusicCatalogContext.Domain.Entities;
 
-namespace MusicCatalog.Infrastructure.Configurations
+namespace MusicCatalogContext.Infrastructure.Configurations
 {
     public class GenreConfiguration : IEntityTypeConfiguration<Genre>
     {

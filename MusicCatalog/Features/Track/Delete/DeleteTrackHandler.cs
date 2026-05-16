@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.Track.Delete
+namespace MusicCatalogContext.Features.Track.Delete
 {
     public class DeleteTrackHandler : IRequestHandler<DeleteTrackCommand, bool>
     {

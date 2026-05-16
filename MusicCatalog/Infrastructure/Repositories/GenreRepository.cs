@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Domain.Entities;
-using MusicCatalog.Features.Genre.Interfaces;
-using MusicCatalog.Features.Language.Interfaces;
+using MusicCatalogContext.Domain.Entities;
+using MusicCatalogContext.Features.Genre.Interfaces;
+using MusicCatalogContext.Features.Language.Interfaces;
 
-namespace MusicCatalog.Infrastructure.Repositories
+namespace MusicCatalogContext.Infrastructure.Repositories
 {
     public class GenreRepository : IGenreRepository
     {

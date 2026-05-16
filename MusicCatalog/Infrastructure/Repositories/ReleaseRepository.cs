@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Domain.Entities;
-using MusicCatalog.Features.Release;
+using MusicCatalogContext.Domain.Entities;
+using MusicCatalogContext.Features.Release;
 
-namespace MusicCatalog.Infrastructure.Repositories
+namespace MusicCatalogContext.Infrastructure.Repositories
 {
     public class ReleaseRepository : IReleaseRepository
     {

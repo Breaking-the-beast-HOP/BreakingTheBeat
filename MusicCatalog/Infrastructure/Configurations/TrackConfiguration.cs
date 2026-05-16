@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MusicCatalog.Domain.Entities;
-namespace MusicCatalog.Infrastructure.Configurations
+using MusicCatalogContext.Domain.Entities;
+namespace MusicCatalogContext.Infrastructure.Configurations
 {
     public class TrackConfiguration : IEntityTypeConfiguration<Track>
     {

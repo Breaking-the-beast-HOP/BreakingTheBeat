@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.Contributor.Get
+namespace MusicCatalogContext.Features.Contributor.Get
 {
     public record GetContributorsQuery : IRequest<List<ContributorDTO>>;
 }

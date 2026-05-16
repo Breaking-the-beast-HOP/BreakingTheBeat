@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicCatalog.Features.Volume
+namespace MusicCatalogContext.Features.Volume
 {
     internal class AddTrackOnVolume
     {

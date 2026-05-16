@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.Language.GetLanguages
+namespace MusicCatalogContext.Features.Language.GetLanguages
 {
     public record GetLanguagesQuery : IRequest<List<LanguageDTO>>;
 }

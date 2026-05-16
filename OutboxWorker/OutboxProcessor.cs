@@ -2,7 +2,7 @@
 using System.Text.Json;
 using Gateway.Contracts.MusicQC;
 using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Infrastructure;
+using MusicCatalogContext.Infrastructure;
 
 namespace OutboxWorker;
 

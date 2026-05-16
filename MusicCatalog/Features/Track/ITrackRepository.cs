@@ -1,7 +1,7 @@
 ﻿using SharedKernel;
 
 
-namespace MusicCatalog.Features.Track
+namespace MusicCatalogContext.Features.Track
 {
     public interface ITrackRepository : ICrudRepository<Domain.Entities.Track>
     {

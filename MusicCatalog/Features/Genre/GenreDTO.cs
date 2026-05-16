@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicCatalog.Features.Genre
+namespace MusicCatalogContext.Features.Genre
 {
     public class GenreDTO
     {

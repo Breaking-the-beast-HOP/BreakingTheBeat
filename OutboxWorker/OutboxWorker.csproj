@@ -15,6 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BreakingTheBeat\Gateway.csproj" />
-    <ProjectReference Include="..\MusicCatalog\MusicCatalog.csproj" />
+    <ProjectReference Include="..\MusicCatalog\MusicCatalogContext.csproj" />
   </ItemGroup>
 </Project>

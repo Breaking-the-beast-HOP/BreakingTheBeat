@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.Track.Create
+namespace MusicCatalogContext.Features.Track.Create
 {
     public class CreateTrackHandler : IRequestHandler<CreateTrackCommand, Guid>
     {

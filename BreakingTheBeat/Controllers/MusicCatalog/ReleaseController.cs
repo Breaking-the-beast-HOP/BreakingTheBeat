@@ -5,10 +5,10 @@ using Gateway.Contracts.Music.MusicRelease.Update;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Features.Release.Create;
-using MusicCatalog.Features.Release.GetAll;
-using MusicCatalog.Features.Release.GetById;
-using MusicCatalog.Features.Release.Update;
+using MusicCatalogContext.Features.Release.Create;
+using MusicCatalogContext.Features.Release.GetAll;
+using MusicCatalogContext.Features.Release.GetById;
+using MusicCatalogContext.Features.Release.Update;
 
 namespace Gateway.Controllers.Music
 {
@@ -43,10 +43,10 @@ namespace Gateway.Controllers.Music
                 var status = request.Status switch
                 {
                     Gateway.Contracts.Music.MusicRelease.Create.ReleaseStatusDto.Draft
-                        => MusicCatalog.Domain.Enums.ReleaseStatus.Draft,
+                        => MusicCatalogContext.Domain.Enums.ReleaseStatus.Draft,
 
                     Gateway.Contracts.Music.MusicRelease.Create.ReleaseStatusDto.ReadyForQc
-                        => MusicCatalog.Domain.Enums.ReleaseStatus.ReadyForQc,
+                        => MusicCatalogContext.Domain.Enums.ReleaseStatus.ReadyForQc,
 
                     _ => throw new ArgumentOutOfRangeException(nameof(request.Status))
                 };
