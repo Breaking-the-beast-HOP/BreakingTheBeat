@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Labels\NewFolder\" />
+    <Folder Include="Features\Label\NewFolder\" />
   </ItemGroup>
 
 </Project>

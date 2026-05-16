@@ -333,7 +333,7 @@
     {
         _selectedCountry = country;
 
-        _model.CountryCode = country?.ISO;
+        _model.CountryId = country.Id;
 
         return Task.CompletedTask;
     }
@@ -342,7 +342,7 @@
     {
         _selectedPrimaryLanguage = language;
 
-        _model.PrimaryLanguageCode = language?.ISO;
+        _model.PrimaryLanguageId = language?.Id;
 
         return Task.CompletedTask;
     }
@@ -353,7 +353,7 @@
 
         _model.ContactPerson ??= new CreateLabelContactPersonRequest();
 
-        _model.ContactPerson.PreferredLanguageCode = language?.ISO;
+        _model.ContactPerson.PreferredLanguageId = language?.Id;
 
         return Task.CompletedTask;
     }
@@ -374,7 +374,7 @@
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(_model.CountryCode))
+        if (_model.CountryId == Guid.Empty)
         {
             _errorMessage = "Country is required.";
             return;
@@ -384,8 +384,7 @@
         {
             _isSaving = true;
 
-            var response =
-                await Http.PostAsJsonAsync("api/Label", _model);
+            var response = await Http.PostAsJsonAsync("api/Label", _model);
 
             if (response.IsSuccessStatusCode)
             {
@@ -468,16 +467,15 @@
         public string? FacebookUrl { get; set; }
 
         // Localization
-        public string? CountryCode { get; set; }
+        public Guid CountryId { get; set; }
 
-        public string? PrimaryLanguageCode { get; set; }
+        public Guid? PrimaryLanguageId { get; set; }
 
         // Branding
         public string? LogoUrl { get; set; }
 
         // Contact
-        public CreateLabelContactPersonRequest ContactPerson { get; set; }
-            = new();
+        public CreateLabelContactPersonRequest ContactPerson { get; set; } = new();
     }
 
     public class CreateLabelContactPersonRequest
@@ -490,7 +488,7 @@
 
         public string? Role { get; set; }
 
-        public string? PreferredLanguageCode { get; set; }
+        public Guid? PreferredLanguageId { get; set; }
     }
 
     public class LanguageDto

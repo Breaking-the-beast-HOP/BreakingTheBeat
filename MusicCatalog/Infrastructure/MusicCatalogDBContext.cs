@@ -18,6 +18,7 @@ namespace MusicCatalogContext.Infrastructure
         public DbSet<Contribution> Contributions => Set<Contribution>();
         public DbSet<Release> Releases => Set<Release>();
         public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+        public DbSet<Label> Labels => Set<Label>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MusicCatalog.Features.Label.Create;
 using MusicCatalogContext.Features;
 using MusicCatalogContext.Features.Contributor;
 using MusicCatalogContext.Features.Contributor.Create;
@@ -183,6 +184,7 @@ namespace Gateway
             builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
             builder.Services.AddScoped<IOutBoxRepository, OutboxRepository>();
             builder.Services.AddScoped<IUnitOfWork, MusicCatalogUnitOfWork>();
+            builder.Services.AddScoped<ILabelRepository, MusicCatalogContext.Infrastructure.Repositories.LabelRepository>();
 
 
             // MUSIC QC
@@ -212,6 +214,7 @@ namespace Gateway
                 cfg.RegisterServicesFromAssembly(typeof(CreateReleaseCommand).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetContributorRolesQuery).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetAllCountriesQuery).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(CreateLabelCommand).Assembly);
 
                 // Podcast
                 cfg.RegisterServicesFromAssembly(typeof(CreatePodcastHandler).Assembly);
