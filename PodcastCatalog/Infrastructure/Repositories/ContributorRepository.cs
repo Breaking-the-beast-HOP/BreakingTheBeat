@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PodcastCatalog.Domain.Entities;
-using PodcastCatalog.Infrastructure.Data;
 using SharedKernel;
 
 namespace PodcastCatalog.Infrastructure.Repositories

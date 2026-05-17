@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PodcastCatalog.Domain.Entities;
 using PodcastCatalog.Features.Podcasts.Interfaces;
-using PodcastCatalog.Infrastructure.Data;
+using PodcastCatalog.Infrastructure;
 using SharedKernel;
 
 public class PodcastRepository : IPodcastRepository

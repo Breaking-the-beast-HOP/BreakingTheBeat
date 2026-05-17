@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PodcastCatalog.Domain.Entities;
 
-namespace PodcastCatalog.Infrastructure.Data
+namespace PodcastCatalog.Infrastructure
 {
     public class PodcastCatalogDbContext : DbContext
     {

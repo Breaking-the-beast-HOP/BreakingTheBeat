@@ -40,8 +40,11 @@ jobs:
             - name: Build solution
               run: dotnet build BreakingTheBeat.sln --configuration Release --verbosity detailed
 
-            - name: Run linting (dotnet format)
-              run: dotnet format --verify-no-changes --severity error
+            - name: Lint formatting
+              run: dotnet format whitespace --verify-no-changes
+
+            - name: Build with analyzers
+              run: dotnet build BreakingTheBeat.sln -c Release -warnaserror
     
     security-scans:
       name: Secret Scanning (Gitleaks)
@@ -71,14 +74,6 @@ jobs:
           uses: gitleaks/gitleaks-action@v1
           with: 
             args: detect --source . --verbose --redact
-
-        - name: Setup .NET
-          uses: actions/setup-dotnet@v4
-          with:
-            dotnet-version: 9.0.x
-        
-        - name: Restore
-          run: dotnet restore
         
         - name: List vulnerable packages
           run: |

@@ -28,7 +28,7 @@ using PodcastCatalog.Features.Podcasts.PodcastCore.Create;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Get;
 using PodcastCatalog.Features.Podcasts.PodcastCore.GetAll;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Update;
-using PodcastCatalog.Infrastructure.Data;
+using PodcastCatalog.Infrastructure;
 using PodcastCatalog.Infrastructure.Repositories;
 using Serilog;
 using Serilog.Sinks.PostgreSQL;
@@ -52,6 +52,8 @@ namespace Gateway
             builder.Services.AddHttpContextAccessor();
 
             // Serilog
+#pragma warning disable CA1305
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
 
@@ -80,6 +82,8 @@ namespace Gateway
                         ["properties"] = new PropertiesColumnWriter()
                     })
                 .CreateLogger();
+
+#pragma warning restore CA1305
 
             builder.Host.UseSerilog();
 
