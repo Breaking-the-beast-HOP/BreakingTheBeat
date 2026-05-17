@@ -14,9 +14,12 @@ namespace PodcastCatalog.Infrastructure.Repositories
         }
         public async Task<List<ContributorRole>> GetAllAsync()
         {
-            return await _dbContext.ContributorRoles
-                .AsNoTracking()
-                .ToListAsync();
+            Console.WriteLine($"Connection String: {_dbContext.Database.GetConnectionString()}");
+            Console.WriteLine($"Database Name: {_dbContext.Database.GetDbConnection().Database}");
+
+            var roles = await _dbContext.ContributorRoles.AsNoTracking().ToListAsync();
+            Console.WriteLine($"Number of roles: {roles.Count}");
+            return roles;
         }
 
         public async Task<ContributorRole?> GetByIdAsync(Guid id)
