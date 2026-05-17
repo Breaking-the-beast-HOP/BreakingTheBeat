@@ -22,6 +22,7 @@ namespace PodcastCatalog.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("public");
             base.OnModelCreating(modelBuilder);
 
             ConfigurePodcast(modelBuilder);
