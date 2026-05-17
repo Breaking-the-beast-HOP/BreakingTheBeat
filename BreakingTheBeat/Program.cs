@@ -31,7 +31,6 @@ using PodcastCatalog.Features.Podcasts.PodcastCore.Update;
 using PodcastCatalog.Infrastructure.Data;
 using PodcastCatalog.Infrastructure.Repositories;
 using Serilog;
-using Serilog.Enrichers;
 using Serilog.Sinks.PostgreSQL;
 using SharedKernel;
 using SharedKernel.Interfaces.Base;
@@ -40,7 +39,6 @@ using UserManagement.Features.User.GetAll;
 using UserManagement.Features.User.Register;
 using UserManagement.Infrastructure.Auth;
 using UserManagement.Infrastructure.Persistence;
-using System.Diagnostics;
 using Serilog.Enrichers.Span;
 
 namespace Gateway
@@ -89,8 +87,6 @@ namespace Gateway
             var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatalogDb");
             var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb");
 
-            builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
-
             builder.Services.AddScoped<PostgresRoleService>();
             builder.Services.AddScoped<PostgresRoleInterceptor>();
 
@@ -134,6 +130,7 @@ namespace Gateway
                 options.AddInterceptors(interceptor);
             });
 
+            builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
 
             // 3. Identity
             builder.Services
@@ -235,29 +232,14 @@ namespace Gateway
 
             // Logging
             app.UseMiddleware<ExceptionHandlingMiddleware>();
-            app.UseMiddleware<RequestResponseLoggingMiddleware>();
+            //app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
             app.UseHttpsRedirection();
 
-            // Seed / migrate podcast database
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-
-                try
-                {
-                    var podcastContext = services.GetRequiredService<PodcastCatalogDbContext>();
-                    podcastContext.Database.Migrate();
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding the database.");
-                }
-            }
-
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<UserEnrichmentMiddleware>();
 
             app.MapControllers();
 
@@ -305,7 +287,7 @@ namespace Gateway
             {
                 Log.Information("Starting web application");
 
-                app.Run();
+                await app.RunAsync();
             }
             catch (Exception ex)
             {

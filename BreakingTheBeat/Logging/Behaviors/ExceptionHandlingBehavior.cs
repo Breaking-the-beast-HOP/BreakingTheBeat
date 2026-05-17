@@ -1,45 +1,45 @@
 ﻿using MediatR;
-using Serilog;
 using ILogger = Serilog.ILogger;
 
-namespace Gateway.Logging.Behaviors;
-
-public class ExceptionHandlingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+namespace Gateway.Logging.Behaviors
 {
-    private readonly ILogger _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public ExceptionHandlingBehavior(
-        ILogger logger,
-        IHttpContextAccessor httpContextAccessor)
+    public class ExceptionHandlingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
-        _logger = logger.ForContext<ExceptionHandlingBehavior<TRequest, TResponse>>();
-        _httpContextAccessor = httpContextAccessor;
-    }
+        private readonly ILogger _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
-    {
-        try
+        public ExceptionHandlingBehavior(
+            ILogger logger,
+            IHttpContextAccessor httpContextAccessor)
         {
-            return await next();
+            _logger = logger.ForContext<ExceptionHandlingBehavior<TRequest, TResponse>>();
+            _httpContextAccessor = httpContextAccessor;
         }
-        catch (Exception ex)
+
+        public async Task<TResponse> Handle(
+            TRequest request,
+            RequestHandlerDelegate<TResponse> next,
+            CancellationToken cancellationToken)
         {
-            var httpContext = _httpContextAccessor.HttpContext;
+            try
+            {
+                return await next();
+            }
+            catch (Exception ex)
+            {
+                var httpContext = _httpContextAccessor.HttpContext;
 
-            var requestName = typeof(TRequest).Name;
+                var requestName = typeof(TRequest).Name;
 
-            var requestId = httpContext?.Items["requestId"]?.ToString() ?? "UNKNOWN";
+                var requestId = httpContext?.Items["requestId"]?.ToString() ?? "UNKNOWN";
 
-            _logger
-                .ForContext("RequestId", requestId)
-                .ForContext("RequestName", requestName)
-                .Error(ex, "Unhandled MediatR exception");
+                _logger
+                    .ForContext("RequestId", requestId)
+                    .ForContext("RequestName", requestName)
+                    .Error(ex, "Unhandled MediatR exception");
 
-            throw;
+                throw;
+            }
         }
     }
 }

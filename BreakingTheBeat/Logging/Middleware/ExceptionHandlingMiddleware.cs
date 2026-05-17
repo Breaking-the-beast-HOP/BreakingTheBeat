@@ -1,40 +1,41 @@
 ﻿using System.Text.Json;
 using ILogger = Serilog.ILogger;
 
-namespace Gateway.Logging.Middleware;
-
-public class ExceptionHandlingMiddleware
+namespace Gateway.Logging.Middleware
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger _logger;
-
-    public ExceptionHandlingMiddleware(
-        RequestDelegate next,
-        ILogger logger)
+    public class ExceptionHandlingMiddleware
     {
-        _next = next;
-        _logger = logger.ForContext<ExceptionHandlingMiddleware>();
-    }
+        private readonly RequestDelegate _next;
+        private readonly ILogger _logger;
 
-    public async Task InvokeAsync(HttpContext context)
-    {
-        try
+        public ExceptionHandlingMiddleware(
+            RequestDelegate next,
+            ILogger logger)
         {
-            await _next(context);
+            _next = next;
+            _logger = logger.ForContext<ExceptionHandlingMiddleware>();
         }
-        catch (Exception ex)
+
+        public async Task InvokeAsync(HttpContext context)
         {
-            _logger
-                .ForContext("Path", context.Request.Path)
-                .ForContext("StatusCode", StatusCodes.Status500InternalServerError)
-                .Error(ex, "Unhandled exception");
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                _logger
+                    .ForContext("Path", context.Request.Path)
+                    .ForContext("StatusCode", StatusCodes.Status500InternalServerError)
+                    .Error(ex, "Unhandled exception");
 
 
-            context.Response.ContentType = "application/json";
+                context.Response.ContentType = "application/json";
 
-            var response = new { Message = "An unexpected error occurred." };
-            var json = JsonSerializer.Serialize(response);
-            await context.Response.WriteAsync(json);
+                var response = new { Message = "An unexpected error occurred." };
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
+            }
         }
     }
 }
