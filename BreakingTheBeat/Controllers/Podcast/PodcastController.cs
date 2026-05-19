@@ -18,6 +18,7 @@ namespace Gateway.Controllers.Podcast
 {
     [Route("api/podcasts/[controller]")]
     [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(Roles = "Admin, Content Creator, Quality controller")]
     [ApiController]
     public class PodcastController : ControllerBase
     {

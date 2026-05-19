@@ -9,6 +9,7 @@ namespace Gateway.Controllers.Podcast
 {
     [Route("api/podcasts/[controller]")]
     [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(Roles = "Admin, Content Creator, Quality controller")]
     [ApiController]
     public class ContributorRoleController : ControllerBase
     {
@@ -19,7 +20,6 @@ namespace Gateway.Controllers.Podcast
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin, Content Creator, Quality controller")]
         public async Task<IActionResult> GetContributorRoles(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetAllContributionRolesQuery(), cancellationToken);
