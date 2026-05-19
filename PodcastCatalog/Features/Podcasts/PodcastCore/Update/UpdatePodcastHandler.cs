@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PodcastCatalog.Domain.Entities;
 using PodcastCatalog.Features.Podcasts.Interfaces;
 using PodcastCatalog.Features.Podcasts.Shared;
@@ -38,8 +39,12 @@ namespace PodcastCatalog.Features.Podcasts.PodcastCore.Update
                 request.CategoryId,
                 request.LanguageId);
 
+            
+
+
             var contributions = request.Contributions
                 .Where(c =>
+                    c.Id != Guid.Empty &&
                     c.ContributorId != Guid.Empty &&
                     c.ContributorRoleId != Guid.Empty)
                 .Select(c => (

@@ -11,8 +11,8 @@
         public Guid? EpisodeId { get; private set; }
 
         public bool HasRights { get; private set; }
-        public ContributorRole Role { get; private set; }
-        public Contributor Contributor { get; private set; }
+        public ContributorRole? Role { get; private set; }
+        public Contributor? Contributor { get; private set; }
         public Podcast? Podcast { get; private set; }
         public Episode? Episode { get; private set; }
 

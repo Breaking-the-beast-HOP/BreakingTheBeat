@@ -5,6 +5,8 @@
 @using Microsoft.AspNetCore.Authorization
 @using MudBlazor
 @using Frontend.Components.Shared
+@using Frontend.Components.Pages.PodcastCatalog
+@using Microsoft.AspNetCore.Components.Web
 
 @inject HttpClient Http
 @inject NavigationManager Navigation
@@ -114,11 +116,87 @@
                             </MudGrid>
                         </MudPaper>
 
-                        <ContributionEditor Title="Podcast contributors"
-                                            Description="Add podcast-level contributors and their roles."
-                                            Rows="_contributions"
-                                            Contributors="_availableContributors"
-                                            AvailableRoles="_contributionRoles" />
+                        <MudPaper Class="pa-4" Elevation="5">
+                            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+                                <div>
+                                    <MudText Typo="Typo.h6">Contributions</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        Add hosts, guests, producers, editors, or other contributors.
+                                    </MudText>
+                                </div>
+
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Warning"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           OnClick="AddContributionRow">
+                                    Add contributor
+                                </MudButton>
+                            </MudStack>
+
+                            @if (!_contributions.Any())
+                            {
+                                <MudAlert Severity="Severity.Info" Dense="true">
+                                    No contributors added yet.
+                                </MudAlert>
+                            }
+                            else
+                            {
+                                <MudStack Spacing="2">
+                                    @foreach (var contribution in _contributions.Select((value, index) => new { value, index }))
+                                    {
+                                        <MudPaper Outlined="true" Class="pa-3">
+                                            <MudGrid Spacing="2">
+                                                <MudItem xs="12" sm="5">
+                                                    <MudAutocomplete T="Contributor"
+                                                                     Label="Contributor"
+                                                                     Variant="Variant.Outlined"
+                                                                     Value="_contributors.FirstOrDefault(c => c.Id == contribution.value.ContributorId)"
+                                                                     ValueChanged="@(value => OnContributionChanged(value, contribution.value))"
+                                                                     SearchFunc="SearchContributors"
+                                                                     ToStringFunc="@(c => c?.Name ?? string.Empty)"
+                                                                     Clearable="true"
+                                                                     ResetValueOnEmptyText="true"
+                                                                     CoerceText="false"
+                                                                     Dense="true"
+                                                                     FullWidth="true"
+                                                                     MaxItems="8"
+                                                                     Disabled="@IsContributorLocked(contribution.value, contribution.index)"
+                                                                     ItemDisabledFunc="@(c => UsedContributorIds.Contains(c.Id)
+                                                                                                                                                                 && c.Id != contribution.value.ContributorId)" />
+                                    </MudItem>
+
+                                                <MudItem xs="12" sm="5">
+                                                    <MudSelect T="Guid?"
+                                                               Label="Role"
+                                                               Value="contribution.value.ContributorRoleId"
+                                                               ValueChanged="@(async (Guid? value) => await OnRoleChanged(value, contribution.value))"
+                                                               Variant="Variant.Outlined"
+                                                               FullWidth="true">
+
+                                            @foreach (var role in _contributionRoles)
+                                                        {
+                                                            <MudSelectItem T="Guid?" Value="@role.Id">
+                                                                @role.Name
+                                                            </MudSelectItem>
+                                                        }
+
+                                                    </MudSelect>
+                                                </MudItem>
+
+                                                <MudItem xs="12" sm="2" Class="d-flex align-center">
+                                                    <MudButton Variant="Variant.Text"
+                                                               Color="Color.Error"
+                                                               StartIcon="@Icons.Material.Filled.Delete"
+                                                               OnClick="@(() => RemoveContributionRow(contribution.index))">
+                                                        Remove
+                                                    </MudButton>
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudPaper>
+                                    }
+                                </MudStack>
+                            }
+                        </MudPaper>
 
                     </MudStack>
                 </MudItem>
@@ -155,6 +233,7 @@
     private bool _isSaving;
 
     private string? _errorMessage;
+    private string? _successMessage;
 
     private PodcastEditModel _model = new();
 
@@ -164,12 +243,35 @@
     private LanguageDto? _selectedLanguage;
     private PodcastCategoryDto? _selectedCategory;
 
-    private List<ContributionEditor.ContributorOption> _availableContributors = new();
-    private List<ContributionEditor.ContributorRoleDto> _contributionRoles = new();
-    private List<ContributionEditor.ContributionRow> _contributions = new();
+    private List<Contributor> _contributors = new();
+    private List<ContributionRoles> _contributionRoles = new();
+    private List<ContributionRow> _contributions = new();
+
+    private HashSet<Guid> UsedContributorIds =>
+        _contributions
+            .Where(c => c.ContributorId.HasValue)
+            .Select(c => c.ContributorId!.Value)
+            .ToHashSet();
+
+    private bool IsContributorLocked(ContributionRow row, int index)
+    {
+        return row.ContributorId.HasValue;
+    }
 
     protected override async Task OnInitializedAsync()
     {
+        _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category") ?? new();
+        //_selectedCategory = _categories.FirstOrDefault(c => c.Id == podcast.CategoryId);
+
+        _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") ?? new();
+        //_selectedLanguage = _languages.FirstOrDefault(l => l.Id == podcast.LanguageId);
+
+        _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>(
+            "api/podcasts/ContributorRole") ?? new();
+
+        _contributors = await Http.GetFromJsonAsync<List<Contributor>>(
+            "api/podcasts/Contributor") ?? new();
+
         await LoadPodcast();
     }
 
@@ -195,41 +297,28 @@
                 LanguageId = podcast.LanguageId
             };
 
-            _contributions = podcast.Contributions
-                .Where(c => c.ContributorId != Guid.Empty)
-                .GroupBy(c => new
+            _contributions = podcast.Contributions?
+                .Select(c => new ContributionRow
                 {
-                    c.ContributorId,
-                    c.ContributorName
+                    Id = c.Id,
+                    ContributorId = c.ContributorId,
+                    ContributorName = c.ContributorName,
+                    ContributorRoleId = c.ContributorRoleId,
+                    HasRights = c.HasRights
                 })
-                .Select(group => new ContributionEditor.ContributionRow
-                {
-                    ContributorId = group.Key.ContributorId,
-                    Contributor = new ContributionEditor.ContributorOption
-                    {
-                        Id = group.Key.ContributorId,
-                        DisplayName = group.Key.ContributorName ?? ""
-                    },
-                    Roles = group
-                        .Where(x => x.ContributorRoleId != Guid.Empty)
-                        .Select(x => new ContributionEditor.ContributorRoleDto
-                        {
-                            Id = x.ContributorRoleId,
-                            Name = x.ContributorRoleName ?? ""
-                        })
-                        .ToList()
-                })
-                .ToList();
+                .ToList() ?? new();
 
-            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category") ?? new();
+            //_categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category") ?? new();
             _selectedCategory = _categories.FirstOrDefault(c => c.Id == podcast.CategoryId);
 
-            _languages =await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language")?? new();
+            //_languages =await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language")?? new();
             _selectedLanguage = _languages.FirstOrDefault(l => l.Id == podcast.LanguageId);
 
-            _availableContributors = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorOption>>("api/Podcasts/Contributor")?? new();
+            // _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>(
+            //     "api/podcasts/ContributorRole") ?? new();
 
-            _contributionRoles = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorRoleDto>>("api/Podcasts/ContributorRole")?? new();
+            // _contributors = await Http.GetFromJsonAsync<List<Contributor>>(
+            //     "api/podcasts/Contributor") ?? new();
         }
         catch (Exception ex)
         {
@@ -240,6 +329,7 @@
             _isLoading = false;
         }
     }
+
 
     private Task<IEnumerable<PodcastCategoryDto>> SearchCategories(string value, CancellationToken token)
     {
@@ -262,6 +352,22 @@
         return Task.FromResult(result);
     }
 
+    private Task<IEnumerable<Contributor>> SearchContributors(
+        string value,
+        CancellationToken token)
+    {
+        var query = _contributors.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            query = query.Where(c =>
+                c.Name.Contains(value, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return Task.FromResult(query);
+    }
+
+
     private Task OnCategoryChanged(PodcastCategoryDto? category)
     {
         _selectedCategory = category;
@@ -274,6 +380,37 @@
         _selectedLanguage = language;
         _model.LanguageId = language?.Id ?? Guid.Empty;
         return Task.CompletedTask;
+    }
+
+    private Task OnContributionChanged(
+    Contributor? contributor,
+    ContributionRow row)
+    {
+        if (row.ContributorId.HasValue)
+            return Task.CompletedTask;
+        row.ContributorId = contributor?.Id;
+        row.ContributorName = contributor?.Name;
+
+        return Task.CompletedTask;
+    }
+
+
+    private Task OnRoleChanged(Guid? roleId, ContributionRow row)
+    {
+        row.ContributorRoleId = roleId;
+
+        return Task.CompletedTask;
+    }
+
+    private void AddContributionRow()
+    {
+        _contributions.Add(new ContributionRow());
+    }
+
+    private void RemoveContributionRow(int index)
+    {
+        if (index >= 0 && index < _contributions.Count)
+            _contributions.RemoveAt(index);
     }
 
     private async Task SavePodcast()
@@ -298,6 +435,29 @@
             return;
         }
 
+        _model.Contributions = _contributions.Select(r => new ContributionDto
+        {
+            Id = r.Id,
+            ContributorId = r.ContributorId ?? Guid.Empty,
+            ContributorRoleId = r.ContributorRoleId ?? Guid.Empty,
+            HasRights = r.HasRights,
+            ContributorName = r.ContributorName
+        }).ToList();
+
+
+
+        if (!_model.Contributions.Any())
+        {
+            _errorMessage = "At least one contribution is required.";
+            return;
+        }
+
+        if (_model.Contributions.Any(c => c.ContributorId == null || c.ContributorRoleId == null))
+        {
+            _errorMessage = "All contributions must have a contributor and a role selected.";
+            return;
+        }
+
         _isSaving = true;
 
         try
@@ -313,13 +473,26 @@
                     .Select(c => new UpdatePodcastContributionRequest
                     {
                         ContributorId = c.ContributorId!.Value,
-                        RoleIds = c.Roles
-                            .Where(r => r.Id != Guid.Empty)
-                            .Select(r => r.Id)
-                            .ToList()
+                        ContributorName = c.ContributorName ?? string.Empty, 
+                        ContributorRoleId = c.ContributorRoleId!.Value 
                     })
                     .ToList()
+                // Contributions = _contributions
+                //     .Where(c => c.ContributorId.HasValue && c.ContributorId.Value != Guid.Empty)
+                //     .Select(c => new UpdatePodcastContributionRequest
+                //     {
+                //         ContributorId = c.ContributorId!.Value,
+                //         RoleIds = c.Roles
+                //             .Where(r => r.RoleId != Guid.Empty)
+                //             .Select(r => r.RoleId)
+                //             .ToList()
+                //     })
+                //     .ToList()
             };
+
+            //debugging step
+            foreach (var c in request.Contributions)
+                Console.WriteLine($"ContributionId: {c.Id}, ContributorId: {c.ContributorId}, ContributorRoleId: {c.ContributorRoleId}");
 
             var response = await Http.PutAsJsonAsync(
                 $"api/podcasts/podcast/{Id}",
@@ -347,12 +520,15 @@
         }
     }
 
+
     private class PodcastEditModel
     {
         public string Title { get; set; } = "";
         public string? Description { get; set; }
         public Guid CategoryId { get; set; }
         public Guid LanguageId { get; set; }
+
+        public List<ContributionDto> Contributions { get; set; } = new();
     }
 
     public class UpdatePodcastRequest
@@ -364,10 +540,13 @@
         public List<UpdatePodcastContributionRequest> Contributions { get; set; } = new();
     }
 
+
     public class UpdatePodcastContributionRequest
     {
+        public Guid? Id { get; set; }
         public Guid ContributorId { get; set; }
-        public List<Guid> RoleIds { get; set; } = new();
+        public string ContributorName { get; set; } = string.Empty;
+        public Guid ContributorRoleId { get; set; }
     }
 
     public class PodcastDetailsDto
@@ -388,13 +567,37 @@
 
     public class ContributionDto
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public Guid ContributorId { get; set; }
         public string? ContributorName { get; set; }
         public Guid ContributorRoleId { get; set; }
-        public string? ContributorRoleName { get; set; }
         public bool HasRights { get; set; }
     }
+    
+
+    public class ContributionRow
+    {
+        public Guid? Id { get; set; }
+        public Guid? ContributorId { get; set; }
+        public string? ContributorName { get; set; }
+
+        public Guid? ContributorRoleId { get; set; }
+        public bool HasRights { get; set; }
+    }
+
+    public class ContributionRoles
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
+
+    public class Contributor
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+    }
+
 
     public class LanguageDto
     {

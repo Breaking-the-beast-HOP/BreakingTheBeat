@@ -79,6 +79,7 @@ namespace Gateway.Controllers.Podcast
         {
             var contributions = request.Contributions.Select(c =>
                 new UpdatePodcastContributionInput(
+                    c.Id,
                     c.ContributorId,
                     c.ContributorRoleId,
                     c.HasRights

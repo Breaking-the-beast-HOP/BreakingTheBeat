@@ -129,39 +129,43 @@
         }
 
         public void UpdateContributions(
-            List<(Guid ContributorId, Guid ContributorRoleId, bool HasRights)> contributions)
+            List<(Guid ContributorId, Guid ContributorRoleId, bool HasRights)> incoming)
         {
-            contributions ??= new();
+            incoming ??= new();
 
-            _contributions.RemoveAll(existing =>
-                !contributions.Any(incoming =>
-                    incoming.ContributorId == existing.ContributorId &&
-                    incoming.ContributorRoleId == existing.ContributorRoleId));
+            // 1. REMOVE (tracked entities only)
+            var toRemove = _contributions
+                .Where(existing => !incoming.Any(i =>
+                    i.ContributorId == existing.ContributorId &&
+                    i.ContributorRoleId == existing.ContributorRoleId))
+                .ToList();
 
-            foreach (var incoming in contributions)
+            foreach (var r in toRemove)
+                _contributions.Remove(r);
+
+            // 2. UPDATE EXISTING
+            foreach (var existing in _contributions)
             {
-                if (incoming.ContributorId == Guid.Empty)
-                    throw new ArgumentException("ContributorId is required.");
+                var match = incoming.FirstOrDefault(i =>
+                    i.ContributorId == existing.ContributorId &&
+                    i.ContributorRoleId == existing.ContributorRoleId);
 
-                if (incoming.ContributorRoleId == Guid.Empty)
-                    throw new ArgumentException("ContributorRoleId is required.");
+                if (match != default)
+                    existing.SetRights(match.HasRights);
+            }
 
-                var existing = _contributions.FirstOrDefault(c =>
-                    c.ContributorId == incoming.ContributorId &&
-                    c.ContributorRoleId == incoming.ContributorRoleId);
+            // 3. ADD NEW (IMPORTANT: DO NOT use detached contributor objects)
+            var existingKeys = _contributions
+                .Select(c => (c.ContributorId, c.ContributorRoleId))
+                .ToHashSet();
 
-                if (existing is not null)
-                {
-                    existing.SetRights(incoming.HasRights);
+            foreach (var i in incoming)
+            {
+                if (existingKeys.Contains((i.ContributorId, i.ContributorRoleId)))
                     continue;
-                }
 
-                var contribution = Contribution.ForPodcast(
-                    Id,
-                    incoming.ContributorId,
-                    incoming.ContributorRoleId);
-
-                contribution.SetRights(incoming.HasRights);
+                var contribution = Contribution.ForPodcast(Id, i.ContributorId, i.ContributorRoleId);
+                contribution.SetRights(i.HasRights);
 
                 _contributions.Add(contribution);
             }
