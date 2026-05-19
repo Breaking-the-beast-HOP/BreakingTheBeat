@@ -227,9 +227,9 @@
             _languages =await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language")?? new();
             _selectedLanguage = _languages.FirstOrDefault(l => l.Id == podcast.LanguageId);
 
-            // _availableContributors = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorOption>>("api/contributors")?? new();
+            _availableContributors = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorOption>>("api/Podcasts/Contributor")?? new();
 
-            // _contributionRoles = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorRoleDto>>("api/contributor-roles")?? new();
+            _contributionRoles = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorRoleDto>>("api/Podcasts/ContributorRole")?? new();
         }
         catch (Exception ex)
         {
