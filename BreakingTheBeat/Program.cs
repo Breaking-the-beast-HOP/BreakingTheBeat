@@ -39,6 +39,7 @@ using PodcastCatalog.Features.Podcasts.PodcastCore.Update;
 using PodcastCatalog.Infrastructure;
 using PodcastCatalog.Infrastructure.Repositories;
 using Serilog;
+using Serilog.Enrichers.Span;
 using Serilog.Sinks.PostgreSQL;
 using SharedKernel;
 using SharedKernel.Interfaces;
@@ -48,7 +49,6 @@ using UserManagement.Features.User.GetAll;
 using UserManagement.Features.User.Register;
 using UserManagement.Infrastructure.Auth;
 using UserManagement.Infrastructure.Persistence;
-using Serilog.Enrichers.Span;
 
 namespace Gateway
 {
@@ -99,6 +99,7 @@ namespace Gateway
             var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatalogDb");
             var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatalogDb");
             var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb");
+            var musicQualityControlConnectionString = builder.Configuration.GetConnectionString("MusicQualityControlDb");
 
             builder.Services.AddScoped<PostgresRoleService>();
             builder.Services.AddScoped<PostgresRoleInterceptor>();
@@ -143,7 +144,7 @@ namespace Gateway
                 options.AddInterceptors(interceptor);
             });
 
-            builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
+            builder.Services.AddSingleton(Log.Logger);
             builder.Services.AddDbContext<MusicQualityControlDbContext>((sp, options) =>
             {
                 var interceptor = sp.GetRequiredService<PostgresRoleInterceptor>();
@@ -189,7 +190,7 @@ namespace Gateway
 
             // 4. Repositories (music)
             builder.Services.AddScoped<ILanguageRepository, MusicCatalogContext.Infrastructure.Repositories.LanguageRepository>();
-            builder.Services.AddScoped<ICountryRepository, MusicCatalogContext.Infrastructure.Repositories.CountryRepository>();
+            builder.Services.AddScoped<ICountryRepository, CountryRepository>();
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
             builder.Services.AddScoped<IContributorRepository, MusicCatalogContext.Infrastructure.Repositories.ContributorRepository>();
@@ -197,7 +198,7 @@ namespace Gateway
             builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
             builder.Services.AddScoped<IOutBoxRepository, OutboxRepository>();
             builder.Services.AddScoped<IUnitOfWork, MusicCatalogUnitOfWork>();
-            builder.Services.AddScoped<ILabelRepository, MusicCatalogContext.Infrastructure.Repositories.LabelRepository>();
+            builder.Services.AddScoped<ILabelRepository, LabelRepository>();
 
 
             // MUSIC QC
@@ -299,6 +300,17 @@ namespace Gateway
                     SanitizeConnectionString(musicCatalogConnectionString!));
             }
 
+            if (musicQualityControlConnectionString is null)
+            {
+                Log.Warning("MusicCatalog connection string not loaded");
+            }
+            else
+            {
+                Log.Information(
+                    "MusicQualityControll connection loaded: {ConnectionString}",
+                    SanitizeConnectionString(musicQualityControlConnectionString!));
+            }
+
 
             if (podcastCatalogConnectionString is null)
             {
@@ -348,7 +360,7 @@ namespace Gateway
         {
             var parts = connectionString.Split(';');
 
-            for (int i = 0; i < parts.Length; i++)
+            for (var i = 0; i < parts.Length; i++)
             {
                 if (parts[i].StartsWith("Password=", StringComparison.OrdinalIgnoreCase))
                 {

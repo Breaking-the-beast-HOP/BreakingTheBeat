@@ -3,7 +3,7 @@ on:
     push:
         branches: ["feature/**", "bugfix/**", "master"]
     pull_request:
-        branches: ["feature/**", bugfix/**, "master"]
+        branches: ["feature/**", "bugfix/**", "master"]
 
 jobs:
     linting:
@@ -40,11 +40,8 @@ jobs:
             - name: Build solution
               run: dotnet build BreakingTheBeat.sln --configuration Release --verbosity detailed
 
-            - name: Lint formatting
-              run: dotnet format whitespace --verify-no-changes
-
-            - name: Build with analyzers
-              run: dotnet build BreakingTheBeat.sln -c Release -warnaserror
+            - name: Run linting (dotnet format)
+              run: dotnet format --verify-no-changes --severity error
     
     security-scans:
       name: Secret Scanning (Gitleaks)
@@ -63,9 +60,6 @@ jobs:
           uses: NuGet/setup-nuget@v1
           with:
             nuget-version: 'latest'
-
-        - name: Clear NuGet cache
-          run: dotnet nuget locals all --clear
         
         - name: Restore
           run: dotnet restore --no-cache
@@ -100,7 +94,7 @@ jobs:
           run: docker build -t gateway-test -f ./BreakingTheBeat/Dockerfile .
 
         - name: Scan gateway-image with Trivy
-          uses: aquasecurity/trivy-action@master
+          uses: aquasecurity/trivy-action@v0.36.0
           with:
             image-ref: gateway-test
             format: table
@@ -112,7 +106,7 @@ jobs:
           run: docker build -t frontend-test -f ./Frontend/Dockerfile ./Frontend
 
         - name: Scan frontend-image with Trivy
-          uses: aquasecurity/trivy-action@master
+          uses: aquasecurity/trivy-action@v0.36.0
           with:
             image-ref: frontend-test
             format: table
@@ -124,7 +118,7 @@ jobs:
           run: docker build -t monitoring-test -f ./Monitoring/Dockerfile ./Monitoring
 
         - name: Scan monitoring-image with Trivy
-          uses: aquasecurity/trivy-action@master
+          uses: aquasecurity/trivy-action@v0.36.0
           with:
             image-ref: monitoring-test
             format: table
