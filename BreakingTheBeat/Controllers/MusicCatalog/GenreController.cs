@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Features.Genre;
+using MusicCatalogContext.Features.Genre;
 
 namespace Gateway.Controllers
 {

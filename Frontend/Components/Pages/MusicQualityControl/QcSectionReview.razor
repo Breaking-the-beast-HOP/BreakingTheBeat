@@ -1,0 +1,35 @@
+﻿@using MudBlazor
+
+<MudPaper Class="pa-3 mb-3" Outlined="true">
+    <MudStack Spacing="2">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.subtitle2">@Title</MudText>
+
+            <MudCheckBox T="bool"
+                         Value="IsApproved"
+                         ValueChanged="IsApprovedChanged"
+                         Color="Color.Success"
+                         Label="Approved" />
+        </MudStack>
+
+        @if (!IsApproved)
+        {
+            <MudTextField T="string"
+                          Value="Comment"
+                          ValueChanged="CommentChanged"
+                          Label="What needs to be changed?"
+                          Variant="Variant.Outlined"
+                          Lines="3" />
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+
+    [Parameter] public bool IsApproved { get; set; }
+    [Parameter] public EventCallback<bool> IsApprovedChanged { get; set; }
+
+    [Parameter] public string? Comment { get; set; }
+    [Parameter] public EventCallback<string?> CommentChanged { get; set; }
+}

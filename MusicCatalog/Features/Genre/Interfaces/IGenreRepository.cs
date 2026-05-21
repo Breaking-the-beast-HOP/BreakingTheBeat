@@ -1,6 +1,6 @@
 ﻿using SharedKernel.Interfaces.Base;
 
-namespace MusicCatalog.Features.Genre.Interfaces
+namespace MusicCatalogContext.Features.Genre.Interfaces
 {
     public interface IGenreRepository : IReadRepository<Domain.Entities.Genre>
     {

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.Contributor.Delete
+namespace MusicCatalogContext.Features.Contributor.Delete
 {
     public class DeleteContributorHandler : IRequestHandler<DeleteContributorCommand, bool>
     {

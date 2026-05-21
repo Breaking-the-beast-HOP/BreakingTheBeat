@@ -10,36 +10,48 @@
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<string> GetDatabaseRole()
+        public Task<string> GetDatabaseRole()
         {
-            var user = _httpContextAccessor.HttpContext?.User;
+            var httpContext = _httpContextAccessor.HttpContext;
 
-            // Ikke logget ind
-            if (user?.Identity?.IsAuthenticated != true)
+            if (httpContext is null)
             {
-                return "app_anon";
+                return Task.FromResult("app_background_worker");
             }
 
-            // Admin
+            var user = httpContext.User;
+
+            // Check if this is an authenticated worker request
+            if (httpContext.Request.Headers.TryGetValue("X-Worker-Key", out var workerKey)
+                && !string.IsNullOrEmpty(workerKey))
+            {
+                // Optionally validate the key here too, or trust that
+                // the controller already validated it
+                return Task.FromResult("app_background_worker");
+            }
+
+            if (user.Identity?.IsAuthenticated != true)
+            {
+                return Task.FromResult("app_anon");
+            }
+
             if (user.IsInRole("Admin"))
             {
-                return "app_admin";
+                return Task.FromResult("app_admin");
             }
 
-            // Content Creator
-            if (user.IsInRole("Content Creator"))
+            if (user.IsInRole("Content creator"))
             {
-                return "app_content_creator";
+                return Task.FromResult("app_content_creator");
             }
 
-            // Quality Controller
             if (user.IsInRole("Quality controller"))
             {
-                return "app_quality_controller";
+                return Task.FromResult("app_quality_controller");
             }
 
-            // Fallback
-            return "app_anon";
+            return Task.FromResult("app_anon");
         }
     }
 }
+

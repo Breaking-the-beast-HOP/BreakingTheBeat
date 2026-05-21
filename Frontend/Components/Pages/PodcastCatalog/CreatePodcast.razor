@@ -292,11 +292,17 @@
             _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category") 
                                 ?? new();
 
+
             _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>("api/podcasts/ContributorRole")
                                 ?? new();
 
             _contributors = await Http.GetFromJsonAsync<List<Contributor>>("api/podcasts/Contributor")
                                 ?? new();
+
+             // _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoles>>("api/podcasts/ContributorRole")?? new();
+
+             // _contributors = await Http.GetFromJsonAsync<List<Contributor>>("api/podcasts/Contributor") ?? new();
+
         }
         catch
         {

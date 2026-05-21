@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.Contributor.GetById
+namespace MusicCatalogContext.Features.Contributor.GetById
 {
     public class GetContributorByIdHandler
         : IRequestHandler<GetContributorByIdQuery, ContributorDetailsDTO>

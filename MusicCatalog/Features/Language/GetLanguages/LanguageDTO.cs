@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicCatalog.Features.Language.GetLanguages
+namespace MusicCatalogContext.Features.Language.GetLanguages
 {
     public class LanguageDTO
     {

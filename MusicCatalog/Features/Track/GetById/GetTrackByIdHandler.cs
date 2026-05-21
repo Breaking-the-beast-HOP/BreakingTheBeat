@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.Track.GetById
+namespace MusicCatalogContext.Features.Track.GetById
 {
     public class GetTrackByIdHandler : IRequestHandler<GetTrackByIdQuery, TrackDTO>
     {

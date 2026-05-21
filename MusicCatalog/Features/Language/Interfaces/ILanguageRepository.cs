@@ -1,6 +1,6 @@
 ﻿using SharedKernel.Interfaces.Base;
 
-namespace MusicCatalog.Features.Language.Interfaces
+namespace MusicCatalogContext.Features.Language.Interfaces
 {
     public interface ILanguageRepository : IReadRepository<Domain.Entities.Language>
     {

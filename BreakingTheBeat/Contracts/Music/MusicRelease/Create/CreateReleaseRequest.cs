@@ -6,6 +6,7 @@
         public string? Version { get; set; }
         public string? EAN { get; set; }
         public DateTime? ReleaseDate { get; set; }
+        public ReleaseStatusDto Status { get; set; }
 
         public Guid? GenreId { get; set; }
         public Guid? LanguageId { get; set; }
@@ -30,5 +31,14 @@
     {
         public Guid ContributorId { get; set; }
         public List<Guid> RoleIds { get; set; } = new();
+    }
+
+    public enum ReleaseStatusDto
+    {
+        Draft,
+        ReadyForQc,
+        InQc,
+        Approved,
+        Rejected
     }
 }

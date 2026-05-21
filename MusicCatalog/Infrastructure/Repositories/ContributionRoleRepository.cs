@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Domain.Entities;
-using MusicCatalog.Features.ContributorRole;
+using MusicCatalogContext.Domain.Entities;
+using MusicCatalogContext.Features.ContributorRole;
 
-namespace MusicCatalog.Infrastructure.Repositories
+namespace MusicCatalogContext.Infrastructure.Repositories
 {
     public class ContributionRoleRepository : IContributorRoleRepository
     {

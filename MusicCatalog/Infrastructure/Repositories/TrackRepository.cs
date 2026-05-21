@@ -1,9 +1,9 @@
 ﻿using System.Threading;
 using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Domain.Entities;
-using MusicCatalog.Features.Track;
+using MusicCatalogContext.Domain.Entities;
+using MusicCatalogContext.Features.Track;
 
-namespace MusicCatalog.Infrastructure.Repositories
+namespace MusicCatalogContext.Infrastructure.Repositories
 {
     public class TrackRepository : ITrackRepository
     {

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.ContributorRole.GetAll
+namespace MusicCatalogContext.Features.ContributorRole.GetAll
 {
     public record GetContributorRolesQuery : IRequest<List<ContributorRoleDTO>>;
 

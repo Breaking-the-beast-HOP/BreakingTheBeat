@@ -2,10 +2,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Features.Contributor.Create;
-using MusicCatalog.Features.Contributor.Delete;
-using MusicCatalog.Features.Contributor.Get;
-using MusicCatalog.Features.Contributor.GetById;
+using MusicCatalogContext.Features.Contributor.Create;
+using MusicCatalogContext.Features.Contributor.Delete;
+using MusicCatalogContext.Features.Contributor.Get;
+using MusicCatalogContext.Features.Contributor.GetById;
 
 namespace Gateway.Controllers.Music
 {

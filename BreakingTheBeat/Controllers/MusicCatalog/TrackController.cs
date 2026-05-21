@@ -4,11 +4,11 @@ using Gateway.Contracts.Music.Track;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalog.Features.Track.Create;
-using MusicCatalog.Features.Track.Delete;
-using MusicCatalog.Features.Track.Get;
-using MusicCatalog.Features.Track.GetById;
-using MusicCatalog.Features.Track.Update;
+using MusicCatalogContext.Features.Track.Create;
+using MusicCatalogContext.Features.Track.Delete;
+using MusicCatalogContext.Features.Track.Get;
+using MusicCatalogContext.Features.Track.GetById;
+using MusicCatalogContext.Features.Track.Update;
 
 namespace Gateway.Controllers.Music
 {

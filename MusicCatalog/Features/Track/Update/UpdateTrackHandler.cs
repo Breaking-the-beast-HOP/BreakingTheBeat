@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using MusicCatalog.Domain.Entities;
+using MusicCatalogContext.Domain.Entities;
 
-namespace MusicCatalog.Features.Track.Update
+namespace MusicCatalogContext.Features.Track.Update
 {
     public class UpdateTrackHandler : IRequestHandler<UpdateTrackCommand, bool>
     {

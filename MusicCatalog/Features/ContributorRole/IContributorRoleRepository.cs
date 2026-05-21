@@ -1,8 +1,8 @@
 ﻿using SharedKernel.Interfaces.Base;
 
-namespace MusicCatalog.Features.ContributorRole
+namespace MusicCatalogContext.Features.ContributorRole
 {
-    public interface IContributorRoleRepository : IReadRepository<MusicCatalog.Domain.Entities.ContributorRole>
+    public interface IContributorRoleRepository : IReadRepository<MusicCatalogContext.Domain.Entities.ContributorRole>
     {
     }
 }

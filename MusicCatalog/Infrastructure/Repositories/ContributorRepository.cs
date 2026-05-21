@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Domain.Entities;
-using MusicCatalog.Features.Contributor;
+using MusicCatalogContext.Domain.Entities;
+using MusicCatalogContext.Features.Contributor;
 
-namespace MusicCatalog.Infrastructure.Repositories
+namespace MusicCatalogContext.Infrastructure.Repositories
 {
     public class ContributorRepository : IContributorRepository
     {

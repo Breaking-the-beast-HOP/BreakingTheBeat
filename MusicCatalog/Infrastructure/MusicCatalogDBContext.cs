@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Domain.Entities;
+using MusicCatalogContext.Domain;
+using MusicCatalogContext.Domain.Entities;
 
-namespace MusicCatalog.Infrastructure
+namespace MusicCatalogContext.Infrastructure
 {
     public class MusicCatalogDbContext : DbContext
     {
@@ -9,12 +10,15 @@ namespace MusicCatalog.Infrastructure
         {
         }
         public DbSet<Language> Languages => Set<Language>();
+        public DbSet<Country> Countries => Set<Country>();
         public DbSet<Genre> Genres => Set<Genre>();
         public DbSet<Track> Tracks => Set<Track>();
         public DbSet<Contributor> Contributors => Set<Contributor>();
         public DbSet<ContributorRole> ContributorRoles => Set<ContributorRole>();
         public DbSet<Contribution> Contributions => Set<Contribution>();
         public DbSet<Release> Releases => Set<Release>();
+        public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+        public DbSet<Label> Labels => Set<Label>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,4 +1,8 @@
-﻿namespace MusicCatalog.Domain.Entities
+﻿using MediatR;
+using MusicCatalogContext.Domain.Enums;
+using MusicCatalogContext.Domain.Events;
+
+namespace MusicCatalogContext.Domain.Entities
 {
     public class Release
     {
@@ -8,6 +12,8 @@
         public string? Version { get; private set; }
         public string? EAN { get; private set; }
         public DateTime? ReleaseDate { get; private set; }
+
+        public ReleaseStatus Status { get; set; } = ReleaseStatus.Draft;
 
         public Guid GenreId { get; private set; }
         public Genre Genre { get; private set; }
@@ -20,6 +26,15 @@
 
         private readonly List<Contribution> _contributions = new();
         public IReadOnlyCollection<Contribution> Contributions => _contributions.AsReadOnly();
+
+        //domain events
+        private readonly List<INotification> _domainEvents = new();
+        public IReadOnlyCollection<INotification> DomainEvents => _domainEvents.AsReadOnly();
+
+        private void AddDomainEvent(INotification domainEvent)
+        {
+            _domainEvents.Add(domainEvent);
+        }
 
         private Release() { }
 
@@ -42,7 +57,7 @@
                 EAN = ean,
                 ReleaseDate = releaseDate,
                 GenreId = genreId,
-                LanguageId = languageId
+                LanguageId = languageId,
             };
         }
 
@@ -165,6 +180,11 @@
                         incoming.ContributorRoleId));
                 }
             }
+        }
+
+        public void SubmitToQc()
+        {
+            AddDomainEvent(new ReleaseSubmittedToQcEvent(Id, Title));
         }
     }
 }

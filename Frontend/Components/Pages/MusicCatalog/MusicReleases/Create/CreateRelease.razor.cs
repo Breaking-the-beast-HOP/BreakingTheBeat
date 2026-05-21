@@ -203,49 +203,44 @@ namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Create
                 volume.Tracks[i].TrackNumber = i + 1;
         }
 
-        private async Task SaveRelease()
+        private Task SaveDraft()
+        {
+            return SaveRelease(ReleaseStatusDto.Draft, validateForQc: false);
+        }
+
+        private Task SubmitToQc()
+        {
+            return SaveRelease(ReleaseStatusDto.ReadyForQc, validateForQc: true);
+        }
+
+        private async Task SaveRelease(ReleaseStatusDto status, bool validateForQc)
         {
             _errorMessage = null;
 
-            if (string.IsNullOrWhiteSpace(_model.Title))
+            if (validateForQc)
             {
-                _errorMessage = "Title is required.";
-                return;
-            }
+                var validationError = ValidateReleaseReadyForQc();
 
-            if (_model.GenreId is null || _model.GenreId == Guid.Empty)
-            {
-                _errorMessage = "Genre is required.";
-                return;
+                if (!string.IsNullOrWhiteSpace(validationError))
+                {
+                    _errorMessage = validationError;
+                    return;
+                }
             }
-
-            if (_model.LanguageId is null || _model.LanguageId == Guid.Empty)
+            else
             {
-                _errorMessage = "Metadata language is required.";
-                return;
-            }
-
-            if (!_model.Volumes.Any())
-            {
-                _errorMessage = "At least one volume is required.";
-                return;
-            }
-
-            if (_model.Volumes.Any(v => !v.Tracks.Any()))
-            {
-                _errorMessage = "Each volume must contain at least one track.";
-                return;
-            }
-
-            if (_model.Volumes.SelectMany(v => v.Tracks).Any(t => t.TrackId is null || t.TrackId == Guid.Empty))
-            {
-                _errorMessage = "All track rows must have a selected track.";
-                return;
+                if (string.IsNullOrWhiteSpace(_model.Title))
+                {
+                    _errorMessage = "Title is required to save a draft.";
+                    return;
+                }
             }
 
             try
             {
                 _isSaving = true;
+
+                _model.Status = status;
 
                 _model.Contributions = _contributions
                     .Where(c => c.ContributorId.HasValue && c.Roles.Any())
@@ -279,6 +274,29 @@ namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Create
             {
                 _isSaving = false;
             }
+        }
+
+        private string? ValidateReleaseReadyForQc()
+        {
+            if (string.IsNullOrWhiteSpace(_model.Title))
+                return "Title is required.";
+
+            if (_model.GenreId is null || _model.GenreId == Guid.Empty)
+                return "Genre is required.";
+
+            if (_model.LanguageId is null || _model.LanguageId == Guid.Empty)
+                return "Metadata language is required.";
+
+            if (!_model.Volumes.Any())
+                return "At least one volume is required.";
+
+            if (_model.Volumes.Any(v => !v.Tracks.Any()))
+                return "Each volume must contain at least one track.";
+
+            if (_model.Volumes.SelectMany(v => v.Tracks).Any(t => t.TrackId is null || t.TrackId == Guid.Empty))
+                return "All track rows must have a selected track.";
+
+            return null;
         }
 
         private void ResetForm()
@@ -342,7 +360,6 @@ namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Create
             _showSuccessDialog = false;
             _errorMessage = null;
         }
-
     }
 }
 

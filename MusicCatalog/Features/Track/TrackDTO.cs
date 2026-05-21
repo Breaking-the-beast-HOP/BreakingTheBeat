@@ -1,4 +1,4 @@
-﻿namespace MusicCatalog.Features.Track
+﻿namespace MusicCatalogContext.Features.Track
 {
     public class TrackDTO
     {

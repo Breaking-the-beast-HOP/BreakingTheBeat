@@ -1,7 +1,7 @@
-﻿using MusicCatalog.Domain.Entities;
+﻿using MusicCatalogContext.Domain.Entities;
 using SharedKernel;
 
-namespace MusicCatalog.Features.Contributor
+namespace MusicCatalogContext.Features.Contributor
 {
     public interface IContributorRepository : ICrudRepository<Domain.Entities.Contributor>
     {

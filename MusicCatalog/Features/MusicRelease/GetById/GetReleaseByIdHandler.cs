@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalog.Features.Release.GetById
+namespace MusicCatalogContext.Features.Release.GetById
 {
     public class GetReleaseByIdHandler : IRequestHandler<GetReleaseByIdQuery, ReleaseDetailsDto?>
     {

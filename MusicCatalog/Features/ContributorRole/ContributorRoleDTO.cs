@@ -1,4 +1,4 @@
-﻿namespace MusicCatalog.Features.ContributorRole
+﻿namespace MusicCatalogContext.Features.ContributorRole
 {
     public class ContributorRoleDTO
     {

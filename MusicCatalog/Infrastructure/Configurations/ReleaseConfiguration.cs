@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MusicCatalog.Domain.Entities;
+using MusicCatalogContext.Domain.Entities;
 
-namespace MusicCatalog.Infrastructure.Configurations
+namespace MusicCatalogContext.Infrastructure.Configurations
 {
     public class ReleaseConfiguration : IEntityTypeConfiguration<Release>
     {
@@ -27,6 +27,12 @@ namespace MusicCatalog.Infrastructure.Configurations
             builder.Property(r => r.EAN)
                 .HasColumnName("EAN")
                 .HasMaxLength(50);
+
+            builder.Property(r => r.Status)
+                .HasColumnName("Status")
+                .HasConversion<string>()
+                .HasMaxLength(50)
+                .IsRequired();
 
             builder.Property(r => r.ReleaseDate)
                 .HasColumnName("ReleaseDate")

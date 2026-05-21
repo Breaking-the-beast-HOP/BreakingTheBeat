@@ -1,11 +1,14 @@
 ﻿using MediatR;
+using MusicCatalogContext.Domain.Entities;
+using MusicCatalogContext.Domain.Enums;
 
-namespace MusicCatalog.Features.Release.Create;
+namespace MusicCatalogContext.Features.Release.Create;
 
 public record CreateReleaseCommand(
     string Title,
     string? Version,
     string? EAN,
+    ReleaseStatus Status,
     DateTime? ReleaseDate,
     Guid GenreId,
     Guid LanguageId,

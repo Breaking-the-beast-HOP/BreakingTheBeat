@@ -1,4 +1,4 @@
-﻿namespace MusicCatalog.Features.Contributor
+﻿namespace MusicCatalogContext.Features.Contributor
 {
     public class ContributorDTO
     {

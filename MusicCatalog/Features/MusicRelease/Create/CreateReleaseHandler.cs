@@ -1,51 +1,89 @@
-﻿using MediatR;
+﻿using System.Text.Json;
+using MediatR;
+using MusicCatalogContext.Domain;
+using MusicCatalogContext.Domain.Enums;
+using MusicCatalogContext.Infrastructure.Repositories;
+using SharedKernel.Interfaces;
 
-namespace MusicCatalog.Features.Release.Create
+namespace MusicCatalogContext.Features.Release.Create
 {
     public class CreateReleaseHandler : IRequestHandler<CreateReleaseCommand, Guid>
     {
-        private readonly IReleaseRepository _repository;
+        private readonly IReleaseRepository _releaseRepository;
+        private readonly IOutBoxRepository _outboxRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CreateReleaseHandler(IReleaseRepository repository)
+        public CreateReleaseHandler(IReleaseRepository releaseRepository, IOutBoxRepository outBoxRepository, IUnitOfWork unitOfWork)
         {
-            _repository = repository;
+            _releaseRepository = releaseRepository;
+            _outboxRepository = outBoxRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Guid> Handle(CreateReleaseCommand request, CancellationToken cancellationToken)
         {
-            var release = Domain.Entities.Release.Create(
-                request.Title,
-                request.Version,
-                request.EAN,
-                request.ReleaseDate,
-                request.GenreId,
-                request.LanguageId
-            );
+            await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-            foreach (var volumeRequest in request.Volumes.OrderBy(v => v.VolumeNumber))
+            try
             {
-                var volume = release.AddVolume(volumeRequest.VolumeNumber);
+                var release = Domain.Entities.Release.Create(
+                    request.Title,
+                    request.Version,
+                    request.EAN,
+                    request.ReleaseDate,
+                    request.GenreId,
+                    request.LanguageId
+                );
 
-                foreach (var trackRequest in volumeRequest.Tracks.OrderBy(t => t.TrackNumber))
+                foreach (var volumeRequest in request.Volumes.OrderBy(v => v.VolumeNumber))
                 {
-                    volume.AddTrack(
-                        trackRequest.TrackId,
-                        trackRequest.TrackNumber
-                    );
-                }
-            }
+                    var volume = release.AddVolume(volumeRequest.VolumeNumber);
 
-            foreach (var contribution in request.Contributions)
+                    foreach (var trackRequest in volumeRequest.Tracks.OrderBy(t => t.TrackNumber))
+                    {
+                        volume.AddTrack(
+                            trackRequest.TrackId,
+                            trackRequest.TrackNumber
+                        );
+                    }
+                }
+
+                foreach (var contribution in request.Contributions)
+                {
+                    foreach (var roleId in contribution.RoleIds)
+                    {
+                        release.AddContribution(contribution.ContributorId, roleId);
+                    }
+                }
+
+                if (request.Status == ReleaseStatus.ReadyForQc)
+                {
+                    release.SubmitToQc();
+
+                    var outboxMessage = OutboxMessage.Create(
+                        "ReleaseSubmittedToQc",
+                        JsonSerializer.Serialize(new
+                        {
+                            ReleaseId = release.Id,
+                            release.Title,
+                            release.Version,
+                            release.EAN,
+                        }));
+
+                    await _outboxRepository.AddAsync(outboxMessage);
+                }
+
+                await _releaseRepository.AddAsync(release);
+
+                await _unitOfWork.CommitAsync(cancellationToken);
+
+                return release.Id;
+            }
+            catch
             {
-                foreach (var roleId in contribution.RoleIds)
-                {
-                    release.AddContribution(contribution.ContributorId, roleId);
-                }
+                await _unitOfWork.RollbackAsync(cancellationToken);
+                throw;
             }
-
-            await _repository.AddAsync(release);
-
-            return release.Id;
         }
     }
 }
