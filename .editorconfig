@@ -5,6 +5,7 @@ indent_style = space
 indent_size = 4
 
 dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
 
 # Enforce style in CI
 dotnet_analyzer_diagnostic.severity = warning
