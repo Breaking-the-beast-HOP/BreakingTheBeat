@@ -3,7 +3,7 @@
 ## Peter
 - [ ] Deployment diagram
 - [ ] Deployment unittests
-- [ ] Pipeline flow diagram
+- [x] Pipeline flow diagram
 - [ ] Fremtidig Kubernetes arkitektur
 - [ ] Debug container scan i pipeline
 
