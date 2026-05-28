@@ -29,12 +29,26 @@
                         Cancel
                     </MudButton>
 
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               Href="@($"/releases/{Id}")">
+                        Cancel
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Default"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               OnClick="SaveDraft"
+                               Disabled="@(_isSaving || _isLoadingLookups)">
+                        @(_isSaving ? "Saving..." : "Save draft")
+                    </MudButton>
+
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Warning"
-                               StartIcon="@Icons.Material.Filled.Save"
-                               OnClick="SaveRelease"
+                               StartIcon="@Icons.Material.Filled.Send"
+                               OnClick="SubmitToQc"
                                Disabled="@(_isSaving || _isLoadingLookups)">
-                        @(_isSaving ? "Saving..." : "Save")
+                        Submit to QC
                     </MudButton>
                 </MudStack>
             </MudStack>

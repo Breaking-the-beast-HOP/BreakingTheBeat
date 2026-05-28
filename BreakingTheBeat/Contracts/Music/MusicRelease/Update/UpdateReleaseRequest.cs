@@ -8,6 +8,7 @@
         public DateTime? ReleaseDate { get; set; }
         public Guid? GenreId { get; set; }
         public Guid? LanguageId { get; set; }
+        public ReleaseStatusDto Status { get; set; }
 
         public List<UpdateReleaseContributionRequest> Contributions { get; set; } = new();
         public List<UpdateReleaseVolumeRequest> Volumes { get; set; } = new();
@@ -29,5 +30,14 @@
     {
         public Guid ContributorId { get; set; }
         public List<Guid> RoleIds { get; set; } = new();
+    }
+
+    public enum ReleaseStatusDto
+    {
+        Draft,
+        ReadyForQc,
+        InQc,
+        Approved,
+        Rejected
     }
 }

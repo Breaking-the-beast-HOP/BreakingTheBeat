@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MusicCatalogContext.Domain.Enums;
 
 namespace MusicCatalogContext.Features.Release.Update;
 
@@ -10,6 +11,7 @@ public record UpdateReleaseCommand(
     DateTime? ReleaseDate,
     Guid? GenreId,
     Guid? MetadataLanguageId,
+    ReleaseStatus Status,
     List<UpdateReleaseVolumeInput> Volumes,
     List<UpdateReleaseContributionInput> Contributions
 ) : IRequest<bool>;

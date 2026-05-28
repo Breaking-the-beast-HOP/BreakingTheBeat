@@ -141,7 +141,17 @@ public partial class EditRelease
         }
     }
 
-    private async Task SaveRelease()
+    private Task SaveDraft()
+    {
+        return SaveRelease(ReleaseStatusDto.Draft);
+    }
+
+    private Task SubmitToQc()
+    {
+        return SaveRelease(ReleaseStatusDto.ReadyForQc);
+    }
+
+    private async Task SaveRelease(ReleaseStatusDto status)
     {
         _errorMessage = null;
         _successMessage = null;
@@ -163,6 +173,11 @@ public partial class EditRelease
             _errorMessage = "Metadata language is required.";
             return;
         }
+
+        if (status == ReleaseStatusDto.ReadyForQc)
+            _model.Status = ReleaseStatusDto.ReadyForQc;
+        else
+            _model.Status = ReleaseStatusDto.Draft;
 
         if (!_model.Volumes.Any())
         {

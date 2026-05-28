@@ -22,11 +22,14 @@ public class QcReleaseController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> ReceiveReleaseSubmittedToQc(
-        [FromHeader(Name = "X-Worker-Key")] string workerKey,
-        [FromBody] ReleaseSubmittedToQcDto dto,
-        CancellationToken cancellationToken)
+     [FromHeader(Name = "X-Worker-Key")] string workerKey,
+     [FromBody] ReleaseSubmittedToQcDto dto,
+     CancellationToken cancellationToken)
     {
+
+       /*var expectedKey = _configuration["WorkerAuth:Key"];  //slet mig*/
         if (workerKey != _configuration["WorkerAuth:Key"])
             return Unauthorized();
 

@@ -124,6 +124,9 @@ namespace Gateway.Controllers.Music
         [Authorize(Roles = "Admin,Content Creator")]
         public async Task<IActionResult> UpdateRelease(Guid id, [FromBody] UpdateReleaseRequest request, CancellationToken cancellationToken)
         {
+            if (request is null)
+                return BadRequest("Request body is required.");
+
             if (string.IsNullOrWhiteSpace(request.Title))
                 return BadRequest("Title is required.");
 
@@ -141,6 +144,17 @@ namespace Gateway.Controllers.Music
 
             if (request.Volumes.SelectMany(v => v.Tracks).Any(t => t.TrackId == Guid.Empty))
                 return BadRequest("All track rows must have a selected track.");
+
+            var status = request.Status switch
+            {
+                Gateway.Contracts.Music.MusicRelease.Update.ReleaseStatusDto.Draft
+                    => MusicCatalogContext.Domain.Enums.ReleaseStatus.Draft,
+
+                Gateway.Contracts.Music.MusicRelease.Update.ReleaseStatusDto.ReadyForQc
+                    => MusicCatalogContext.Domain.Enums.ReleaseStatus.ReadyForQc,
+
+                _ => throw new ArgumentOutOfRangeException(nameof(request.Status))
+            };
 
             var volumes = request.Volumes
                 .Select(v => new UpdateReleaseVolumeInput(
@@ -160,6 +174,8 @@ namespace Gateway.Controllers.Music
                     )))
                 .ToList();
 
+
+
             var result = await _mediator.Send(
                 new UpdateReleaseCommand(
                     id,
@@ -169,6 +185,7 @@ namespace Gateway.Controllers.Music
                     request.ReleaseDate,
                     request.GenreId,
                     request.LanguageId,
+                    status,
                     volumes,
                     contributions),
                 cancellationToken);

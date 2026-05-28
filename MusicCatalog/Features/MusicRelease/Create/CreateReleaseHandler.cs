@@ -2,7 +2,6 @@
 using MediatR;
 using MusicCatalogContext.Domain;
 using MusicCatalogContext.Domain.Enums;
-using MusicCatalogContext.Infrastructure.Repositories;
 using SharedKernel.Interfaces;
 
 namespace MusicCatalogContext.Features.Release.Create

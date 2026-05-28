@@ -1,55 +1,98 @@
-﻿using MediatR;
+﻿using System.Text.Json;
+using MediatR;
+using MusicCatalogContext.Domain;
+using MusicCatalogContext.Domain.Enums;
+using SharedKernel.Interfaces;
 
 namespace MusicCatalogContext.Features.Release.Update
 {
     public class UpdateReleaseHandler : IRequestHandler<UpdateReleaseCommand, bool>
     {
-        private readonly IReleaseRepository _repository;
+        private readonly IReleaseRepository _releaseRepository;
+        private readonly IOutBoxRepository _outboxRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UpdateReleaseHandler(IReleaseRepository repository)
+        public UpdateReleaseHandler(
+            IReleaseRepository releaseRepository,
+            IOutBoxRepository outboxRepository,
+            IUnitOfWork unitOfWork)
         {
-            _repository = repository;
+            _releaseRepository = releaseRepository;
+            _outboxRepository = outboxRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<bool> Handle(UpdateReleaseCommand request, CancellationToken cancellationToken)
         {
-            var release = await _repository.GetByIdAsync(request.Id);
+            await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-            if (release is null)
-                return false;
+            try
+            {
+                var release = await _releaseRepository.GetByIdAsync(request.Id);
 
-            release.UpdateDetails(
-                request.Title,
-                request.Version,
-                request.EAN,
-                request.GenreId,
-                request.MetadataLanguageId
+                if (release is null)
+                {
+                    await _unitOfWork.RollbackAsync(cancellationToken);
+                    return false;
+                }
 
-            );
+                release.UpdateDetails(
+                    request.Title,
+                    request.Version,
+                    request.EAN,
+                    request.GenreId,
+                    request.MetadataLanguageId
+                );
 
-            release.UpdateContributions(
-                request.Contributions
-                    .Select(c => (c.ContributorId, c.ContributorRoleId))
-                    .ToList()
-            );
+                release.UpdateContributions(
+                    request.Contributions
+                        .Select(c => (c.ContributorId, c.ContributorRoleId))
+                        .ToList()
+                );
 
-            release.UpdateVolumes(
-                request.Volumes
-                    .Select(v => (
-                        VolumeNumber: v.VolumeNumber,
-                        Tracks: v.Tracks
-                            .Select(t => (
-                                TrackId: t.TrackId,
-                                TrackNumber: t.TrackNumber
-                            ))
-                            .ToList()
-                    ))
-                    .ToList()
-            );
+                release.UpdateVolumes(
+                    request.Volumes
+                        .Select(v => (
+                            VolumeNumber: v.VolumeNumber,
+                            Tracks: v.Tracks
+                                .Select(t => (
+                                    TrackId: t.TrackId,
+                                    TrackNumber: t.TrackNumber
+                                ))
+                                .ToList()
+                        ))
+                        .ToList()
+                );
 
-            await _repository.UpdateAsync(release);
+                if (request.Status == ReleaseStatus.ReadyForQc)
+                {
+                    release.SubmitToQc();
 
-            return true;
+                    var outboxMessage = OutboxMessage.Create(
+                        "ReleaseSubmittedToQc",
+                        JsonSerializer.Serialize(new
+                        {
+                            ReleaseId = release.Id,
+                            release.Title,
+                            release.Version,
+                            release.EAN
+                        }));
+
+                    await _outboxRepository.AddAsync(outboxMessage);
+                }
+
+                await _releaseRepository.UpdateAsync(release);
+
+                await _unitOfWork.CommitAsync(cancellationToken);
+
+                return true;
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
     }
 }
+
