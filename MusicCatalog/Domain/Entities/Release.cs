@@ -151,7 +151,7 @@ namespace MusicCatalogContext.Domain.Entities
                 if (languageId.Value == Guid.Empty)
                     throw new ArgumentException("MetadataLanguageId is required.");
 
-                languageId = languageId.Value;
+                LanguageId = languageId.Value;
             }
 
 
