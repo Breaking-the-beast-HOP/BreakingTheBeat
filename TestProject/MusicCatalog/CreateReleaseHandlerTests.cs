@@ -19,11 +19,17 @@ public class CreateReleaseHandlerTests
 
     public CreateReleaseHandlerTests()
     {
+        // Fælles Arrange for alle tests.
+        // Vi mocker repositories og UnitOfWork, så vi tester handlerens logik
+        // uden at ramme en rigtig database.
         _releaseRepository = Substitute.For<IReleaseRepository>();
         _outboxRepository = Substitute.For<IOutBoxRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
 
-        _handler = new CreateReleaseHandler(_releaseRepository, _outboxRepository, _unitOfWork);
+        _handler = new CreateReleaseHandler(
+            _releaseRepository,
+            _outboxRepository,
+            _unitOfWork);
     }
 
     private static CreateReleaseCommand DraftCmd(
@@ -41,57 +47,110 @@ public class CreateReleaseHandlerTests
             Volumes: volumes ?? new(),
             Contributions: contributions ?? new());
 
+    // [Fact]
+    // Bruges fordi testen dækker ét konkret scenarie:
+    // Når en release oprettes som Draft, skal handleren starte transaction,
+    // gemme releasen og committe.
     [Fact]
     public async Task Handle_DraftStatus_AddsReleaseAndCommits()
     {
-        await _handler.Handle(DraftCmd(), CancellationToken.None);
+        // Arrange
+        var command = DraftCmd();
 
-        await _unitOfWork.Received(1).BeginTransactionAsync(Arg.Any<CancellationToken>());
-        await _releaseRepository.Received(1).AddAsync(Arg.Any<ReleaseEntity>());
-        await _unitOfWork.Received(1).CommitAsync(Arg.Any<CancellationToken>());
-        await _unitOfWork.DidNotReceiveWithAnyArgs().RollbackAsync(default);
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        await _unitOfWork.Received(1)
+            .BeginTransactionAsync(Arg.Any<CancellationToken>());
+
+        await _releaseRepository.Received(1)
+            .AddAsync(Arg.Any<ReleaseEntity>());
+
+        await _unitOfWork.Received(1)
+            .CommitAsync(Arg.Any<CancellationToken>());
+
+        await _unitOfWork.DidNotReceiveWithAnyArgs()
+            .RollbackAsync(default);
     }
 
     [Fact]
     public async Task Handle_DraftStatus_DoesNotEmitOutboxMessage()
     {
-        await _handler.Handle(DraftCmd(), CancellationToken.None);
+        // Tester at en Draft ikke sender besked til outbox,
+        // fordi den endnu ikke er klar til QC.
 
-        await _outboxRepository.DidNotReceiveWithAnyArgs().AddAsync(default!);
+        // Arrange
+        var command = DraftCmd();
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        await _outboxRepository.DidNotReceiveWithAnyArgs()
+            .AddAsync(default!);
     }
 
     [Fact]
     public async Task Handle_ReadyForQc_EmitsOutboxMessage()
     {
-        await _handler.Handle(DraftCmd(ReleaseStatus.ReadyForQc), CancellationToken.None);
+        // Tester at en release med status ReadyForQc opretter en outbox message.
+        // Det bruges til at publicere hændelsen senere via outbox pattern.
 
-        await _outboxRepository.Received(1).AddAsync(
-            Arg.Is<OutboxMessage>(m => m.Type == "ReleaseSubmittedToQc"));
+        // Arrange
+        var command = DraftCmd(ReleaseStatus.ReadyForQc);
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        await _outboxRepository.Received(1)
+            .AddAsync(Arg.Is<OutboxMessage>(message =>
+                message.Type == "ReleaseSubmittedToQc"));
     }
 
     [Fact]
     public async Task Handle_ReadyForQc_OutboxPayloadContainsReleaseFields()
     {
+        // Tester at outbox payloaden indeholder relevante release-data.
+        // Her fanger vi objektet, som sendes til repository, så vi kan inspicere det.
+
+        // Arrange
         OutboxMessage? captured = null;
-        await _outboxRepository.AddAsync(Arg.Do<OutboxMessage>(m => captured = m));
 
-        var cmd = DraftCmd(ReleaseStatus.ReadyForQc);
-        await _handler.Handle(cmd, CancellationToken.None);
+        await _outboxRepository
+            .AddAsync(Arg.Do<OutboxMessage>(message => captured = message));
 
+        var command = DraftCmd(ReleaseStatus.ReadyForQc);
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
         Assert.NotNull(captured);
-        Assert.Contains(cmd.Title, captured!.Payload);
-        Assert.Contains(cmd.EAN!, captured.Payload);
+        Assert.Contains(command.Title, captured!.Payload);
+        Assert.Contains(command.EAN!, captured.Payload);
         Assert.Contains("ReleaseId", captured.Payload);
     }
 
     [Fact]
     public async Task Handle_ReturnsReleaseId()
     {
+        // Tester at handleren returnerer Id'et på den release,
+        // som bliver oprettet og gemt.
+
+        // Arrange
         ReleaseEntity? captured = null;
-        await _releaseRepository.AddAsync(Arg.Do<ReleaseEntity>(r => captured = r));
 
-        var id = await _handler.Handle(DraftCmd(), CancellationToken.None);
+        await _releaseRepository
+            .AddAsync(Arg.Do<ReleaseEntity>(release => captured = release));
 
+        var command = DraftCmd();
+
+        // Act
+        var id = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
         Assert.NotEqual(Guid.Empty, id);
         Assert.Equal(captured!.Id, id);
     }
@@ -99,22 +158,31 @@ public class CreateReleaseHandlerTests
     [Fact]
     public async Task Handle_BuildsVolumesAndTracks()
     {
+        // Tester at handleren bygger volumes og tracks ud fra commandens input.
+        // Selve reglerne ligger i domænet, men handleren skal kalde dem korrekt.
+
+        // Arrange
         var trackId1 = Guid.NewGuid();
         var trackId2 = Guid.NewGuid();
-        var cmd = DraftCmd(volumes: new()
+
+        var command = DraftCmd(volumes: new()
         {
             new CreateReleaseVolumeInput(1, new()
             {
                 new CreateReleaseTrackInput(1, trackId1),
-                new CreateReleaseTrackInput(2, trackId2),
+                new CreateReleaseTrackInput(2, trackId2)
             })
         });
 
         ReleaseEntity? captured = null;
-        await _releaseRepository.AddAsync(Arg.Do<ReleaseEntity>(r => captured = r));
 
-        await _handler.Handle(cmd, CancellationToken.None);
+        await _releaseRepository
+            .AddAsync(Arg.Do<ReleaseEntity>(release => captured = release));
 
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
         var volume = Assert.Single(captured!.Volumes);
         Assert.Equal(2, volume.Tracks.Count);
     }
@@ -122,32 +190,55 @@ public class CreateReleaseHandlerTests
     [Fact]
     public async Task Handle_FlattensContributionsAcrossRoles()
     {
+        // Tester at én contributor med flere roller bliver lavet om til
+        // flere contributions på releasen.
+
+        // Arrange
         var contributorId = Guid.NewGuid();
         var role1 = Guid.NewGuid();
         var role2 = Guid.NewGuid();
-        var cmd = DraftCmd(contributions: new()
+
+        var command = DraftCmd(contributions: new()
         {
-            new CreateReleaseContributionInput(contributorId, new() { role1, role2 })
+            new CreateReleaseContributionInput(
+                contributorId,
+                new() { role1, role2 })
         });
 
         ReleaseEntity? captured = null;
-        await _releaseRepository.AddAsync(Arg.Do<ReleaseEntity>(r => captured = r));
 
-        await _handler.Handle(cmd, CancellationToken.None);
+        await _releaseRepository
+            .AddAsync(Arg.Do<ReleaseEntity>(release => captured = release));
 
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
         Assert.Equal(2, captured!.Contributions.Count);
     }
 
     [Fact]
     public async Task Handle_RepositoryThrows_RollsBackTransaction()
     {
-        _releaseRepository.AddAsync(Arg.Any<ReleaseEntity>())
-            .Returns<ReleaseEntity>(_ => throw new InvalidOperationException("db down"));
+        // Tester at transactionen bliver rullet tilbage,
+        // hvis repository fejler under oprettelse af releasen.
 
+        // Arrange
+        _releaseRepository
+            .AddAsync(Arg.Any<ReleaseEntity>())
+            .Returns<ReleaseEntity>(_ =>
+                throw new InvalidOperationException("db down"));
+
+        var command = DraftCmd();
+
+        // Act + Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _handler.Handle(DraftCmd(), CancellationToken.None));
+            _handler.Handle(command, CancellationToken.None));
 
-        await _unitOfWork.Received(1).RollbackAsync(Arg.Any<CancellationToken>());
-        await _unitOfWork.DidNotReceiveWithAnyArgs().CommitAsync(default);
+        await _unitOfWork.Received(1)
+            .RollbackAsync(Arg.Any<CancellationToken>());
+
+        await _unitOfWork.DidNotReceiveWithAnyArgs()
+            .CommitAsync(default);
     }
 }

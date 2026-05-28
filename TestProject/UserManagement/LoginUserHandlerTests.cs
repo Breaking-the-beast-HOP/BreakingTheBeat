@@ -20,15 +20,37 @@ public class LoginUserHandlerTests
 
     public LoginUserHandlerTests()
     {
+        // Fælles Arrange for alle tests.
+        // Vi mocker UserManager og SignInManager, så handleren kan testes
+        // uden rigtig database, Identity setup eller HTTP request.
         var userStore = Substitute.For<IUserStore<ApplicationUser>>();
+
         _userManager = Substitute.For<UserManager<ApplicationUser>>(
-            userStore, null!, null!, null!, null!, null!, null!, null!, null!);
+            userStore,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!);
 
         var contextAccessor = Substitute.For<IHttpContextAccessor>();
         var claimsFactory = Substitute.For<IUserClaimsPrincipalFactory<ApplicationUser>>();
-        _signInManager = Substitute.For<SignInManager<ApplicationUser>>(
-            _userManager, contextAccessor, claimsFactory, null!, null!, null!, null!);
 
+        _signInManager = Substitute.For<SignInManager<ApplicationUser>>(
+            _userManager,
+            contextAccessor,
+            claimsFactory,
+            null!,
+            null!,
+            null!,
+            null!);
+
+        // JwtService er ikke mocked her.
+        // Vi giver den test-konfiguration, så testen kan kontrollere,
+        // at der faktisk bliver lavet en JWT-token ved succesfuldt login.
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -37,20 +59,34 @@ public class LoginUserHandlerTests
                 ["Jwt:Audience"] = "test-audience"
             })
             .Build();
+
         _jwtService = new JwtService(config);
 
-        _handler = new LoginUserHandler(_signInManager, _userManager, _jwtService);
+        _handler = new LoginUserHandler(
+            _signInManager,
+            _userManager,
+            _jwtService);
     }
 
+    // [Fact]
+    // Bruges fordi testen dækker ét konkret scenarie:
+    // Hvis brugeren ikke findes, skal login fejle med en generisk fejlbesked.
     [Fact]
     public async Task Handle_UserNotFound_ReturnsGenericError()
     {
-        _userManager.FindByEmailAsync("missing@example.com").ReturnsNull();
+        // Arrange
+        _userManager
+            .FindByEmailAsync("missing@example.com")
+            .ReturnsNull();
 
-        var result = await _handler.Handle(
-            new LoginUserCommand("missing@example.com", "anything"),
-            CancellationToken.None);
+        var command = new LoginUserCommand(
+            "missing@example.com",
+            "anything");
 
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
         Assert.False(result.Succeeded);
         Assert.Null(result.Token);
         Assert.Equal(new[] { GenericError }, result.Errors);
@@ -59,28 +95,55 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task Handle_UserNotFound_DoesNotCheckPassword()
     {
-        _userManager.FindByEmailAsync(Arg.Any<string>()).ReturnsNull();
+        // Tester at password-check ikke kaldes,
+        // hvis brugeren ikke findes.
 
-        await _handler.Handle(
-            new LoginUserCommand("missing@example.com", "pw"),
-            CancellationToken.None);
+        // Arrange
+        _userManager
+            .FindByEmailAsync(Arg.Any<string>())
+            .ReturnsNull();
 
-        await _signInManager.DidNotReceiveWithAnyArgs()
+        var command = new LoginUserCommand(
+            "missing@example.com",
+            "pw");
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        await _signInManager
+            .DidNotReceiveWithAnyArgs()
             .CheckPasswordSignInAsync(default!, default!, default);
     }
 
     [Fact]
     public async Task Handle_WrongPassword_ReturnsGenericError()
     {
-        var user = new ApplicationUser { Id = Guid.NewGuid(), Email = "user@example.com", UserName = "user" };
-        _userManager.FindByEmailAsync(user.Email).Returns(user);
-        _signInManager.CheckPasswordSignInAsync(user, "wrong", false)
+        // Tester at forkert password giver samme generiske fejlbesked.
+        // Det er bedre sikkerhed, fordi man ikke afslører om emailen findes.
+
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "user@example.com",
+            UserName = "user"
+        };
+
+        _userManager
+            .FindByEmailAsync(user.Email)
+            .Returns(user);
+
+        _signInManager
+            .CheckPasswordSignInAsync(user, "wrong", false)
             .Returns(SignInResult.Failed);
 
-        var result = await _handler.Handle(
-            new LoginUserCommand(user.Email, "wrong"),
-            CancellationToken.None);
+        var command = new LoginUserCommand(user.Email, "wrong");
 
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
         Assert.False(result.Succeeded);
         Assert.Null(result.Token);
         Assert.Equal(new[] { GenericError }, result.Errors);
@@ -89,16 +152,35 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task Handle_CorrectPassword_ReturnsTokenAndSucceeded()
     {
-        var user = new ApplicationUser { Id = Guid.NewGuid(), Email = "user@example.com", UserName = "user" };
-        _userManager.FindByEmailAsync(user.Email).Returns(user);
-        _signInManager.CheckPasswordSignInAsync(user, "correct", false)
+        // Tester happy path:
+        // Når email og password er korrekte, returneres succes og en JWT-token.
+
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "user@example.com",
+            UserName = "user"
+        };
+
+        _userManager
+            .FindByEmailAsync(user.Email)
+            .Returns(user);
+
+        _signInManager
+            .CheckPasswordSignInAsync(user, "correct", false)
             .Returns(SignInResult.Success);
-        _userManager.GetRolesAsync(user).Returns(new List<string> { "Admin" });
 
-        var result = await _handler.Handle(
-            new LoginUserCommand(user.Email, "correct"),
-            CancellationToken.None);
+        _userManager
+            .GetRolesAsync(user)
+            .Returns(new List<string> { "Admin" });
 
+        var command = new LoginUserCommand(user.Email, "correct");
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
         Assert.True(result.Succeeded);
         Assert.False(string.IsNullOrWhiteSpace(result.Token));
         Assert.Empty(result.Errors);
@@ -107,23 +189,49 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task Handle_CorrectPassword_PassesRolesToTokenGeneration()
     {
-        var user = new ApplicationUser { Id = Guid.NewGuid(), Email = "user@example.com", UserName = "user" };
-        _userManager.FindByEmailAsync(user.Email).Returns(user);
-        _signInManager.CheckPasswordSignInAsync(user, "correct", false)
+        // Tester at brugerens roller kommer med i JWT-token.
+        // Det er vigtigt fordi rollerne senere bruges til authorization.
+
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "user@example.com",
+            UserName = "user"
+        };
+
+        _userManager
+            .FindByEmailAsync(user.Email)
+            .Returns(user);
+
+        _signInManager
+            .CheckPasswordSignInAsync(user, "correct", false)
             .Returns(SignInResult.Success);
-        _userManager.GetRolesAsync(user).Returns(new List<string> { "Admin", "Content Creator" });
 
-        var result = await _handler.Handle(
-            new LoginUserCommand(user.Email, "correct"),
-            CancellationToken.None);
+        _userManager
+            .GetRolesAsync(user)
+            .Returns(new List<string>
+            {
+                "Admin",
+                "Content Creator"
+            });
 
+        var command = new LoginUserCommand(user.Email, "correct");
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
         Assert.True(result.Succeeded);
+
         var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
         var token = handler.ReadJwtToken(result.Token);
+
         var roles = token.Claims
-            .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
-            .Select(c => c.Value)
+            .Where(claim => claim.Type == System.Security.Claims.ClaimTypes.Role)
+            .Select(claim => claim.Value)
             .ToList();
+
         Assert.Contains("Admin", roles);
         Assert.Contains("Content Creator", roles);
     }
@@ -131,15 +239,37 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task Handle_LockoutOnFailure_IsDisabled()
     {
-        // Documents current behavior: LoginUserHandler passes lockoutOnFailure=false.
-        // See ARCHITECTURE_REVIEW.md #7 — this disables Identity's brute-force protection.
-        var user = new ApplicationUser { Id = Guid.NewGuid(), Email = "user@example.com", UserName = "user" };
-        _userManager.FindByEmailAsync(user.Email).Returns(user);
-        _signInManager.CheckPasswordSignInAsync(Arg.Any<ApplicationUser>(), Arg.Any<string>(), Arg.Any<bool>())
+        // Tester den nuværende implementation:
+        // Handleren kalder CheckPasswordSignInAsync med lockoutOnFailure = false.
+        //
+        // Det betyder at Identitys brute-force beskyttelse ikke aktiveres
+        // ved gentagne fejlede loginforsøg.
+
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "user@example.com",
+            UserName = "user"
+        };
+
+        _userManager
+            .FindByEmailAsync(user.Email)
+            .Returns(user);
+
+        _signInManager
+            .CheckPasswordSignInAsync(
+                Arg.Any<ApplicationUser>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>())
             .Returns(SignInResult.Failed);
 
-        await _handler.Handle(new LoginUserCommand(user.Email, "x"), CancellationToken.None);
+        var command = new LoginUserCommand(user.Email, "x");
 
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
         await _signInManager.Received(1)
             .CheckPasswordSignInAsync(user, "x", false);
     }
