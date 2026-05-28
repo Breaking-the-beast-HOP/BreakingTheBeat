@@ -1,21 +1,21 @@
 # To-do
 
 ## Peter
-- [ ] Deployment diagram
-- [ ] Deployment unittests
+- [x] Deployment diagram
+- [x] Deployment unittests
 - [x] Pipeline flow diagram
 - [x] Fremtidig Kubernetes arkitektur
 - [x] Debug container scan i pipeline
-- [ ] Debug tests, og integrer i pipeline
+- [x] Debug tests, og integrer i pipeline
 
 ## Ea
-- [ ] Figure beskrivelser/numre
-- [ ] Fodnoter
+- [x] Figure beskrivelser/numre
+- [x] Fodnoter
 - [ ] Integrere DCD i rapport
 - [ ] Sekvensdiagram
-- [ ] Unittest: Login controller
-- [ ] Unittest: Login handler (behavior)
-- [ ] Unittest: Entity rule
+- [x] Unittest: Login controller
+- [x] Unittest: Login handler (behavior)
+- [x] Unittest: Entity rule
 
 ## Peter + Ea
 - [ ] Perspektivering
