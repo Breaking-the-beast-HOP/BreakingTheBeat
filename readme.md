@@ -4,8 +4,9 @@
 - [ ] Deployment diagram
 - [ ] Deployment unittests
 - [x] Pipeline flow diagram
-- [ ] Fremtidig Kubernetes arkitektur
+- [x] Fremtidig Kubernetes arkitektur
 - [x] Debug container scan i pipeline
+- [ ] Debug tests, og integrer i pipeline
 
 ## Ea
 - [ ] Figure beskrivelser/numre

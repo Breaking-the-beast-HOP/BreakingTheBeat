@@ -43,6 +43,34 @@ jobs:
             - name: Run linting (dotnet format)
               run: dotnet format --verify-no-changes --severity error
     
+    tests:
+      name: Gateway Unit tests (xUnit)
+      runs-on: ubuntu-latest
+      needs: linting
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Set up .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 9.0.312
+        
+        - name: Restore dependencies
+          run: dotnet restore BreakingTheBeat.sln --verbosity detailed
+
+        - name: Build solution
+          run: dotnet build BreakingTheBeat.sln --configuration Release --verbosity detailed
+
+        - name: Run unit tests with report
+          run: dotnet test ./BreakingTheBeat.Tests/BreakingTheBeat.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=TestResults.trx"
+        
+        - name: Upload test results
+          uses: actions/upload-artifact@v4
+          with: 
+            name: TestResults
+            path: ./BreakingTheBeat.tests/TestResults/TestResults.trx
+    
     security-scans:
       name: Secret Scanning (Gitleaks)
       runs-on: ubuntu-latest
