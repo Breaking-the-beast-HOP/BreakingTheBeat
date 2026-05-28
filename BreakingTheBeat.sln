@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutboxWorker", "OutboxWorke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicQualityControl", "MusicQualityControl\MusicQualityControl.csproj", "{099E11B8-2252-4536-A66D-E3B25BA3A402}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{953382FD-0816-4AB3-AAB4-C582AA0A74C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{099E11B8-2252-4536-A66D-E3B25BA3A402}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{099E11B8-2252-4536-A66D-E3B25BA3A402}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{099E11B8-2252-4536-A66D-E3B25BA3A402}.Release|Any CPU.Build.0 = Release|Any CPU
+		{953382FD-0816-4AB3-AAB4-C582AA0A74C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{953382FD-0816-4AB3-AAB4-C582AA0A74C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{953382FD-0816-4AB3-AAB4-C582AA0A74C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{953382FD-0816-4AB3-AAB4-C582AA0A74C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
