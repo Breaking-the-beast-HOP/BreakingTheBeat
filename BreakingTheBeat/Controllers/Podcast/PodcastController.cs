@@ -51,7 +51,14 @@ namespace Gateway.Controllers.Podcast
                          Duration = e.Duration,
                          AiringDate = e.AiringDate,
                          TagId = e.TagId,
-                         Status = e.Status
+                         Status = e.Status,
+                         Contributions = e.Contributions?
+                            .Select(c => new CreateContributionDTO
+                            {
+                                ContributorId = c.ContributorId,
+                                ContributorRoleId = c.ContributorRoleId
+                            })
+                            .ToList() ?? new List<CreateContributionDTO>()
                      }).ToList()
                  })
                  .ToList() ?? new List<CreateSeasonDTO>();
@@ -137,7 +144,15 @@ namespace Gateway.Controllers.Podcast
                         Title = e.Title,
                         Description = e.Description,
                         EpisodeNumber = e.EpisodeNumber,
-                        Status = e.Status
+                        Status = e.Status,
+                        Contributions = e.Contributions.Select(c => new ContributionResponse
+                        {
+                            Id = c.Id,
+                            ContributorId = c.ContributorId,
+                            ContributorName = c.ContributorName,
+                            ContributorRoleId = c.ContributorRoleId,
+                            ContributorRoleName = c.ContributorRoleName
+                        }).ToList()
                     }).ToList()
                 }).ToList()
             };

@@ -27,5 +27,6 @@ namespace PodcastCatalog.Features.Podcasts.PodcastCore.Create
         public DateTime? AiringDate { get; set; }
         public Guid? TagId { get; set; }
         public string Status { get; set; } = "Draft";
+        public List<CreateContributionDTO>? Contributions { get; set; }
     }
 }

@@ -13,6 +13,7 @@ public class NewPodcastRequest
     public List<ContributionRequest>? Contributions { get; set; }
 
     public List<NewPodcastSeasonRequest> Seasons { get; set; } = new();
+    
 }
 
 public class NewPodcastSeasonRequest
@@ -34,4 +35,5 @@ public class NewPodcastEpisodeRequest
     public Guid? TagId { get; set; }
 
     public string Status { get; set; } = "Draft";
+    public List<ContributionRequest>? Contributions { get; set; }
 }

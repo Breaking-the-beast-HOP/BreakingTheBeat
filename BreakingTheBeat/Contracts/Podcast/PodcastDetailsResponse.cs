@@ -45,6 +45,8 @@ namespace Gateway.Contracts.Podcast
         public int EpisodeNumber { get; set; }
 
         public string Status { get; set; } = "Draft";
+
+        public List<ContributionResponse> Contributions { get; set; } = new();
     }
 
 }

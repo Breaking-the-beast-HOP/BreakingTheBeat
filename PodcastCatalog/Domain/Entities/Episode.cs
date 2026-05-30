@@ -99,7 +99,7 @@
             EpisodeTag = null;
         }
 
-        public void AddContribution(Guid contributorId, Guid roleId, bool hasRights)
+        public void AddContribution(Guid contributorId, Guid roleId)
         {
             if (contributorId == Guid.Empty)
                 throw new ArgumentException("ContributorId is required.");
@@ -114,10 +114,9 @@
                 return;
             }
 
-            //var contribution = Contribution.ForEpisode(Id, contributorId, roleId);
-            //contribution.SetRights(hasRights);
+            var contribution = Contribution.ForEpisode(Id, contributorId, roleId);
 
-            //_contributions.Add(contribution);
+            _contributions.Add(contribution);
         }
 
         public void RemoveContribution(Guid contributorId, Guid roleId)

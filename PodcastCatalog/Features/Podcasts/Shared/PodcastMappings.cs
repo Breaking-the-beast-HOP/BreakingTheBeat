@@ -40,20 +40,30 @@ namespace PodcastCatalog.Features.Podcasts.Shared
                         ReleaseDate = s.ReleaseDate,
 
                         Episodes = s.Episodes
-                            .OrderBy(e => e.EpisodeNumber)
-                            .Select(e => new EpisodeDTO
-                            {
-                                Id = e.Id,
-                                Title = e.Title,
-                                Description = e.Description,
-                                Duration = e.Duration,
-                                AiringDate = e.AiringDate,
-                                TagId = e.TagId,
-                                TagName = e.EpisodeTag?.Name,
-                                EpisodeNumber = e.EpisodeNumber,
-                                Status = e.Status
-                            })
-                            .ToList()
+                                .OrderBy(e => e.EpisodeNumber)
+                                .Select(e => new EpisodeDTO
+                                {
+                                    Id = e.Id,
+                                    Title = e.Title,
+                                    Description = e.Description,
+                                    Duration = e.Duration,
+                                    AiringDate = e.AiringDate,
+                                    TagId = e.TagId,
+                                    TagName = e.EpisodeTag?.Name,
+                                    EpisodeNumber = e.EpisodeNumber,
+                                    Status = e.Status,
+                                    Contributions = e.Contributions
+                                        .Select(c => new ContributionRowDTO
+                                        {
+                                            Id = c.Id,
+                                            ContributorId = c.ContributorId,
+                                            ContributorName = c.Contributor?.DisplayName,
+                                            ContributorRoleId = c.ContributorRoleId,
+                                            ContributorRoleName = c.Role?.Name
+                                        })
+                                        .ToList()
+                                })
+                                .ToList()
                     })
                     .ToList()
             };

@@ -38,5 +38,6 @@
         public string? TagName { get; set; }
         public int EpisodeNumber { get; set; }
         public string Status { get; set; } = "Draft";
+        public List<ContributionRowDTO> Contributions { get; set; } = new();
     }
 }

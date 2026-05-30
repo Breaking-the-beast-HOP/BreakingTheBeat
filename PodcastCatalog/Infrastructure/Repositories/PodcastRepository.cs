@@ -33,6 +33,14 @@ public class PodcastRepository : IPodcastRepository
             .Include(p => p.Seasons)
                 .ThenInclude(s => s.Episodes)
                     .ThenInclude(e => e.EpisodeTag)
+            .Include(p => p.Seasons)
+                .ThenInclude(s => s.Episodes)
+                    .ThenInclude(e => e.Contributions)
+                        .ThenInclude(c => c.Contributor)
+            .Include(p => p.Seasons)
+                .ThenInclude(s => s.Episodes)
+                    .ThenInclude(e => e.Contributions)
+                        .ThenInclude(c => c.Role)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 

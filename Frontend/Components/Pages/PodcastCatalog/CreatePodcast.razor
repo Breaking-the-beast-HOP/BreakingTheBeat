@@ -237,12 +237,9 @@
     {
         try
         {
-            _languages =await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language")?? [];
-
+            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language") ?? [];
             _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/podcasts/Category") ?? [];
-
-            _contributionRoles =await Http.GetFromJsonAsync<List<ContributionRoleDto>>("api/podcasts/ContributorRole") ?? [];
-
+            _contributionRoles = await Http.GetFromJsonAsync<List<ContributionRoleDto>>("api/podcasts/ContributorRole") ?? [];
             _contributors = await Http.GetFromJsonAsync<List<ContributorDto>>("api/podcasts/Contributor") ?? [];
         }
         catch (Exception ex)
@@ -352,14 +349,28 @@
     {
         var options = new DialogOptions
         {
-            MaxWidth = MaxWidth.Small,
+            MaxWidth = MaxWidth.Medium,
             FullWidth = true,
             CloseButton = true
         };
 
+        var parameters = new DialogParameters
+        {
+            ["Contributors"] = _contributors.Select(c => new EpisodeDialog.ContributorLookup
+            {
+                Id = c.Id,
+                DisplayName = c.DisplayName
+            }).ToList(),
+            ["ContributionRoles"] = _contributionRoles.Select(r => new EpisodeDialog.ContributionRoleLookup
+            {
+                Id = r.Id,
+                Name = r.Name
+            }).ToList()
+        };
+
         var dialog = await DialogService.ShowAsync<EpisodeDialog>(
             "Add Episode",
-            new DialogParameters(),
+            parameters,
             options);
 
         var result = await dialog.Result;
@@ -378,7 +389,14 @@
             Duration = episode.Duration,
             AiringDate = episode.AiringDate,
             TagId = episode.TagId,
-            TagName = episode.TagName
+            TagName = episode.TagName,
+            Contributions = episode.Contributions
+                .Where(c => c.ContributorId.HasValue && c.ContributorRoleId.HasValue)
+                .Select(c => new ContributionRequest
+                {
+                    ContributorId = c.ContributorId!.Value,
+                    ContributorRoleId = c.ContributorRoleId!.Value
+                }).ToList()
         });
     }
 
@@ -449,7 +467,8 @@
                     Duration = episode.Duration,
                     AiringDate = episode.AiringDate,
                     TagId = episode.TagId,
-                    Status = "Draft"
+                    Status = "Draft",
+                    Contributions = episode.Contributions
                 }).ToList()
             }).ToList()
         };
@@ -554,5 +573,6 @@
         public DateOnly? AiringDate { get; set; }
         public Guid? TagId { get; set; }
         public string Status { get; set; } = "Draft";
+        public List<ContributionRequest> Contributions { get; set; } = [];
     }
 }
