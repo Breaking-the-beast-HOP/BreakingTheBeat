@@ -12,6 +12,12 @@ namespace PodcastCatalog.Infrastructure.Configurations
 
             entity.HasKey(e => e.Id);
 
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever();
+
+            entity.Property(e => e.SeasonId)
+                .IsRequired();
+
             entity.Property(e => e.Title)
                 .IsRequired(false)
                 .HasMaxLength(250);

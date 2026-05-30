@@ -107,7 +107,7 @@
             }
         }
 
-        public void AddContribution(Guid contributorId, Guid roleId, bool hasRights = false)
+        public void AddContribution(Guid contributorId, Guid roleId)
         {
             if (contributorId == Guid.Empty)
                 throw new ArgumentException("ContributorId is required.");
@@ -123,47 +123,29 @@
             }
 
             var contribution = Contribution.ForPodcast(Id, contributorId, roleId);
-            contribution.SetRights(hasRights);
 
             _contributions.Add(contribution);
         }
 
-        public void UpdateContributions(
-            List<(Guid ContributorId, Guid ContributorRoleId, bool HasRights)> contributions)
+        public void UpdateContributions(IEnumerable<(Guid ContributorId, Guid ContributorRoleId)> contributions)
         {
-            contributions ??= new();
+            var incomingContributions = contributions
+                .Where(c =>
+                    c.ContributorId != Guid.Empty &&
+                    c.ContributorRoleId != Guid.Empty)
+                .Distinct()
+                .ToList();
 
             _contributions.RemoveAll(existing =>
-                !contributions.Any(incoming =>
+                !incomingContributions.Any(incoming =>
                     incoming.ContributorId == existing.ContributorId &&
                     incoming.ContributorRoleId == existing.ContributorRoleId));
 
-            foreach (var incoming in contributions)
+            foreach (var incoming in incomingContributions)
             {
-                if (incoming.ContributorId == Guid.Empty)
-                    throw new ArgumentException("ContributorId is required.");
-
-                if (incoming.ContributorRoleId == Guid.Empty)
-                    throw new ArgumentException("ContributorRoleId is required.");
-
-                var existing = _contributions.FirstOrDefault(c =>
-                    c.ContributorId == incoming.ContributorId &&
-                    c.ContributorRoleId == incoming.ContributorRoleId);
-
-                if (existing is not null)
-                {
-                    existing.SetRights(incoming.HasRights);
-                    continue;
-                }
-
-                var contribution = Contribution.ForPodcast(
-                    Id,
+                AddContribution(
                     incoming.ContributorId,
                     incoming.ContributorRoleId);
-
-                contribution.SetRights(incoming.HasRights);
-
-                _contributions.Add(contribution);
             }
         }
     }

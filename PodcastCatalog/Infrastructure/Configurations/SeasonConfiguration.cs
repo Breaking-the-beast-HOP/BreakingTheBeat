@@ -12,6 +12,12 @@ namespace PodcastCatalog.Infrastructure.Configurations
 
             entity.HasKey(s => s.Id);
 
+            entity.Property(s => s.Id)
+                .ValueGeneratedNever();
+
+            entity.Property(s => s.PodcastId)
+                .IsRequired();
+
             entity.Property(s => s.Title)
                 .IsRequired(false)
                 .HasColumnType("text");

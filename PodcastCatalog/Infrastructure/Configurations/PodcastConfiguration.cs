@@ -12,6 +12,9 @@ namespace PodcastCatalog.Infrastructure.Configurations
 
             entity.HasKey(p => p.Id);
 
+            entity.Property(p => p.Id)
+                .ValueGeneratedNever();
+
             entity.Property(p => p.Title)
                 .IsRequired()
                 .HasMaxLength(250);
@@ -19,22 +22,32 @@ namespace PodcastCatalog.Infrastructure.Configurations
             entity.Property(p => p.Description)
                 .IsRequired(false);
 
+            entity.Property(p => p.CategoryId)
+                .IsRequired();
+
             entity.HasOne(p => p.Category)
                 .WithMany(c => c.Podcasts)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            entity.Property(p => p.LanguageId)
+                .IsRequired();
 
             entity.HasOne(p => p.Language)
                 .WithMany()
                 .HasForeignKey(p => p.LanguageId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            entity.Metadata
-                .FindNavigation(nameof(Podcast.Seasons))!
-                .SetPropertyAccessMode(PropertyAccessMode.Field);
+            entity.HasMany(p => p.Contributions)
+                .WithOne(c => c.Podcast)
+                .HasForeignKey(c => c.PodcastId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Navigation(p => p.Contributions)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             entity.Metadata
-                .FindNavigation(nameof(Podcast.Contributions))!
+                .FindNavigation(nameof(Podcast.Seasons))!
                 .SetPropertyAccessMode(PropertyAccessMode.Field);
         }
     }

@@ -16,5 +16,7 @@ namespace PodcastCatalog.Features.Podcasts.Interfaces
             Guid? tagId);
         Task<bool> DeleteEpisodeAsync(Guid episodeId);
 
+        Task<Podcast?> GetByIdForUpdateAsync(Guid id);
+
     }
 }
