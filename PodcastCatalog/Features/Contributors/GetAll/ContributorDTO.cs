@@ -1,9 +1,11 @@
 ﻿namespace PodcastCatalog.Features.Contributors.GetAll
 {
-    public class ContributorDTO
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string? Description { get; set; }
-    }
+    public record ContributorDTO(
+       Guid Id,
+       string DisplayName,
+       string? FullName,
+       string? Title,
+       string? Biography,
+       string? Expertise
+   );
 }
