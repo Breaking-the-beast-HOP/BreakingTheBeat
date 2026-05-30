@@ -20,9 +20,7 @@ public partial class Contributors
     {
         try
         {
-            _contributors =
-                await Http.GetFromJsonAsync<List<PodcastContributorDto>>("api/podcasts/contributor")
-                ?? new List<PodcastContributorDto>();
+            _contributors = await Http.GetFromJsonAsync<List<PodcastContributorDto>>("api/podcasts/contributor") ?? new List<PodcastContributorDto>();
         }
         catch (Exception ex)
         {

@@ -36,8 +36,7 @@ public class CreatePodcastHandler : IRequestHandler<CreatePodcastCommand, Podcas
         {
             podcast.AddContribution(
                 contributorId: contributor.ContributorId,
-                roleId: contributor.ContributorRoleId,
-                hasRights: contributor.HasRights
+                roleId: contributor.ContributorRoleId
             );
         }
 
