@@ -31,8 +31,8 @@ namespace PodcastCatalog.Features.Contributors.GetAll
             var contributorDTOs = contributors.Select(c => new ContributorDTO
             {
                 Id = c.Id,
-                Name = c.Name,
-                Description = c.Description
+                Name = c.DisplayName,
+                Description = c.Biography
             }).ToList();
             return contributorDTOs;
         }

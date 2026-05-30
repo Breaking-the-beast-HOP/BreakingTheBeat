@@ -1,7 +1,8 @@
-﻿using MediatR;
+﻿using Gateway.Contracts.Podcast.Contributor;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PodcastCatalog.Features.Contributors.Create;
 
 namespace Gateway.Controllers.Podcast
 {
@@ -28,6 +29,25 @@ namespace Gateway.Controllers.Podcast
                 Description = r.Description
             }).ToList();
             return Ok(responses);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        public async Task<IActionResult> CreateContributor(
+           [FromBody] CreatePodcastContributorRequest request,
+           CancellationToken cancellationToken)
+        {
+            var contributorId = await _mediator.Send(
+                new CreatePodcastContributorCommand(
+                    request.DisplayName,
+                    request.FullName,
+                    request.Title,
+                    request.Biography,
+                    request.Expertise,
+                    request.ProfileUrl),
+                cancellationToken);
+
+            return Ok(contributorId);
         }
     }
 }

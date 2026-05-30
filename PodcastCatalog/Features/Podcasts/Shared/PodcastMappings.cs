@@ -23,7 +23,7 @@ namespace PodcastCatalog.Features.Podcasts.Shared
                     {
                         Id = c.Id,
                         ContributorId = c.ContributorId,
-                        ContributorName = c.Contributor?.Name,
+                        ContributorName = c.Contributor?.DisplayName,
                         ContributorRoleId = c.ContributorRoleId,
                         ContributorRoleName = c.Role?.Name,
                         HasRights = c.HasRights
