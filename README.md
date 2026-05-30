@@ -118,7 +118,7 @@ Dette gør det muligt at afvikle løsningen uden adgang til Tailscale-netværket
 
 ## Login
 
-Testbrugere og adgangsoplysninger fremgår af rapportens bilag 22.
+Testbrugere og adgangsoplysninger fremgår af rapportens bilag 22 ellers benyt snydelogin knapperne.
 
 Roller anvendt i systemet:
 
