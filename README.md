@@ -43,7 +43,7 @@ Løsningen demonstrerer håndtering af musik- og podcastkataloger samt integrati
 | Projekt             | Beskrivelse                                                  |
 | ------------------- | ------------------------------------------------------------ |
 | Frontend            | Brugergrænseflade udviklet i Blazor                          |
-| GatewayAPI          | API Gateway, authentication, authorization og JWT-udstedelse |
+| GatewayAPI          | API Gateway,                                                 |
 | MusicCatalogContext | Musikdomænet med tracks, releases, contributors m.m.         |
 | PodcastCatalog      | Podcastdomænet med podcasts, seasons og episodes             |
 | MusicQualityControl | Submission- og kvalitetskontrolflow                          |
@@ -79,7 +79,7 @@ Hvis workeren ikke kører:
 
 Projektet benytter User Secrets til følsom konfiguration såsom connection strings, JWT-indstillinger og interne API-nøgler.
 
-Nødvendige secrets findes i rapportens bilag X.
+Nødvendige secrets findes i rapportens bilag 22.
 
 Som minimum skal følgende projekter konfigureres:
 
@@ -118,7 +118,7 @@ Dette gør det muligt at afvikle løsningen uden adgang til Tailscale-netværket
 
 ## Login
 
-Testbrugere og adgangsoplysninger fremgår af rapportens bilag X.
+Testbrugere og adgangsoplysninger fremgår af rapportens bilag 22 ellers benyt snydelogin knapperne.
 
 Roller anvendt i systemet:
 
