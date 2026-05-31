@@ -1,4 +1,83 @@
+root = true
+
 [*.cs]
 indent_style = space
 indent_size = 4
+
 dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# Enforce style in CI
+dotnet_analyzer_diagnostic.severity = warning
+
+# -------------------------
+# Formatting
+# -------------------------
+
+csharp_prefer_braces = true
+
+# Expression-bodied members
+csharp_style_expression_bodied_methods = false
+
+# Var usage
+csharp_style_var_for_built_in_types = true
+csharp_style_var_when_type_is_apparent = true
+csharp_style_var_elsewhere = true
+
+# -------------------------
+# Naming
+# -------------------------
+
+dotnet_naming_rule.interface_should_begin_with_i.severity = warning
+
+# Disable unstable/fix-all problematic naming analyzer
+dotnet_diagnostic.IDE1006.severity = none
+
+# -------------------------
+# dotnet format / Roslyn stability
+# -------------------------
+
+# Common false positives in Program.cs / infrastructure
+dotnet_diagnostic.IDE0058.severity = none
+dotnet_diagnostic.IDE0052.severity = suggestion
+dotnet_diagnostic.IDE0060.severity = suggestion
+
+# Logging / globalization noise
+dotnet_diagnostic.CA1305.severity = none
+
+# Misc analyzer noise often not useful in app code
+dotnet_diagnostic.CA1050.severity = none
+dotnet_diagnostic.CA1051.severity = none
+dotnet_diagnostic.CA1716.severity = none
+dotnet_diagnostic.CA2201.severity = none
+
+# -------------------------
+# Generated / migration files
+# -------------------------
+
+[**/Migrations/*.cs]
+generated_code = true
+
+[*.Designer.cs]
+generated_code = true
+
+[*.g.cs]
+generated_code = true
+
+[*.generated.cs]
+generated_code = true
+
+# -------------------------
+# Program.cs special cases
+# -------------------------
+
+[**/Program.cs]
+dotnet_diagnostic.IDE0058.severity = none
+dotnet_diagnostic.CA1305.severity = none
+
+# -------------------------
+# Razor
+# -------------------------
+
+[*.razor]
+indent_size = 4

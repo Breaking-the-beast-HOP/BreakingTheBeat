@@ -36,9 +36,10 @@ using PodcastCatalog.Features.Podcasts.PodcastCore.Create;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Get;
 using PodcastCatalog.Features.Podcasts.PodcastCore.GetAll;
 using PodcastCatalog.Features.Podcasts.PodcastCore.Update;
-using PodcastCatalog.Infrastructure.Data;
+using PodcastCatalog.Infrastructure;
 using PodcastCatalog.Infrastructure.Repositories;
 using Serilog;
+using Serilog.Enrichers.Span;
 using Serilog.Sinks.PostgreSQL;
 using SharedKernel;
 using SharedKernel.Interfaces;
@@ -60,8 +61,20 @@ namespace Gateway
             builder.Services.AddHttpContextAccessor();
 
             // Serilog
+#pragma warning disable CA1305
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
+
+                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+                .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+
+                .Enrich.FromLogContext()
+                .Enrich.WithProcessId()
+                .Enrich.WithThreadId()
+                .Enrich.WithSpan()
+
                 .WriteTo.Console()
                 .WriteTo.PostgreSQL(
                     connectionString: builder.Configuration.GetConnectionString("LoggingDb"),
@@ -79,13 +92,14 @@ namespace Gateway
                     })
                 .CreateLogger();
 
+#pragma warning restore CA1305
+
             builder.Host.UseSerilog();
 
             var musicCatalogConnectionString = builder.Configuration.GetConnectionString("MusicCatalogDb");
             var podcastCatalogConnectionString = builder.Configuration.GetConnectionString("PodcastCatalogDb");
             var userManagementConnectionString = builder.Configuration.GetConnectionString("UserManagementDb");
-
-            builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
+            var musicQualityControlConnectionString = builder.Configuration.GetConnectionString("MusicQualityControlDb");
 
             builder.Services.AddScoped<PostgresRoleService>();
             builder.Services.AddScoped<PostgresRoleInterceptor>();
@@ -130,6 +144,7 @@ namespace Gateway
                 options.AddInterceptors(interceptor);
             });
 
+            builder.Services.AddSingleton(Log.Logger);
             builder.Services.AddDbContext<MusicQualityControlDbContext>((sp, options) =>
             {
                 var interceptor = sp.GetRequiredService<PostgresRoleInterceptor>();
@@ -142,7 +157,6 @@ namespace Gateway
                 options.UseNpgsql(connectionString);
                 options.AddInterceptors(interceptor);
             });
-
 
             // 3. Identity
             builder.Services
@@ -176,7 +190,7 @@ namespace Gateway
 
             // 4. Repositories (music)
             builder.Services.AddScoped<ILanguageRepository, MusicCatalogContext.Infrastructure.Repositories.LanguageRepository>();
-            builder.Services.AddScoped<ICountryRepository, MusicCatalogContext.Infrastructure.Repositories.CountryRepository>();
+            builder.Services.AddScoped<ICountryRepository, CountryRepository>();
             builder.Services.AddScoped<IGenreRepository, GenreRepository>();
             builder.Services.AddScoped<ITrackRepository, TrackRepository>();
             builder.Services.AddScoped<IContributorRepository, MusicCatalogContext.Infrastructure.Repositories.ContributorRepository>();
@@ -184,7 +198,7 @@ namespace Gateway
             builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
             builder.Services.AddScoped<IOutBoxRepository, OutboxRepository>();
             builder.Services.AddScoped<IUnitOfWork, MusicCatalogUnitOfWork>();
-            builder.Services.AddScoped<ILabelRepository, MusicCatalogContext.Infrastructure.Repositories.LabelRepository>();
+            builder.Services.AddScoped<ILabelRepository, LabelRepository>();
 
 
             // MUSIC QC
@@ -193,6 +207,7 @@ namespace Gateway
 
             // 5. Repositories (podcast)
             builder.Services.AddScoped<IPodcastRepository, PodcastRepository>();
+            builder.Services.AddScoped<PodcastCatalog.Features.Contributors.IContributorRepository,PodcastCatalog.Infrastructure.Repositories.ContributorRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
             builder.Services.AddScoped<IReadRepository<Category>, CategoryRepository>();
             builder.Services.AddScoped<IReadRepository<ContributorRole>, ContributorRoleRepository>();
@@ -259,29 +274,14 @@ namespace Gateway
 
             // Logging
             app.UseMiddleware<ExceptionHandlingMiddleware>();
-            app.UseMiddleware<RequestResponseLoggingMiddleware>();
+            //app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
             app.UseHttpsRedirection();
 
-            // Seed / migrate podcast database
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-
-                try
-                {
-                    var podcastContext = services.GetRequiredService<PodcastCatalogDbContext>();
-                    podcastContext.Database.Migrate();
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding the database.");
-                }
-            }
-
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<UserEnrichmentMiddleware>();
 
             app.MapControllers();
 
@@ -299,6 +299,17 @@ namespace Gateway
                 Log.Information(
                     "MusicCatalog connection loaded: {ConnectionString}",
                     SanitizeConnectionString(musicCatalogConnectionString!));
+            }
+
+            if (musicQualityControlConnectionString is null)
+            {
+                Log.Warning("MusicCatalog connection string not loaded");
+            }
+            else
+            {
+                Log.Information(
+                    "MusicQualityControll connection loaded: {ConnectionString}",
+                    SanitizeConnectionString(musicQualityControlConnectionString!));
             }
 
 
@@ -329,7 +340,7 @@ namespace Gateway
             {
                 Log.Information("Starting web application");
 
-                app.Run();
+                await app.RunAsync();
             }
             catch (Exception ex)
             {
@@ -350,7 +361,7 @@ namespace Gateway
         {
             var parts = connectionString.Split(';');
 
-            for (int i = 0; i < parts.Length; i++)
+            for (var i = 0; i < parts.Length; i++)
             {
                 if (parts[i].StartsWith("Password=", StringComparison.OrdinalIgnoreCase))
                 {

@@ -36,8 +36,7 @@ public class CreatePodcastHandler : IRequestHandler<CreatePodcastCommand, Podcas
         {
             podcast.AddContribution(
                 contributorId: contributor.ContributorId,
-                roleId: contributor.ContributorRoleId,
-                hasRights: contributor.HasRights
+                roleId: contributor.ContributorRoleId
             );
         }
 
@@ -50,13 +49,21 @@ public class CreatePodcastHandler : IRequestHandler<CreatePodcastCommand, Podcas
 
             foreach (var episodeDto in seasonDto.Episodes ?? [])
             {
-                season.AddEpisode(
+                var episode = season.AddEpisode(
                     title: episodeDto.Title,
                     description: episodeDto.Description,
                     duration: episodeDto.Duration,
                     airingDate: episodeDto.AiringDate,
                     tagId: episodeDto.TagId
                 );
+
+                foreach (var contribution in episodeDto.Contributions ?? [])
+                {
+                    episode.AddContribution(
+                        contributorId: contribution.ContributorId,
+                        roleId: contribution.ContributorRoleId
+                    );
+                }
             }
         }
 

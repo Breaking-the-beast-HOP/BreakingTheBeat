@@ -27,7 +27,7 @@ namespace PodcastCatalog.Features.Podcasts.PodcastCore.Update
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
-            var podcast = await _podcastRepository.GetByIdAsync(request.Id);
+            var podcast = await _podcastRepository.GetByIdForUpdateAsync(request.Id);
 
             if (podcast is null)
                 throw new KeyNotFoundException($"Podcast with ID {request.Id} not found.");
@@ -38,19 +38,9 @@ namespace PodcastCatalog.Features.Podcasts.PodcastCore.Update
                 request.CategoryId,
                 request.LanguageId);
 
-            var contributions = request.Contributions
-                .Where(c =>
-                    c.ContributorId != Guid.Empty &&
-                    c.ContributorRoleId != Guid.Empty)
-                .Select(c => (
-                    ContributorId: c.ContributorId,
-                    ContributorRoleId: c.ContributorRoleId,
-                    HasRights: c.HasRights
-                ))
-                .Distinct()
-                .ToList();
-
-            podcast.UpdateContributions(contributions);
+            podcast.UpdateContributions(
+                request.Contributions
+                    .Select(c => (c.ContributorId, c.ContributorRoleId)));
 
             await _podcastRepository.UpdateAsync(podcast);
 

@@ -1,0 +1,131 @@
+﻿@page "/podcasts/create-contributor"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
+
+@using Microsoft.AspNetCore.Authorization
+@using MudBlazor
+
+<PageTitle>Create Podcast Contributor</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="pa-6">
+
+    <MudStack Spacing="4">
+
+        <MudPaper Class="pa-4">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h4">Create Podcast Contributor</MudText>
+
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               Href="/podcast-contributors"
+                               Disabled="_isSaving">
+                        Cancel
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               OnClick="SaveContributor"
+                               Disabled="_isSaving">
+                        @(_isSaving ? "Saving..." : "Save")
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <MudAlert Severity="Severity.Error">
+                @_errorMessage
+            </MudAlert>
+        }
+
+        <MudPaper Class="pa-4" Elevation="5">
+            <MudText Typo="Typo.h6" Class="mb-3">Contributor Info</MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudTextField Label="Display name"
+                                  @bind-Value="_model.DisplayName"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  FullWidth="true"
+                                  HelperText="The name shown in podcast episodes." />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField Label="Full name"
+                                  @bind-Value="_model.FullName"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField Label="Title"
+                                  @bind-Value="_model.Title"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Placeholder="Journalist, chef, expert on..." />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Biography"
+                                  @bind-Value="_model.Biography"
+                                  Variant="Variant.Outlined"
+                                  Lines="5"
+                                  FullWidth="true"
+                                  Placeholder="Example: Former head chef with 15 years of experience in Nordic cuisine..." />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Expertise / topics"
+                                  @bind-Value="_model.Expertise"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Placeholder="Food history, baking, fermentation, nutrition..." />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Website or social link"
+                                  @bind-Value="_model.ProfileUrl"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true" />
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+    </MudStack>
+
+</MudContainer>
+
+<MudDialog @bind-Visible="_showSuccessDialog">
+    <TitleContent>
+        Podcast contributor created
+    </TitleContent>
+
+    <DialogContent>
+        <MudText>
+            The contributor was created successfully. What would you like to do now?
+        </MudText>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text"
+                   OnClick="GoToContributors">
+            Go to contributors
+        </MudButton>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Warning"
+                   OnClick="CreateAnother">
+            Create another
+        </MudButton>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   OnClick="GoToCreatedContributor">
+            View contributor
+        </MudButton>
+    </DialogActions>
+</MudDialog>

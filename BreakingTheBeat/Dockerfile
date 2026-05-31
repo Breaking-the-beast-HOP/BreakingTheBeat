@@ -17,9 +17,11 @@ WORKDIR /src
 
 COPY ["BreakingTheBeat/Gateway.csproj", "BreakingTheBeat/"]
 COPY ["PodcastCatalog/PodcastCatalog.csproj", "BreakingTheBeat/PodcastCatalog/"]
-COPY ["MusicCatalog/MusicCatalog.csproj", "BreakingTheBeat/MusicCatalog/"]
+COPY ["MusicCatalog/MusicCatalogContext.csproj", "BreakingTheBeat/MusicCatalog/"]
+COPY ["MusicQualityControl/MusicQualityControl.csproj", "BreakingTheBeat/MusicQualityControl/"]
 COPY ["SharedKernel/SharedKernel.csproj", "BreakingTheBeat/SharedKernel/"]
 COPY ["UserManagement/UserManagement.csproj", "BreakingTheBeat/UserManagement/"]
+COPY ["OutboxWorker/OutboxWorker.csproj", "BreakingTheBeat/OutboxWorker/"]
 
 RUN dotnet restore "./BreakingTheBeat/Gateway.csproj"
 

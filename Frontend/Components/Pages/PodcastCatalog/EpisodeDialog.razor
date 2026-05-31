@@ -46,6 +46,82 @@
                 </MudAlert>
             }
 
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+                    <div>
+                        <MudText Typo="Typo.h6">Contributions</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Add hosts, guests, producers or other contributors.
+                        </MudText>
+                    </div>
+
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="AddContributionRow">
+                        Add contributor
+                    </MudButton>
+                </MudStack>
+
+                @if (!_contributionRows.Any())
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true">
+                        No contributors added yet.
+                    </MudAlert>
+                }
+                else
+                {
+                    <MudStack Spacing="2">
+                        @foreach (var contribution in _contributionRows.Select((value, index) => new { value, index }))
+                        {
+                            <MudPaper Outlined="true" Class="pa-3">
+                                <MudGrid Spacing="2">
+                                    <MudItem xs="12" sm="5">
+                                        <MudAutocomplete T="ContributorLookup"
+                                                         Label="Contributor"
+                                                         Variant="Variant.Outlined"
+                                                         Value="Contributors.FirstOrDefault(c => c.Id == contribution.value.ContributorId)"
+                                                         ValueChanged="@(v => OnContributorSelected(v, contribution.value))"
+                                                         SearchFunc="SearchContributors"
+                                                         ToStringFunc="@(c => c?.DisplayName ?? string.Empty)"
+                                                         Clearable="true"
+                                                         Dense="true"
+                                                         FullWidth="true"
+                                                         MaxItems="8" />
+                                    </MudItem>
+
+                                    <MudItem xs="12" sm="5">
+                                        <MudSelect T="Guid?"
+                                                   Label="Role"
+                                                   Value="contribution.value.ContributorRoleId"
+                                                   ValueChanged="@(v => contribution.value.ContributorRoleId = v)"
+                                                   Variant="Variant.Outlined"
+                                                   Dense="true"
+                                                   FullWidth="true">
+                                            @foreach (var role in ContributionRoles)
+                                            {
+                                                <MudSelectItem T="Guid?" Value="@role.Id">
+                                                    @role.Name
+                                                </MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </MudItem>
+
+                                    <MudItem xs="12" sm="2" Class="d-flex align-center">
+                                        <MudButton Variant="Variant.Text"
+                                                   Color="Color.Error"
+                                                   StartIcon="@Icons.Material.Filled.Delete"
+                                                   OnClick="@(() => RemoveContributionRow(contribution.index))">
+                                            Remove
+                                        </MudButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudPaper>
+                        }
+                    </MudStack>
+                }
+            </MudPaper>
+
             @if (!string.IsNullOrWhiteSpace(_errorMessage))
             {
                 <MudAlert Severity="Severity.Error" Dense="true">
@@ -74,10 +150,14 @@
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
 
+    [Parameter] public List<ContributorLookup> Contributors { get; set; } = [];
+    [Parameter] public List<ContributionRoleLookup> ContributionRoles { get; set; } = [];
+
     private EpisodeDialogResult _model = new();
     private DateTime? _airingDate = DateTime.Today;
     private IBrowserFile? _audioFile;
     private string? _errorMessage;
+    private List<ContributionRow> _contributionRows = [];
 
     private void OnAudioSelected(IBrowserFile file)
     {
@@ -85,6 +165,29 @@
         _model.AudioFileName = file.Name;
         _model.AudioFileSize = file.Size;
         _model.AudioContentType = file.ContentType;
+    }
+
+    private Task<IEnumerable<ContributorLookup>> SearchContributors(string value, CancellationToken token)
+    {
+        IEnumerable<ContributorLookup> result = string.IsNullOrWhiteSpace(value)
+            ? Contributors
+            : Contributors.Where(c =>
+                c.DisplayName.Contains(value, StringComparison.OrdinalIgnoreCase));
+
+        return Task.FromResult(result);
+    }
+
+    private void OnContributorSelected(ContributorLookup? contributor, ContributionRow row)
+    {
+        row.ContributorId = contributor?.Id;
+    }
+
+    private void AddContributionRow() => _contributionRows.Add(new ContributionRow());
+
+    private void RemoveContributionRow(int index)
+    {
+        if (index >= 0 && index < _contributionRows.Count)
+            _contributionRows.RemoveAt(index);
     }
 
     private void Submit()
@@ -103,15 +206,39 @@
             return;
         }
 
+        if (_contributionRows.Any(r =>
+                r.ContributorId is null || r.ContributorId == Guid.Empty ||
+                r.ContributorRoleId is null || r.ContributorRoleId == Guid.Empty))
+        {
+            _errorMessage = "All contributions must have a contributor and a role selected.";
+            return;
+        }
+
         _model.AiringDate = DateOnly.FromDateTime(_airingDate.Value);
         _model.Duration = TimeSpan.Zero;
+        _model.Contributions = _contributionRows;
 
         MudDialog.Close(DialogResult.Ok(_model));
     }
 
-    private void Cancel()
+    private void Cancel() => MudDialog.Cancel();
+
+    public class ContributorLookup
     {
-        MudDialog.Cancel();
+        public Guid Id { get; set; }
+        public string DisplayName { get; set; } = "";
+    }
+
+    public class ContributionRoleLookup
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+    }
+
+    public class ContributionRow
+    {
+        public Guid? ContributorId { get; set; }
+        public Guid? ContributorRoleId { get; set; }
     }
 
     public class EpisodeDialogResult
@@ -120,12 +247,11 @@
         public string? Description { get; set; }
         public TimeSpan Duration { get; set; } = TimeSpan.Zero;
         public DateOnly AiringDate { get; set; }
-
         public Guid? TagId { get; set; }
         public string? TagName { get; set; }
-
         public string? AudioFileName { get; set; }
         public long? AudioFileSize { get; set; }
         public string? AudioContentType { get; set; }
+        public List<ContributionRow> Contributions { get; set; } = [];
     }
 }

@@ -31,7 +31,7 @@ public partial class EditTrack
     private LanguageDto? _selectedAudioLanguage;
 
     // UI state
-    private bool _isLoading = true;
+    private bool _isLoadingLookups = true;
     private bool _isSaving;
 
     private string? _errorMessage;
@@ -72,7 +72,7 @@ public partial class EditTrack
         }
         finally
         {
-            _isLoading = false;
+            _isLoadingLookups = false;
         }
     }
 

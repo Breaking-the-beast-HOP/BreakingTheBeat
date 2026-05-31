@@ -16,7 +16,9 @@ public class CreatePodcastEpisodeHandler : IRequestHandler<CreatePodcastEpisodeC
         _validator = validator;
     }
 
-    public async Task<EpisodeDTO> Handle(CreatePodcastEpisodeCommand request, CancellationToken cancellationToken)
+    public async Task<EpisodeDTO> Handle(
+     CreatePodcastEpisodeCommand request,
+     CancellationToken cancellationToken)
     {
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
@@ -29,7 +31,10 @@ public class CreatePodcastEpisodeHandler : IRequestHandler<CreatePodcastEpisodeC
             request.Description,
             request.Duration,
             request.AiringDate,
-            request.TagId);
+            request.TagId,
+            request.Contributions
+                .Select(c => (c.ContributorId, c.ContributorRoleId))
+                .ToList());
 
         return new EpisodeDTO
         {
@@ -43,4 +48,5 @@ public class CreatePodcastEpisodeHandler : IRequestHandler<CreatePodcastEpisodeC
             TagId = episode.TagId
         };
     }
+
 }

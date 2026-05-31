@@ -1,40 +1,31 @@
 ﻿using MediatR;
-using PodcastCatalog.Domain.Entities;
-using SharedKernel;
 
 namespace PodcastCatalog.Features.Contributors.GetAll
 {
-    public class GetAllContributorsHandler : IRequestHandler<GetAllContributorsQuery, List<ContributorDTO>>
+    public class GetAllContributorsHandler
+        : IRequestHandler<GetAllContributorsQuery, List<ContributorDTO>>
     {
-        private readonly ICrudRepository<Contributor> _contributorRepository;
+        private readonly IContributorRepository _repository;
 
-        public GetAllContributorsHandler(ICrudRepository<Contributor> contributorRepository)
+        public GetAllContributorsHandler(IContributorRepository repository)
         {
-            _contributorRepository = contributorRepository;
+            _repository = repository;
         }
 
-        public async Task<List<ContributorDTO>> Handle(GetAllContributorsQuery request, CancellationToken cancellationToken)
+        public async Task<List<ContributorDTO>> Handle( GetAllContributorsQuery request, CancellationToken cancellationToken)
         {
-            var contributors = await _contributorRepository.GetAllAsync();
-            if (contributors == null || !contributors.Any())
-            {
-                return new List<ContributorDTO>
-                {
-                    new ContributorDTO
-                    {
-                        Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                        Name = "Placeholder",
-                        Description = "Placeholder"
-                    }
-                };
-            }
-            var contributorDTOs = contributors.Select(c => new ContributorDTO
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Description = c.Description
-            }).ToList();
-            return contributorDTOs;
+            var contributors = await _repository.GetAllAsync();
+
+            return contributors
+            .Select(c => new ContributorDTO(
+                c.Id,
+                c.DisplayName,
+                c.FullName,
+                c.Title,
+                c.Biography,
+                c.Expertise
+            ))
+            .ToList();
         }
     }
 }

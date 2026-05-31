@@ -3,7 +3,7 @@ on:
     push:
         branches: ["feature/**", "bugfix/**", "master"]
     pull_request:
-        branches: ["feature/**", bugfix/**, "master"]
+        branches: ["feature/**", "bugfix/**", "master"]
 
 jobs:
     linting:
@@ -43,10 +43,38 @@ jobs:
             - name: Run linting (dotnet format)
               run: dotnet format --verify-no-changes --severity error
     
+    tests:
+      name: Gateway Unit tests (xUnit)
+      runs-on: ubuntu-latest
+      needs: linting
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Set up .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 9.0.312
+        
+        - name: Restore dependencies
+          run: dotnet restore BreakingTheBeat.sln --verbosity detailed
+
+        - name: Build solution
+          run: dotnet build BreakingTheBeat.sln --configuration Release --verbosity detailed
+
+        - name: Run unit tests with report
+          run: dotnet test ./BreakingTheBeat.Tests/BreakingTheBeat.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=TestResults.trx"
+        
+        - name: Upload test results
+          uses: actions/upload-artifact@v4
+          with: 
+            name: TestResults
+            path: ./BreakingTheBeat.tests/TestResults/TestResults.trx
+    
     security-scans:
       name: Secret Scanning (Gitleaks)
       runs-on: ubuntu-latest
-      needs: linting
+      needs: [linting, tests]
       steps:
         - name: Checkout
           uses: actions/checkout@v4
@@ -60,9 +88,6 @@ jobs:
           uses: NuGet/setup-nuget@v1
           with:
             nuget-version: 'latest'
-
-        - name: Clear NuGet cache
-          run: dotnet nuget locals all --clear
         
         - name: Restore
           run: dotnet restore --no-cache
@@ -71,14 +96,6 @@ jobs:
           uses: gitleaks/gitleaks-action@v1
           with: 
             args: detect --source . --verbose --redact
-
-        - name: Setup .NET
-          uses: actions/setup-dotnet@v4
-          with:
-            dotnet-version: 9.0.x
-        
-        - name: Restore
-          run: dotnet restore
         
         - name: List vulnerable packages
           run: |
@@ -105,7 +122,7 @@ jobs:
           run: docker build -t gateway-test -f ./BreakingTheBeat/Dockerfile .
 
         - name: Scan gateway-image with Trivy
-          uses: aquasecurity/trivy-action@master
+          uses: aquasecurity/trivy-action@v0.36.0
           with:
             image-ref: gateway-test
             format: table
@@ -117,7 +134,7 @@ jobs:
           run: docker build -t frontend-test -f ./Frontend/Dockerfile ./Frontend
 
         - name: Scan frontend-image with Trivy
-          uses: aquasecurity/trivy-action@master
+          uses: aquasecurity/trivy-action@v0.36.0
           with:
             image-ref: frontend-test
             format: table
@@ -125,11 +142,11 @@ jobs:
             severity: CRITICAL,HIGH  
             ignore-unfixed: true
 
-        - name: Scan Monitoring-image (no-push)
+        - name: Build Monitoring-image (no-push)
           run: docker build -t monitoring-test -f ./Monitoring/Dockerfile ./Monitoring
 
         - name: Scan monitoring-image with Trivy
-          uses: aquasecurity/trivy-action@master
+          uses: aquasecurity/trivy-action@v0.36.0
           with:
             image-ref: monitoring-test
             format: table
@@ -188,8 +205,8 @@ jobs:
       if: github.ref == 'refs/heads/master'
       runs-on: ubuntu-latest
       steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+#        - name: Checkout code
+#          uses: actions/checkout@v4
 
         # Set up Tailscale VPN
         - name: Start Tailscale VPN

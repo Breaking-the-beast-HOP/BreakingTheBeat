@@ -1,0 +1,122 @@
+﻿@page "/podcast-contributors"
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
+
+@using Microsoft.AspNetCore.Authorization
+@using MudBlazor
+
+@namespace Frontend.Components.Pages.PodcastCatalog.Contributors.List
+
+<PageTitle>Podcast Contributors</PageTitle>
+
+<MudStack Spacing="3">
+
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+        <div>
+            <MudText Typo="Typo.h4">Podcast Contributors</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Hosts, guests, experts and other podcast contributors
+            </MudText>
+        </div>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Warning"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/podcasts/create-contributor">
+            Create Contributor
+        </MudButton>
+    </MudStack>
+
+    <MudTextField @bind-Value="_searchString"
+                  Placeholder="Search name, title or expertise..."
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Variant="Variant.Outlined"
+                  Immediate="true" />
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">
+            @_errorMessage
+        </MudAlert>
+    }
+    else if (_contributors is null || !_contributors.Any())
+    {
+        <MudAlert Severity="Severity.Info">
+            No podcast contributors found.
+        </MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4">
+            <MudTable Items="FilteredContributors"
+                      T="PodcastContributorDto"
+                      Hover="true"
+                      Dense="true"
+                      Elevation="0">
+
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Title / role</MudTh>
+                    <MudTh>Expertise</MudTh>
+                    <MudTh>Biography</MudTh>
+                    <MudTh Style="width:150px;">Actions</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Name">
+                        <MudLink Href="@($"/podcast-contributors/{context.Id}")">
+                            <MudText Typo="Typo.subtitle2">
+                                @context.DisplayName
+                            </MudText>
+                        </MudLink>
+
+                        @if (!string.IsNullOrWhiteSpace(context.FullName))
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                @context.FullName
+                            </MudText>
+                        }
+                    </MudTd>
+
+                    <MudTd DataLabel="Title / role">
+                        @(context.Title ?? "-")
+                    </MudTd>
+
+                    <MudTd DataLabel="Expertise">
+                        @(context.Expertise ?? "-")
+                    </MudTd>
+
+                    <MudTd DataLabel="Biography">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            @(string.IsNullOrWhiteSpace(context.Biography)
+                                ? "-"
+                                : context.Biography.Length > 120
+                                    ? context.Biography[..120] + "..."
+                                    : context.Biography)
+                        </MudText>
+                    </MudTd>
+
+                    <MudTd DataLabel="Actions">
+                        <MudStack Row="true" Spacing="1">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Warning"
+                                           Size="Size.Small"
+                                           OnClick="@(() => EditContributor(context.Id))" />
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           OnClick="@(() => DeleteContributor(context.Id))" />
+                        </MudStack>
+                    </MudTd>
+                </RowTemplate>
+
+            </MudTable>
+        </MudPaper>
+    }
+
+</MudStack>

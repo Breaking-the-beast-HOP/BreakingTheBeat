@@ -1,61 +1,55 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using MediatR;
-using Serilog;
 using ILogger = Serilog.ILogger;
 
-namespace Gateway.Logging.Behaviors;
-
-public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+namespace Gateway.Logging.Behaviors
 {
-    private readonly ILogger _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public LoggingBehavior(
-        ILogger logger,
-        IHttpContextAccessor httpContextAccessor)
+    public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
-        _logger = logger.ForContext<LoggingBehavior<TRequest, TResponse>>();
-        _httpContextAccessor = httpContextAccessor;
-    }
+        private readonly ILogger _logger;
 
-    public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
-    {
-        var httpContext = _httpContextAccessor.HttpContext;
-
-        var requestName = typeof(TRequest).Name;
-
-        var requestId = httpContext?.Items["requestId"]?.ToString()
-            ?? "UNKNOWN";
-
-        var requestData = JsonSerializer.Serialize(request);
-
-        if (SensitiveRequests.Any(x => requestName.Contains(x)))
+        public LoggingBehavior(
+            ILogger logger)
         {
-            requestData = "Sensitive data omitted";
+            _logger = logger.ForContext<LoggingBehavior<TRequest, TResponse>>();
         }
 
-        _logger
-            .ForContext("RequestId", requestId)
-            .ForContext("RequestName", requestName)
-            .ForContext("RequestData", requestData)
-            .Information("Handling request");
+        public async Task<TResponse> Handle(
+            TRequest request,
+            RequestHandlerDelegate<TResponse> next,
+            CancellationToken cancellationToken)
+        {
 
-        var stopwatch = Stopwatch.StartNew();
-        var response = await next();
-        stopwatch.Stop();
+            var requestName = typeof(TRequest).Name;
 
-        _logger
-            .ForContext("RequestId", requestId)
-            .ForContext("RequestName", requestName)
-            .ForContext("DurationMs", stopwatch.ElapsedMilliseconds)
-            .Information("Handled request");
+            _logger
+                .ForContext("RequestName", requestName)
+                .Information("Handling {@Request}", SanitizeRequest(request));
 
-        return response;
+            var stopwatch = Stopwatch.StartNew();
+            var response = await next();
+            stopwatch.Stop();
+
+            _logger
+                .ForContext("RequestName", requestName)
+                .ForContext("DurationMs", stopwatch.ElapsedMilliseconds.ToString(CultureInfo.InvariantCulture))
+                .Information("Handled request");
+
+            return response;
+        }
+
+        private static readonly string[] SensitiveRequests = ["Login", "Register", "Token", "Password"];
+
+        private object SanitizeRequest(TRequest request)
+        {
+            var json = JsonSerializer.Serialize(request);
+
+            json = Regex.Replace(json, "\"Password\":\".*?\"", "\"Password\":\"***REDACTED***\"");
+
+            return JsonSerializer.Deserialize<object>(json)!;
+        }
     }
-
-    private static readonly string[] SensitiveRequests = ["Login", "Register", "Token", "Password"];
 }

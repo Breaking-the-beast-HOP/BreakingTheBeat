@@ -1,26 +1,38 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PodcastCatalog.Domain.Entities;
-using PodcastCatalog.Infrastructure.Data;
-using SharedKernel;
+using PodcastCatalog.Features.Contributors;
 
 namespace PodcastCatalog.Infrastructure.Repositories
 {
-    public class ContributorRepository : ICrudRepository<Contributor>
+    public class ContributorRepository : IContributorRepository
     {
         private readonly PodcastCatalogDbContext _dbContext;
+
         public ContributorRepository(PodcastCatalogDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public Task<Contributor> AddAsync(Contributor entity)
+        public async Task<Contributor> AddAsync(Contributor entity)
         {
-            throw new NotImplementedException();
+            await _dbContext.Contributors.AddAsync(entity);
+            await _dbContext.SaveChangesAsync();
+
+            return entity;
         }
 
-        public Task<bool> DeleteAsync(Guid Id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var contributor = await _dbContext.Contributors
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (contributor is null)
+                return false;
+
+            _dbContext.Contributors.Remove(contributor);
+            await _dbContext.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<List<Contributor>> GetAllAsync()
@@ -36,9 +48,12 @@ namespace PodcastCatalog.Infrastructure.Repositories
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public Task<bool> UpdateAsync(Contributor entity)
+        public async Task<bool> UpdateAsync(Contributor entity)
         {
-            throw new NotImplementedException();
+            _dbContext.Contributors.Update(entity);
+            await _dbContext.SaveChangesAsync();
+
+            return true;
         }
     }
 }

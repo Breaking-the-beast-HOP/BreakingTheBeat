@@ -9,6 +9,7 @@ public record CreatePodcastEpisodeCommand(
     string? Description,
     TimeSpan? Duration,
     DateTime? AiringDate,
-    Guid? TagId
-,
-    int EpisodeNumber) : IRequest<EpisodeDTO>;
+    Guid? TagId,
+    int EpisodeNumber,
+    List<CreateContributionDTO>? Contributions = null
+    ) : IRequest<EpisodeDTO>;

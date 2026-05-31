@@ -165,5 +165,6 @@
         public DateOnly AiringDate { get; set; }
         public Guid? TagId { get; set; }
         public string? TagName { get; set; }
+        public List<CreatePodcast.ContributionRequest> Contributions { get; set; } = [];
     }
 }
