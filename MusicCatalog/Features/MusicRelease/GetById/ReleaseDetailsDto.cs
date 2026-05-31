@@ -1,5 +1,5 @@
 ﻿
-namespace MusicCatalogContext.Features.Release.GetById
+namespace MusicCatalogContext.Features.MusicRelease.GetById
 {
     public class ReleaseDetailsDto
     {

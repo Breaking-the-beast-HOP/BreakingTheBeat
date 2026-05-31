@@ -1,4 +1,6 @@
-﻿namespace MusicCatalogContext.Features.Release.GetAll
+﻿using MusicCatalogContext.Domain.Enums;
+
+namespace MusicCatalogContext.Features.MusicRelease.GetAll
 {
     public class ReleaseDto
     {
@@ -12,5 +14,6 @@
         public string? GenreName { get; set; }
 
         public string? LanguageName { get; set; }
+        public ReleaseStatus? Status { get; set; }
     }
 }

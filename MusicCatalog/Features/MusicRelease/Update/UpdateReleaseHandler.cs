@@ -4,7 +4,7 @@ using MusicCatalogContext.Domain;
 using MusicCatalogContext.Domain.Enums;
 using SharedKernel.Interfaces;
 
-namespace MusicCatalogContext.Features.Release.Update
+namespace MusicCatalogContext.Features.MusicRelease.Update
 {
     public class UpdateReleaseHandler : IRequestHandler<UpdateReleaseCommand, bool>
     {

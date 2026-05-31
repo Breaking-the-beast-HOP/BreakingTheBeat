@@ -1,14 +1,13 @@
 ﻿using Gateway.Contracts.Music.MusicRelease.Create;
 using Gateway.Contracts.Music.MusicRelease.Get;
-using Gateway.Contracts.Music.MusicRelease.GetAll;
 using Gateway.Contracts.Music.MusicRelease.Update;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MusicCatalogContext.Features.Release.Create;
-using MusicCatalogContext.Features.Release.GetAll;
-using MusicCatalogContext.Features.Release.GetById;
-using MusicCatalogContext.Features.Release.Update;
+using MusicCatalogContext.Features.MusicRelease.Create;
+using MusicCatalogContext.Features.MusicRelease.GetAll;
+using MusicCatalogContext.Features.MusicRelease.GetById;
+using MusicCatalogContext.Features.MusicRelease.Update;
 
 namespace Gateway.Controllers.Music
 {
@@ -102,7 +101,8 @@ namespace Gateway.Controllers.Music
                 EAN = r.EAN,
                 ReleaseDate = r.ReleaseDate,
                 GenreName = r.GenreName,
-                LanguageName = r.LanguageName
+                LanguageName = r.LanguageName,
+                Status = r.Status,
             }).ToList();
 
             return Ok(response);

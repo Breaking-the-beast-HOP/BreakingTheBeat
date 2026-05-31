@@ -2,7 +2,7 @@
 using MusicCatalogContext.Domain.Entities;
 using MusicCatalogContext.Domain.Enums;
 
-namespace MusicCatalogContext.Features.Release.Create;
+namespace MusicCatalogContext.Features.MusicRelease.Create;
 
 public record CreateReleaseCommand(
     string Title,

@@ -1,8 +1,8 @@
 using MusicCatalogContext.Domain;
 using MusicCatalogContext.Domain.Enums;
 using MusicCatalogContext.Features;
-using MusicCatalogContext.Features.Release;
-using MusicCatalogContext.Features.Release.Create;
+using MusicCatalogContext.Features.MusicRelease;
+using MusicCatalogContext.Features.MusicRelease.Create;
 using MusicCatalogContext.Infrastructure.Repositories;
 using NSubstitute;
 using SharedKernel.Interfaces;

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MusicCatalogContext.Features.Release.GetAll
+namespace MusicCatalogContext.Features.MusicRelease.GetAll
 {
     public class GetAllReleasesHandler : IRequestHandler<GetAllReleasesQuery, List<ReleaseDto>>
     {
@@ -25,7 +25,8 @@ namespace MusicCatalogContext.Features.Release.GetAll
                 EAN = r.EAN,
                 ReleaseDate = r.ReleaseDate,
                 GenreName = r.Genre.Name,
-                LanguageName = r.Language.Name
+                LanguageName = r.Language.Name,
+                Status = r.Status
             }).ToList();
         }
     }

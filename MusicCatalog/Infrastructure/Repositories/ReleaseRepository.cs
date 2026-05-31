@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MusicCatalogContext.Domain.Entities;
-using MusicCatalogContext.Features.Release;
+using MusicCatalogContext.Features.MusicRelease;
 
 namespace MusicCatalogContext.Infrastructure.Repositories
 {

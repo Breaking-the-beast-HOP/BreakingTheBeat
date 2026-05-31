@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using MusicCatalogContext.Domain.Enums;
 
-namespace MusicCatalogContext.Features.Release.Update;
+namespace MusicCatalogContext.Features.MusicRelease.Update;
 
 public record UpdateReleaseCommand(
     Guid Id,
