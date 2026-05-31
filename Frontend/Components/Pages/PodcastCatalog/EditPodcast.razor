@@ -32,7 +32,7 @@
                                Color="Color.Warning"
                                StartIcon="@Icons.Material.Filled.Save"
                                OnClick="SavePodcast"
-                               Disabled="@(_isSaving || _isLoading)">
+                               Disabled="@(_isSaving || _isLoadingLookups)">
                         @(_isSaving ? "Saving..." : "Save")
                     </MudButton>
                 </MudStack>
@@ -46,7 +46,7 @@
             </MudAlert>
         }
 
-        @if (_isLoading)
+        @if (_isLoadingLookups)
         {
             <MudProgressCircular Indeterminate="true" />
         }
@@ -91,8 +91,8 @@
                                                      CoerceText="false"
                                                      Dense="true"
                                                      FullWidth="true"
-                                                     MaxItems="8"
-                                                     Disabled="_isLoading" />
+                                                     MaxItems="1000"
+                                                     Disabled="_isLoadingLookups" />
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6">
@@ -108,8 +108,8 @@
                                                      CoerceText="false"
                                                      Dense="true"
                                                      FullWidth="true"
-                                                     MaxItems="8"
-                                                     Disabled="_isLoading" />
+                                                     MaxItems="1000"
+                                                     Disabled="_isLoadingLookups" />
                                 </MudItem>
                             </MudGrid>
                         </MudPaper>
@@ -165,7 +165,7 @@
     private List<ContributionEditor.ContributorOption> _availableContributors = new();
     private List<ContributionEditor.ContributorRoleDto> _contributionRoles = new();
 
-    private bool _isLoading = true;
+    private bool _isLoadingLookups = true;
     private bool _isSaving;
     private string? _errorMessage;
     private string? _successMessage;
@@ -198,7 +198,7 @@
         }
         finally
         {
-            _isLoading = false;
+            _isLoadingLookups = false;
         }
     }
 
@@ -314,16 +314,19 @@
         return Task.FromResult(result.AsEnumerable());
     }
 
-    private Task<IEnumerable<LanguageDto>> SearchLanguages(string value, CancellationToken token)
-    {
-        var result = string.IsNullOrWhiteSpace(value)
-            ? _languages
-            : _languages.Where(l =>
+ 
+  private Task<IEnumerable<LanguageDto>> SearchLanguages( string value, CancellationToken token)
+{
+    IEnumerable<LanguageDto> result = string.IsNullOrWhiteSpace(value)
+        ? _languages.OrderBy(l => l.Name)
+        : _languages
+            .Where(l =>
                 l.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                l.ISO.Contains(value, StringComparison.OrdinalIgnoreCase));
+                l.ISO.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(l => l.Name);
 
-        return Task.FromResult(result.AsEnumerable());
-    }
+    return Task.FromResult(result);
+}
 
     private Task OnCategoryChanged(PodcastCategoryDto? category)
     {

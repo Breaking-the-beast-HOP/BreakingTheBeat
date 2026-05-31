@@ -34,7 +34,7 @@
                                Color="Color.Warning"
                                StartIcon="@Icons.Material.Filled.Save"
                                OnClick="UpdateTrack"
-                               Disabled="_isSaving || _isLoading">
+                               Disabled="_isSaving || _isLoadingLookups">
                         @(_isSaving ? "Saving..." : "Save changes")
                     </MudButton>
                 </MudStack>
@@ -55,7 +55,7 @@
             </MudAlert>
         }
 
-        @if (_isLoading)
+        @if (_isLoadingLookups)
         {
             <MudProgressCircular Indeterminate="true" />
         }
@@ -97,19 +97,18 @@
                                     <MudAutocomplete T="GenreDto"
                                                      Label="Genre"
                                                      Variant="Variant.Outlined"
-                                                     @bind-Value="_selectedGenre"
+                                                     Value="_selectedGenre"
+                                                     ValueChanged="OnGenreChanged"
                                                      SearchFunc="SearchGenres"
                                                      ToStringFunc="@(g => g?.Name ?? string.Empty)"
                                                      Clearable="true"
-                                                     ResetValueOnEmptyText="false"
-                                                     CoerceText="true"
+                                                     ResetValueOnEmptyText="true"
+                                                     CoerceText="false"
                                                      Dense="true"
                                                      FullWidth="true"
-                                                     MaxItems="8"
-                                                     Disabled="_isLoading" />
+                                                     MaxItems="1000"
+                                                     Disabled="_isLoadingLookups" />
                                 </MudItem>
-
-                          
 
                                 <MudItem xs="12" sm="6">
                                     <MudAutocomplete T="LanguageDto"
@@ -124,8 +123,8 @@
                                                      CoerceText="false"
                                                      Dense="true"
                                                      FullWidth="true"
-                                                     MaxItems="8"
-                                                     Disabled="_isLoading" />
+                                                     MaxItems="1000"
+                                                     Disabled="_isLoadingLookups" />
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6">
@@ -141,8 +140,8 @@
                                                      CoerceText="false"
                                                      Dense="true"
                                                      FullWidth="true"
-                                                     MaxItems="8"
-                                                     Disabled="_isLoading" />
+                                                     MaxItems="1000"
+                                                     Disabled="_isLoadingLookups" />
                                 </MudItem>
 
                             </MudGrid>

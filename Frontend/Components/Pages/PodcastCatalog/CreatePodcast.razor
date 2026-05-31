@@ -71,9 +71,11 @@
                                                  SearchFunc="SearchCategories"
                                                  ToStringFunc="@(c => c?.Name ?? string.Empty)"
                                                  Clearable="true"
+                                                 ResetValueOnEmptyText="true"
+                                                 CoerceText="false"
                                                  Dense="true"
                                                  FullWidth="true"
-                                                 MaxItems="8"
+                                                 MaxItems="1000"
                                                  Disabled="_isLoadingLookups" />
                             </MudItem>
 
@@ -86,9 +88,11 @@
                                                  SearchFunc="SearchLanguages"
                                                  ToStringFunc="@(l => l?.Name ?? string.Empty)"
                                                  Clearable="true"
+                                                 ResetValueOnEmptyText="true"
+                                                 CoerceText="false"
                                                  Dense="true"
                                                  FullWidth="true"
-                                                 MaxItems="8"
+                                                 MaxItems="1000"
                                                  Disabled="_isLoadingLookups" />
                             </MudItem>
                         </MudGrid>
@@ -262,16 +266,18 @@
         return Task.FromResult(result);
     }
 
-    private Task<IEnumerable<LanguageDto>> SearchLanguages(string value, CancellationToken token)
-    {
-        IEnumerable<LanguageDto> result = string.IsNullOrWhiteSpace(value)
-            ? _languages
-            : _languages.Where(l =>
+  private Task<IEnumerable<LanguageDto>> SearchLanguages( string value, CancellationToken token)
+{
+    IEnumerable<LanguageDto> result = string.IsNullOrWhiteSpace(value)
+        ? _languages.OrderBy(l => l.Name)
+        : _languages
+            .Where(l =>
                 l.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                l.ISO.Contains(value, StringComparison.OrdinalIgnoreCase));
+                l.ISO.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(l => l.Name);
 
-        return Task.FromResult(result);
-    }
+    return Task.FromResult(result);
+}
 
     private Task<IEnumerable<ContributorDto>> SearchContributors(string value, CancellationToken token)
     {

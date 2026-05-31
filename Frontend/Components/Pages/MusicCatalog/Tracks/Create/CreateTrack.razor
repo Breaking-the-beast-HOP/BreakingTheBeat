@@ -83,53 +83,53 @@
 
                             <MudItem xs="12">
                                 <MudAutocomplete T="GenreDto"
-                                Label="Genre"
-                                Variant="Variant.Outlined"
-                                Value="_selectedGenre"
-                                ValueChanged="OnGenreChanged"
-                                SearchFunc="SearchGenres"
-                                ToStringFunc="@(g => g?.Name ?? string.Empty)"
-                                Clearable="true"
-                                ResetValueOnEmptyText="true"
-                                CoerceText="false"
-                                Dense="true"
-                                FullWidth="true"
-                                MaxItems="8"
-                                Disabled="_isLoadingLookups" />
+                                                 Label="Genre"
+                                                 Variant="Variant.Outlined"
+                                                 Value="_selectedGenre"
+                                                 ValueChanged="OnGenreChanged"
+                                                 SearchFunc="SearchGenres"
+                                                 ToStringFunc="@(g => g?.Name ?? string.Empty)"
+                                                 Clearable="true"
+                                                 ResetValueOnEmptyText="true"
+                                                 CoerceText="false"
+                                                 Dense="true"
+                                                 FullWidth="true"
+                                                 MaxItems="1000"
+                                                 Disabled="_isLoadingLookups" />
                             </MudItem>
 
                             <MudItem xs="12" sm="6">
                                 <MudAutocomplete T="LanguageDto"
-                                Label="Metadata language"
-                                Variant="Variant.Outlined"
-                                Value="_selectedMetadataLanguage"
-                                ValueChanged="OnMetadataLanguageChanged"
-                                SearchFunc="SearchLanguages"
-                                ToStringFunc="@(l => l?.Name ?? string.Empty)"
-                                Clearable="true"
-                                ResetValueOnEmptyText="true"
-                                CoerceText="false"
-                                Dense="true"
-                                FullWidth="true"
-                                MaxItems="8"
-                                Disabled="_isLoadingLookups" />
+                                                 Label="Metadata language"
+                                                 Variant="Variant.Outlined"
+                                                 Value="_selectedMetadataLanguage"
+                                                 ValueChanged="OnMetadataLanguageChanged"
+                                                 SearchFunc="SearchLanguages"
+                                                 ToStringFunc="@(l => l?.Name ?? string.Empty)"
+                                                 Clearable="true"
+                                                 ResetValueOnEmptyText="true"
+                                                 CoerceText="false"
+                                                 Dense="true"
+                                                 FullWidth="true"
+                                                 MaxItems="1000"
+                                                 Disabled="_isLoadingLookups" />
                             </MudItem>
 
                             <MudItem xs="12" sm="6">
                                 <MudAutocomplete T="LanguageDto"
-                                Label="Audio language"
-                                Variant="Variant.Outlined"
-                                Value="_selectedAudioLanguage"
-                                ValueChanged="OnAudioLanguageChanged"
-                                SearchFunc="SearchLanguages"
-                                ToStringFunc="@(l => l?.Name ?? string.Empty)"
-                                Clearable="true"
-                                ResetValueOnEmptyText="true"
-                                CoerceText="false"
-                                Dense="true"
-                                FullWidth="true"
-                                MaxItems="8"
-                                Disabled="_isLoadingLookups" />
+                                                 Label="Audio language"
+                                                 Variant="Variant.Outlined"
+                                                 Value="_selectedAudioLanguage"
+                                                 ValueChanged="OnAudioLanguageChanged"
+                                                 SearchFunc="SearchLanguages"
+                                                 ToStringFunc="@(l => l?.Name ?? string.Empty)"
+                                                 Clearable="true"
+                                                 ResetValueOnEmptyText="true"
+                                                 CoerceText="false"
+                                                 Dense="true"
+                                                 FullWidth="true"
+                                                 MaxItems="1000"
+                                                 Disabled="_isLoadingLookups" />
                             </MudItem>
 
                         </MudGrid>

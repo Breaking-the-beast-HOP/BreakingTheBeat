@@ -139,6 +139,11 @@
                                                      SearchFunc="SearchCountries"
                                                      ToStringFunc="@(c => c is null ? string.Empty : $"{c.Name} ({c.ISO})")"
                                                      Clearable="true"
+                                                     ResetValueOnEmptyText="true"
+                                                     CoerceText="false"
+                                                     Dense="true"
+                                                     FullWidth="true"
+                                                     MaxItems="1000"
                                                      Required="true" />
                                 </MudItem>
 
@@ -150,7 +155,12 @@
                                                      ValueChanged="OnPrimaryLanguageChanged"
                                                      SearchFunc="SearchLanguages"
                                                      ToStringFunc="@(l => l is null ? string.Empty : $"{l.Name} ({l.ISO})")"
-                                                     Clearable="true" />
+                                                     Clearable="true"
+                                                     ResetValueOnEmptyText="true"
+                                                     CoerceText="false"
+                                                     Dense="true"
+                                                     FullWidth="true"
+                                                     MaxItems="1000" />
                                 </MudItem>
                             </MudGrid>
                         </MudPaper>
@@ -221,7 +231,12 @@
                                                      ValueChanged="OnPreferredLanguageChanged"
                                                      SearchFunc="SearchLanguages"
                                                      ToStringFunc="@(l => l is null ? string.Empty : $"{l.Name} ({l.ISO})")"
-                                                     Clearable="true" />
+                                                     Clearable="true"
+                                                     ResetValueOnEmptyText="true"
+                                                     CoerceText="false"
+                                                     Dense="true"
+                                                     FullWidth="true"
+                                                     MaxItems="1000" />
                                 </MudItem>
                             </MudGrid>
                         </MudPaper>

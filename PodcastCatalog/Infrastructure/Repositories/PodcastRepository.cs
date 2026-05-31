@@ -121,7 +121,8 @@ public class PodcastRepository : IPodcastRepository
         string? description,
         TimeSpan? duration,
         DateTime? airingDate,
-        Guid? tagId)
+        Guid? tagId,
+        IEnumerable<(Guid ContributorId, Guid ContributorRoleId)> contributions)
     {
         var season = await _dbContext.Seasons
             .Include(s => s.Episodes)
