@@ -49,10 +49,10 @@ jobs:
       needs: linting
       steps:
         - name: Checkout
-          uses: actions/checkout@v6
+          uses: actions/checkout@v4
 
         - name: Set up .NET
-          uses: actions/setup-dotnet@v5
+          uses: actions/setup-dotnet@v4
           with:
             dotnet-version: 9.0.312
         
@@ -65,6 +65,12 @@ jobs:
         - name: Run unit tests with report
           run: dotnet test ./BreakingTheBeat.Tests/BreakingTheBeat.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=TestResults.trx"
         
+        - name: Upload test results
+          uses: actions/upload-artifact@v4
+          with: 
+            name: TestResults
+            path: ./BreakingTheBeat.tests/TestResults/TestResults.trx
+
         - name: Upload test results
           uses: actions/upload-artifact@v4
           with: 

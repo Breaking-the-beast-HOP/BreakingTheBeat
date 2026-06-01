@@ -22,12 +22,95 @@
     </MudStack>
 
     <!-- Search -->
-    <MudTextField @bind-Value="_searchString"
-                  Placeholder="Search title or ISRC..."
-                  Adornment="Adornment.Start"
-                  AdornmentIcon="@Icons.Material.Filled.Search"
-                  Variant="Variant.Outlined"
-                  Immediate="true" />
+    <MudPaper Class="pa-4" Elevation="2" Style="border: 0.5px solid var(--mud-palette-divider);">
+
+        @* Filter header *@
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Outlined.FilterAlt"
+                     Size="Size.Small"
+                     Color="Color.Default" />
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Filters</MudText>
+            <MudChip T="string"
+                     Size="Size.Small"
+                     Color="Color.Warning"
+                     Variant="Variant.Outlined"
+                     Style="height: 20px; font-size: 11px; font-weight: 500; letter-spacing: 0.04em;">
+                ACTIVE
+            </MudChip>
+        </MudStack>
+
+        @* Filter row – alle felter er på én linje og alignet i bunden *@
+        <MudGrid Spacing="2">
+
+            <MudItem xs="12" md="5">
+                <MudTextField @bind-Value="_searchString"
+                              Label="Search"
+                              Placeholder="Search title, version or ISRC…"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Immediate="true"
+                              Clearable="true"
+                              FullWidth="true" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                <MudSelect T="string"
+                           Label="Genre"
+                           Placeholder="All genres"
+                           @bind-Value="_selectedGenreFilter"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Clearable="true"
+                           FullWidth="true">
+                    @foreach (var genre in _tracks
+                        .Where(t => !string.IsNullOrWhiteSpace(t.GenreName))
+                        .Select(t => t.GenreName!)
+                        .Distinct()
+                        .OrderBy(x => x))
+                    {
+                        <MudSelectItem Value="@genre">@genre</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                <MudSelect T="string"
+                           Label="Audio language"
+                           Placeholder="All languages"
+                           @bind-Value="_selectedLanguageFilter"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Clearable="true"
+                           FullWidth="true">
+                    @foreach (var language in _tracks
+                        .Where(t => !string.IsNullOrWhiteSpace(t.AudioLanguageName))
+                        .Select(t => t.AudioLanguageName!)
+                        .Distinct()
+                        .OrderBy(x => x))
+                    {
+                        <MudSelectItem Value="@language">@language</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" md="1" Class="d-flex align-end">
+                <MudTooltip Text="Clear all filters">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Default"
+                               StartIcon="@Icons.Material.Outlined.FilterAltOff"
+                               Size="Size.Medium"
+                               FullWidth="true"
+                               OnClick="ClearFilters">
+                        Clear
+                    </MudButton>
+                </MudTooltip>
+            </MudItem>
+
+        </MudGrid>
+    </MudPaper>
+
 
     <!-- Content -->
     @if (isLoading)
@@ -55,7 +138,8 @@
                       Hover="true"
                       Dense="true"
                       Elevation="0"
-                      OnRowClick="@(args => OnRowClicked(args))">
+                      OnRowClick="@(args => OnRowClicked(args))"
+                      @bind-CurrentPage="_currentPage">
                 
 
                 <HeaderContent>
@@ -117,6 +201,11 @@
                                    OnClick="@(async () => await DeleteTrack(context.Id))" />
 
                 </RowTemplate>
+
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"
+                                   InfoFormat="{first_item}-{last_item} af {all_items}" />
+                </PagerContent>
 
             </MudTable>
         </MudPaper>

@@ -32,7 +32,7 @@
                                Color="Color.Warning"
                                StartIcon="@Icons.Material.Filled.Save"
                                OnClick="SavePodcast"
-                               Disabled="@(_isSaving || _isLoading)">
+                               Disabled="@(_isSaving || _isLoadingLookups)">
                         @(_isSaving ? "Saving..." : "Save")
                     </MudButton>
                 </MudStack>
@@ -46,7 +46,7 @@
             </MudAlert>
         }
 
-        @if (_isLoading)
+        @if (_isLoadingLookups)
         {
             <MudProgressCircular Indeterminate="true" />
         }
@@ -91,8 +91,8 @@
                                                      CoerceText="false"
                                                      Dense="true"
                                                      FullWidth="true"
-                                                     MaxItems="8"
-                                                     Disabled="_isLoading" />
+                                                     MaxItems="1000"
+                                                     Disabled="_isLoadingLookups" />
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6">
@@ -108,8 +108,8 @@
                                                      CoerceText="false"
                                                      Dense="true"
                                                      FullWidth="true"
-                                                     MaxItems="8"
-                                                     Disabled="_isLoading" />
+                                                     MaxItems="1000"
+                                                     Disabled="_isLoadingLookups" />
                                 </MudItem>
                             </MudGrid>
                         </MudPaper>
@@ -147,14 +147,11 @@
     </MudStack>
 </MudContainer>
 
-@code {
+@code 
+{
+ 
     [Parameter]
     public Guid Id { get; set; }
-
-    private bool _isLoading = true;
-    private bool _isSaving;
-
-    private string? _errorMessage;
 
     private PodcastEditModel _model = new();
 
@@ -164,20 +161,26 @@
     private LanguageDto? _selectedLanguage;
     private PodcastCategoryDto? _selectedCategory;
 
+    private List<ContributionEditor.ContributionRow> _contributions = new();
     private List<ContributionEditor.ContributorOption> _availableContributors = new();
     private List<ContributionEditor.ContributorRoleDto> _contributionRoles = new();
-    private List<ContributionEditor.ContributionRow> _contributions = new();
+
+    private bool _isLoadingLookups = true;
+    private bool _isSaving;
+    private string? _errorMessage;
+    private string? _successMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadPodcast();
-    }
-
-    private async Task LoadPodcast()
-    {
         try
         {
-            _errorMessage = null;
+            _languages = await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language")?? new();
+
+            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/podcasts/Category") ?? new();
+
+            _contributionRoles = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorRoleDto>>("api/podcasts/ContributorRole") ?? new();
+
+            _availableContributors = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorOption>>("api/podcasts/Contributor")?? new();
 
             var podcast = await Http.GetFromJsonAsync<PodcastDetailsDto>($"api/podcasts/podcast/{Id}");
 
@@ -187,98 +190,58 @@
                 return;
             }
 
-            _model = new PodcastEditModel
-            {
-                Title = podcast.Title ?? "",
-                Description = podcast.Description,
-                CategoryId = podcast.CategoryId,
-                LanguageId = podcast.LanguageId
-            };
-
-            _contributions = podcast.Contributions
-                .Where(c => c.ContributorId != Guid.Empty)
-                .GroupBy(c => new
-                {
-                    c.ContributorId,
-                    c.ContributorName
-                })
-                .Select(group => new ContributionEditor.ContributionRow
-                {
-                    ContributorId = group.Key.ContributorId,
-                    Contributor = new ContributionEditor.ContributorOption
-                    {
-                        Id = group.Key.ContributorId,
-                        DisplayName = group.Key.ContributorName ?? ""
-                    },
-                    Roles = group
-                        .Where(x => x.ContributorRoleId != Guid.Empty)
-                        .Select(x => new ContributionEditor.ContributorRoleDto
-                        {
-                            Id = x.ContributorRoleId,
-                            Name = x.ContributorRoleName ?? ""
-                        })
-                        .ToList()
-                })
-                .ToList();
-
-            _categories = await Http.GetFromJsonAsync<List<PodcastCategoryDto>>("api/Podcasts/Category") ?? new();
-            _selectedCategory = _categories.FirstOrDefault(c => c.Id == podcast.CategoryId);
-
-            _languages =await Http.GetFromJsonAsync<List<LanguageDto>>("api/podcasts/Language")?? new();
-            _selectedLanguage = _languages.FirstOrDefault(l => l.Id == podcast.LanguageId);
-
-            // _availableContributors = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorOption>>("api/contributors")?? new();
-
-            // _contributionRoles = await Http.GetFromJsonAsync<List<ContributionEditor.ContributorRoleDto>>("api/contributor-roles")?? new();
+            MapPodcastToForm(podcast);
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Could not load podcast edit data: {ex.Message}";
+            _errorMessage = $"Could not load podcast: {ex.Message}";
         }
         finally
         {
-            _isLoading = false;
+            _isLoadingLookups = false;
         }
     }
 
-    private Task<IEnumerable<PodcastCategoryDto>> SearchCategories(string value, CancellationToken token)
+    private void MapPodcastToForm(PodcastDetailsDto podcast)
     {
-        IEnumerable<PodcastCategoryDto> result = string.IsNullOrWhiteSpace(value)
-            ? _categories
-            : _categories.Where(c =>
-                c.Name.Contains(value, StringComparison.OrdinalIgnoreCase));
+        _model = new PodcastEditModel
+        {
+            Title = podcast.Title ?? "",
+            Description = podcast.Description,
+            CategoryId = podcast.CategoryId,
+            LanguageId = podcast.LanguageId
+        };
 
-        return Task.FromResult(result);
-    }
+        _selectedCategory = _categories.FirstOrDefault(c => c.Id == podcast.CategoryId);
+        _selectedLanguage = _languages.FirstOrDefault(l => l.Id == podcast.LanguageId);
 
-    private Task<IEnumerable<LanguageDto>> SearchLanguages(string value, CancellationToken token)
-    {
-        IEnumerable<LanguageDto> result = string.IsNullOrWhiteSpace(value)
-            ? _languages
-            : _languages.Where(l =>
-                l.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                l.ISO.Contains(value, StringComparison.OrdinalIgnoreCase));
+        _contributions = podcast.Contributions
+            .Where(c => c.ContributorId != Guid.Empty)
+            .GroupBy(c => c.ContributorId)
+            .Select(group =>
+            {
+                var contributor = _availableContributors
+                    .FirstOrDefault(x => x.Id == group.Key);
 
-        return Task.FromResult(result);
-    }
-
-    private Task OnCategoryChanged(PodcastCategoryDto? category)
-    {
-        _selectedCategory = category;
-        _model.CategoryId = category?.Id ?? Guid.Empty;
-        return Task.CompletedTask;
-    }
-
-    private Task OnLanguageChanged(LanguageDto? language)
-    {
-        _selectedLanguage = language;
-        _model.LanguageId = language?.Id ?? Guid.Empty;
-        return Task.CompletedTask;
+                return new ContributionEditor.ContributionRow
+                {
+                    ContributorId = group.Key,
+                    Contributor = contributor,
+                    Roles = group
+                        .Where(x => x.ContributorRoleId != Guid.Empty)
+                        .Select(x => _contributionRoles.FirstOrDefault(r => r.Id == x.ContributorRoleId))
+                        .Where(r => r is not null)
+                        .Select(r => r!)
+                        .ToList()
+                };
+            })
+            .ToList();
     }
 
     private async Task SavePodcast()
     {
         _errorMessage = null;
+        _successMessage = null;
 
         if (string.IsNullOrWhiteSpace(_model.Title))
         {
@@ -298,10 +261,10 @@
             return;
         }
 
-        _isSaving = true;
-
         try
         {
+            _isSaving = true;
+
             var request = new UpdatePodcastRequest
             {
                 Title = _model.Title,
@@ -309,42 +272,74 @@
                 CategoryId = _model.CategoryId,
                 LanguageId = _model.LanguageId,
                 Contributions = _contributions
-                    .Where(c => c.ContributorId.HasValue && c.ContributorId.Value != Guid.Empty)
-                    .Select(c => new UpdatePodcastContributionRequest
+                    .Where(c => c.ContributorId.HasValue && c.Roles.Any())
+                    .SelectMany(c => c.Roles.Select(role => new UpdatePodcastContributionRequest
                     {
                         ContributorId = c.ContributorId!.Value,
-                        RoleIds = c.Roles
-                            .Where(r => r.Id != Guid.Empty)
-                            .Select(r => r.Id)
-                            .ToList()
-                    })
+                        ContributorRoleId = role.Id
+                    }))
                     .ToList()
             };
 
-            var response = await Http.PutAsJsonAsync(
-                $"api/podcasts/podcast/{Id}",
-                request);
+            var response = await Http.PutAsJsonAsync( $"api/podcasts/podcast/{Id}", request);
 
             if (response.IsSuccessStatusCode)
             {
+                _successMessage = "Podcast updated successfully.";
                 Navigation.NavigateTo($"/podcasts/{Id}");
                 return;
             }
 
             var error = await response.Content.ReadAsStringAsync();
 
-            _errorMessage = string.IsNullOrWhiteSpace(error)
-                ? $"Could not save podcast. Status code: {(int)response.StatusCode}"
-                : error;
+            _errorMessage = string.IsNullOrWhiteSpace(error) ? "Failed to update podcast." : error;
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Could not save podcast: {ex.Message}";
+            _errorMessage = $"An error occurred while saving: {ex.Message}";
         }
         finally
         {
             _isSaving = false;
         }
+    }
+
+    private Task<IEnumerable<PodcastCategoryDto>> SearchCategories(string value, CancellationToken token)
+    {
+        var result = string.IsNullOrWhiteSpace(value)
+            ? _categories
+            : _categories.Where(c =>
+                c.Name.Contains(value, StringComparison.OrdinalIgnoreCase));
+
+        return Task.FromResult(result.AsEnumerable());
+    }
+
+ 
+  private Task<IEnumerable<LanguageDto>> SearchLanguages( string value, CancellationToken token)
+{
+    IEnumerable<LanguageDto> result = string.IsNullOrWhiteSpace(value)
+        ? _languages.OrderBy(l => l.Name)
+        : _languages
+            .Where(l =>
+                l.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                l.ISO.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(l => l.Name);
+
+    return Task.FromResult(result);
+}
+
+    private Task OnCategoryChanged(PodcastCategoryDto? category)
+    {
+        _selectedCategory = category;
+        _model.CategoryId = category?.Id ?? Guid.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnLanguageChanged(LanguageDto? language)
+    {
+        _selectedLanguage = language;
+        _model.LanguageId = language?.Id ?? Guid.Empty;
+        return Task.CompletedTask;
     }
 
     private class PodcastEditModel
@@ -367,7 +362,7 @@
     public class UpdatePodcastContributionRequest
     {
         public Guid ContributorId { get; set; }
-        public List<Guid> RoleIds { get; set; } = new();
+        public Guid ContributorRoleId { get; set; }
     }
 
     public class PodcastDetailsDto
@@ -393,7 +388,6 @@
         public string? ContributorName { get; set; }
         public Guid ContributorRoleId { get; set; }
         public string? ContributorRoleName { get; set; }
-        public bool HasRights { get; set; }
     }
 
     public class LanguageDto

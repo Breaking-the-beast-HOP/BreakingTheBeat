@@ -104,6 +104,21 @@
                                                 </MudStack>
                                             </MudStack>
 
+                                            @if (episode.Contributions.Any())
+                                            {
+                                                <MudStack Row="true" Spacing="1" Class="flex-wrap">
+                                                    @foreach (var c in episode.Contributions)
+                                                    {
+                                                        <MudChip T="string"
+                                                                 Size="Size.Small"
+                                                                 Variant="Variant.Outlined"
+                                                                 Color="Color.Default">
+                                                            @c.ContributorRoleName / @c.ContributorName
+                                                        </MudChip>
+                                                    }
+                                                </MudStack>
+                                            }
+
                                             <MudText Typo="Typo.body2" Color="Color.Secondary">
                                                 @(string.IsNullOrWhiteSpace(episode.Description) ? "-" : episode.Description)
                                             </MudText>
@@ -151,5 +166,11 @@
         public string? Description { get; set; }
         public int EpisodeNumber { get; set; }
         public string Status { get; set; } = "Draft";
+        public List<EpisodeContributionDto> Contributions { get; set; } = new();
     }
+public class EpisodeContributionDto
+{
+    public string ContributorName { get; set; } = "";
+    public string ContributorRoleName { get; set; } = "";
+}
 }

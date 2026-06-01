@@ -15,13 +15,35 @@ namespace Frontend.Components.Pages.MusicCatalog.Tracks.List
         private List<TrackDto> _tracks = new();
         private bool isLoading = true;
         private string? errorMessage;
+
+        private int _currentPage = 0;
+
+
         private string _searchString = string.Empty;
+        private string? _selectedGenreFilter;
+        private string? _selectedLanguageFilter;
 
         private IEnumerable<TrackDto> FilteredTracks =>
-            _tracks.Where(t =>
-                string.IsNullOrWhiteSpace(_searchString) ||
-                (t.Title?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (t.ISRC?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+            _tracks
+                .Where(t =>
+                    string.IsNullOrWhiteSpace(_searchString) ||
+                    (t.Title?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.Version?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.ISRC?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false))
+                .Where(t =>
+                    string.IsNullOrWhiteSpace(_selectedGenreFilter) ||
+                    t.GenreName == _selectedGenreFilter)
+                .Where(t =>
+                    string.IsNullOrWhiteSpace(_selectedLanguageFilter) ||
+                    t.AudioLanguageName == _selectedLanguageFilter)
+                .OrderBy(t => t.Title);
+
+        private void ClearFilters()
+        {
+            _searchString = string.Empty;
+            _selectedGenreFilter = null;
+            _selectedLanguageFilter = null;
+        }
 
         protected override async Task OnInitializedAsync()
         {

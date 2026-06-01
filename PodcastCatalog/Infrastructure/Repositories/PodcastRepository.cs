@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PodcastCatalog.Domain.Entities;
 using PodcastCatalog.Features.Podcasts.Interfaces;
-using PodcastCatalog.Infrastructure;
-using SharedKernel;
+
+namespace PodcastCatalog.Infrastructure.Repositories;
 
 public class PodcastRepository : IPodcastRepository
 {
@@ -17,34 +17,52 @@ public class PodcastRepository : IPodcastRepository
     {
         await _dbContext.Podcasts.AddAsync(entity);
         await _dbContext.SaveChangesAsync();
+
         return entity;
     }
 
     public async Task<Podcast?> GetByIdAsync(Guid id)
     {
         return await _dbContext.Podcasts
-                .Include(p => p.Category)
-                .Include(p => p.Language)
-                .Include(p => p.Contributions)
-                    .ThenInclude(c => c.Contributor)
-                .Include(p => p.Contributions)
-                    .ThenInclude(c => c.Role)
-                .Include(p => p.Seasons)
-                    .ThenInclude(s => s.Episodes)
-                        .ThenInclude(e => e.EpisodeTag)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            .Include(p => p.Category)
+            .Include(p => p.Language)
+            .Include(p => p.Contributions)
+                .ThenInclude(c => c.Contributor)
+            .Include(p => p.Contributions)
+                .ThenInclude(c => c.Role)
+            .Include(p => p.Seasons)
+                .ThenInclude(s => s.Episodes)
+                    .ThenInclude(e => e.EpisodeTag)
+            .Include(p => p.Seasons)
+                .ThenInclude(s => s.Episodes)
+                    .ThenInclude(e => e.Contributions)
+                        .ThenInclude(c => c.Contributor)
+            .Include(p => p.Seasons)
+                .ThenInclude(s => s.Episodes)
+                    .ThenInclude(e => e.Contributions)
+                        .ThenInclude(c => c.Role)
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
-
 
     public async Task<List<Podcast>> GetAllAsync()
     {
         return await _dbContext.Podcasts
-        .AsNoTracking()
-        .Include(p => p.Seasons)
-        .Include(p => p.Category)
-        .Include(p => p.Contributions)
-        .Include(p => p.Language)
-        .ToListAsync();
+            .AsNoTracking()
+            .Include(p => p.Seasons)
+            .Include(p => p.Category)
+            .Include(p => p.Language)
+            .Include(p => p.Contributions)
+                .ThenInclude(c => c.Contributor)
+            .Include(p => p.Contributions)
+                .ThenInclude(c => c.Role)
+            .ToListAsync();
+    }
+
+    public async Task<Podcast?> GetByIdForUpdateAsync(Guid id)
+    {
+        return await _dbContext.Podcasts
+            .Include(p => p.Contributions)
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task<bool> UpdateAsync(Podcast entity)
@@ -55,21 +73,22 @@ public class PodcastRepository : IPodcastRepository
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var podcast = await _dbContext.Podcasts.FindAsync(id);
+        var podcast = await _dbContext.Podcasts
+            .FirstOrDefaultAsync(p => p.Id == id);
 
-        if (podcast == null)
+        if (podcast is null)
             return false;
 
         _dbContext.Podcasts.Remove(podcast);
-        return await _dbContext.SaveChangesAsync() > 0;
+        await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 
-    // --- Seasons ---
     public async Task<Season> AddSeasonAsync(Guid podcastId, string? title, int seasonNumber)
     {
         var podcast = await _dbContext.Podcasts
             .Include(p => p.Seasons)
-            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == podcastId);
 
         if (podcast is null)
@@ -77,11 +96,11 @@ public class PodcastRepository : IPodcastRepository
 
         var season = podcast.AddSeason(title, seasonNumber);
 
-        _dbContext.Seasons.Add(season);
         await _dbContext.SaveChangesAsync();
 
         return season;
     }
+
     public async Task<bool> DeleteSeasonAsync(Guid seasonId)
     {
         var season = await _dbContext.Seasons
@@ -96,27 +115,31 @@ public class PodcastRepository : IPodcastRepository
         return true;
     }
 
-    // --- Episodes ---
-
     public async Task<Episode> AddEpisodeAsync(
-      Guid seasonId,
-      string? title,
-      string? description,
-      TimeSpan? duration,
-      DateTime? airingDate,
-      Guid? tagId)
+        Guid seasonId,
+        string? title,
+        string? description,
+        TimeSpan? duration,
+        DateTime? airingDate,
+        Guid? tagId,
+        IEnumerable<(Guid ContributorId, Guid ContributorRoleId)> contributions)
     {
         var season = await _dbContext.Seasons
             .Include(s => s.Episodes)
-            .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == seasonId);
 
         if (season is null)
             throw new KeyNotFoundException($"Season with ID {seasonId} not found.");
 
-        var episode = season.AddEpisode(title, description, duration, airingDate, tagId);
+        var episode = season.AddEpisode(
+            title,
+            description,
+            duration,
+            airingDate,
+            tagId);
 
-        _dbContext.Episodes.Add(episode);
+        _dbContext.Entry(episode).State = EntityState.Added;
+
         await _dbContext.SaveChangesAsync();
 
         return episode;

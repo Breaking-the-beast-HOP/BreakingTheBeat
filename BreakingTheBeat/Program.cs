@@ -207,6 +207,7 @@ namespace Gateway
 
             // 5. Repositories (podcast)
             builder.Services.AddScoped<IPodcastRepository, PodcastRepository>();
+            builder.Services.AddScoped<PodcastCatalog.Features.Contributors.IContributorRepository, PodcastCatalog.Infrastructure.Repositories.ContributorRepository>();
             builder.Services.AddScoped<ICrudRepository<Language>, PodcastCatalog.Infrastructure.Repositories.LanguageRepository>();
             builder.Services.AddScoped<IReadRepository<Category>, CategoryRepository>();
             builder.Services.AddScoped<IReadRepository<ContributorRole>, ContributorRoleRepository>();

@@ -13,8 +13,11 @@ namespace PodcastCatalog.Features.Podcasts.Interfaces
             string? description,
             TimeSpan? duration,
             DateTime? airingDate,
-            Guid? tagId);
+            Guid? tagId,
+            IEnumerable<(Guid ContributorId, Guid ContributorRoleId)> contributions);
         Task<bool> DeleteEpisodeAsync(Guid episodeId);
+
+        Task<Podcast?> GetByIdForUpdateAsync(Guid id);
 
     }
 }
