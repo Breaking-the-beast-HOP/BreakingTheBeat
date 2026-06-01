@@ -26,7 +26,7 @@ namespace PodcastCatalog.Features.Podcasts.Shared
                         ContributorName = c.Contributor?.DisplayName,
                         ContributorRoleId = c.ContributorRoleId,
                         ContributorRoleName = c.Role?.Name
-                        
+
                     })
                     .ToList(),
 

@@ -65,7 +65,7 @@ public partial class CreateContributor
         if (_createdContributorId is null)
             return;
 
-        Navigation.NavigateTo( $"/podcast-contributors/{_createdContributorId}");
+        Navigation.NavigateTo($"/podcast-contributors/{_createdContributorId}");
     }
 
     private void GoToContributors()
