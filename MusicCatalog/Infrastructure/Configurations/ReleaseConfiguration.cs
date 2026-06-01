@@ -62,6 +62,11 @@ namespace MusicCatalogContext.Infrastructure.Configurations
 
             builder.Navigation(r => r.Contributions)
                 .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.HasMany(r => r.Contributions)
+                .WithOne(c => c.Release)
+                .HasForeignKey(c => c.ReleaseId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

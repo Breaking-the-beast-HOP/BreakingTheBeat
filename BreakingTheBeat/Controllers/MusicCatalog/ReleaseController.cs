@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicCatalogContext.Features.MusicRelease.Create;
+using MusicCatalogContext.Features.MusicRelease.Delete;
 using MusicCatalogContext.Features.MusicRelease.GetAll;
 using MusicCatalogContext.Features.MusicRelease.GetById;
 using MusicCatalogContext.Features.MusicRelease.Update;
@@ -190,6 +191,20 @@ namespace Gateway.Controllers.Music
                     contributions),
                 cancellationToken);
 
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin,Content Creator")]
+        public async Task<IActionResult> DeleteRelease(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(
+                new DeleteReleaseCommand(id),
+                cancellationToken);
 
             if (!result)
                 return NotFound();

@@ -21,9 +21,17 @@ namespace MusicCatalogContext.Infrastructure.Repositories
             return entity;
         }
 
-        public Task<bool> DeleteAsync(Guid Id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var release = await _context.Releases
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (release is null)
+                return false;
+
+            _context.Releases.Remove(release);
+
+            return true;
         }
 
         public async Task<List<Release>> GetAllAsync()
