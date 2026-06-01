@@ -20,6 +20,21 @@ namespace MusicQualityControl.Infrastructure
             return entity;
         }
 
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            var item = await _context.ReleaseQcQueueItems
+                .FirstOrDefaultAsync(x => x.ReleaseId == id);
+
+            if (item is null)
+                return false;
+
+            _context.ReleaseQcQueueItems.Remove(item);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
         public async Task<List<ReleaseQcQueueItem>> GetAllAsync()
         {
             return await _context.ReleaseQcQueueItems

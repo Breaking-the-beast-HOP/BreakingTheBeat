@@ -55,6 +55,21 @@ public class OutboxProcessor
 
                     response.EnsureSuccessStatusCode();
                 }
+                else if (message.Type == "ReleaseDeleted")
+                {
+                    var dto = JsonSerializer.Deserialize<ReleaseDeletedDto>(
+                        message.Payload,
+                        new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                    if (dto is null)
+                        throw new InvalidOperationException("Outbox payload could not be deserialized.");
+                    var response = await client.DeleteAsync(
+                        $"api/qc/releases/{dto.ReleaseId}",
+                        cancellationToken);
+                    response.EnsureSuccessStatusCode();
+                }
 
                 message.MarkAsProcessed();
             }

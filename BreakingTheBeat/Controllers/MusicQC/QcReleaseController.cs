@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MusicQualityControl.Features.DeleteReleaseFromQc;
 using MusicQualityControl.Features.GetQcQueue;
 using MusicQualityControl.Features.SubmitReleaseToQc;
 
@@ -23,10 +24,7 @@ public class QcReleaseController : ControllerBase
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> ReceiveReleaseSubmittedToQc(
-     [FromHeader(Name = "X-Worker-Key")] string workerKey,
-     [FromBody] ReleaseSubmittedToQcDto dto,
-     CancellationToken cancellationToken)
+    public async Task<IActionResult> ReceiveReleaseSubmittedToQc([FromHeader(Name = "X-Worker-Key")] string workerKey,[FromBody] ReleaseSubmittedToQcDto dto,CancellationToken cancellationToken)
     {
 
        /*var expectedKey = _configuration["WorkerAuth:Key"];  //slet mig*/
@@ -62,4 +60,23 @@ public class QcReleaseController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpDelete("{releaseId:guid}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> DeleteReleaseFromQc(Guid releaseId, [FromHeader(Name = "X-Worker-Key")] string workerKey,
+    CancellationToken cancellationToken)
+    {
+        if (workerKey != _configuration["WorkerAuth:Key"])
+            return Unauthorized();
+
+        var deleted = await _mediator.Send(
+            new DeleteReleaseFromQcCommand(releaseId),
+            cancellationToken);
+
+        if (!deleted)
+            return NotFound();
+
+        return NoContent();
+    }
+
 }
