@@ -185,6 +185,7 @@ namespace MusicCatalogContext.Domain.Entities
         public void SubmitToQc()
         {
             AddDomainEvent(new ReleaseSubmittedToQcEvent(Id, Title));
+            Status = ReleaseStatus.ReadyForQc;
         }
     }
 }
