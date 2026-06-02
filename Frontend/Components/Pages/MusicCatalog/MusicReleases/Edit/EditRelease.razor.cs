@@ -79,6 +79,7 @@ public partial class EditRelease
             ReleaseDate = release.ReleaseDate,
             GenreId = release.GenreId,
             LanguageId = release.LanguageId,
+            Status = release.status,
             Volumes = release.Volumes
                     .OrderBy(v => v.VolumeNumber)
                     .Select(v => new ReleaseVolumeModel
@@ -101,6 +102,7 @@ public partial class EditRelease
                             .ToList()
                     })
                     .ToList()
+                    
         };
 
         _selectedGenre = _genres.FirstOrDefault(g => g.Id == release.GenreId);
@@ -149,6 +151,31 @@ public partial class EditRelease
     private Task SubmitToQc()
     {
         return SaveRelease(ReleaseStatusDto.ReadyForQc);
+    }
+
+    private async Task WithdrawFromQc()
+    {
+        _isSaving = true;
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            var response = await Http.PostAsync($"api/Release/{Id}/withdraw", null);
+
+            if (response.IsSuccessStatusCode)
+                _successMessage = "Release withdrawn from QC.";
+            else
+                _errorMessage = "Could not withdraw release.";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            _isSaving = false;
+        }
     }
 
     private async Task SaveRelease(ReleaseStatusDto status)

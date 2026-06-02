@@ -3,16 +3,16 @@ using MusicQualityControl.Domain.ReadModels;
 
 namespace MusicQualityControl.Features.DeleteReleaseFromQc;
 
-public class DeleteReleaseFromQcHandler : IRequestHandler<DeleteReleaseFromQcCommand, bool>
+public class WithdrawReleaseFromQcHandler : IRequestHandler<WithdrawReleaseFromQcCommand, bool>
 {
     private readonly IReleaseQcQueueItemRepository _repository;
 
-    public DeleteReleaseFromQcHandler(IReleaseQcQueueItemRepository repository)
+    public WithdrawReleaseFromQcHandler(IReleaseQcQueueItemRepository repository)
     {
         _repository = repository;
     }
 
-    public async Task<bool> Handle(DeleteReleaseFromQcCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(WithdrawReleaseFromQcCommand request, CancellationToken cancellationToken)
     {
         return await _repository.DeleteAsync(request.ReleaseId);
     }

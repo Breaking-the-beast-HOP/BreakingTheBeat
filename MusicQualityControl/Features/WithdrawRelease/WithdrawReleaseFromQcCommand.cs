@@ -2,4 +2,4 @@
 
 namespace MusicQualityControl.Features.DeleteReleaseFromQc;
 
-public record DeleteReleaseFromQcCommand(Guid ReleaseId) : IRequest<bool>;
+public record WithdrawReleaseFromQcCommand(Guid ReleaseId) : IRequest<bool>;

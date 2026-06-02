@@ -9,6 +9,7 @@ using MusicCatalogContext.Features.MusicRelease.Delete;
 using MusicCatalogContext.Features.MusicRelease.GetAll;
 using MusicCatalogContext.Features.MusicRelease.GetById;
 using MusicCatalogContext.Features.MusicRelease.Update;
+using MusicCatalogContext.Features.MusicRelease.Withdraw;
 
 namespace Gateway.Controllers.Music
 {
@@ -210,6 +211,13 @@ namespace Gateway.Controllers.Music
                 return NotFound();
 
             return NoContent();
+        }
+
+        [HttpPost("{id:guid}/withdraw")]
+        public async Task<IActionResult> Withdraw(Guid id)
+        {
+            var result = await _mediator.Send(new WithdrawReleaseCommand(id));
+            return result ? Ok() : BadRequest("Release cannot be withdrawn in its current state.");
         }
     }
 }

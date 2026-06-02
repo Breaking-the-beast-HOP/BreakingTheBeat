@@ -1,4 +1,6 @@
 ﻿
+using MusicCatalogContext.Domain.Enums;
+
 namespace MusicCatalogContext.Features.MusicRelease.GetById
 {
     public class ReleaseDetailsDto
@@ -20,6 +22,8 @@ namespace MusicCatalogContext.Features.MusicRelease.GetById
 
         public List<ReleaseVolumeDto> Volumes { get; set; } = new();
         public List<ContributionDto> Contributions { get; set; } = new();
+
+        public ReleaseStatus Status { get; set; }
     }
 
     public class ReleaseVolumeDto

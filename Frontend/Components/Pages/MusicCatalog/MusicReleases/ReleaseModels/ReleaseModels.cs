@@ -62,7 +62,7 @@ public class ReleaseDetailsDto
 
     public bool HasCover { get; set; }
     public bool HasBooklet { get; set; }
-
+    public ReleaseStatusDto status { get; set; }
     public List<ReleaseVolumeDto> Volumes { get; set; } = new();
     public List<ContributionDto> Contributions { get; set; } = new();
 }

@@ -64,22 +64,26 @@ namespace MusicCatalogContext.Features.MusicRelease.Update
                         .ToList()
                 );
 
-                if (request.Status == ReleaseStatus.ReadyForQc)
+                if (release.Status != ReleaseStatus.ReadyForQc) //Makes sure we dont send the outbox message again for a already submitted release
                 {
-                    release.SubmitToQc();
+                    if (request.Status == ReleaseStatus.ReadyForQc)
+                    {
+                        release.SubmitToQc();
 
-                    var outboxMessage = OutboxMessage.Create(
-                        "ReleaseSubmittedToQc",
-                        JsonSerializer.Serialize(new
-                        {
-                            ReleaseId = release.Id,
-                            release.Title,
-                            release.Version,
-                            release.EAN
-                        }));
+                        var outboxMessage = OutboxMessage.Create(
+                            "ReleaseSubmittedToQc",
+                            JsonSerializer.Serialize(new
+                            {
+                                ReleaseId = release.Id,
+                                release.Title,
+                                release.Version,
+                                release.EAN
+                            }));
 
-                    await _outboxRepository.AddAsync(outboxMessage);
+                        await _outboxRepository.AddAsync(outboxMessage);
+                    }
                 }
+                
 
                 await _releaseRepository.UpdateAsync(release);
 

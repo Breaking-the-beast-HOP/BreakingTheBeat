@@ -29,27 +29,53 @@
                         Cancel
                     </MudButton>
 
-                    <MudButton Variant="Variant.Text"
-                               Color="Color.Default"
-                               Href="@($"/releases/{Id}")">
-                        Cancel
-                    </MudButton>
+                    @if (_model.Status == Models.ReleaseStatusDto.Draft)
+                    {
+    
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Default"
+                                   StartIcon="@Icons.Material.Filled.Save"
+                                   OnClick="SaveDraft"
+                                   Disabled="@(_isSaving || _isLoadingLookups)">
+                            @(_isSaving ? "Saving..." : "Save draft")
+                        </MudButton>
 
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Default"
-                               StartIcon="@Icons.Material.Filled.Save"
-                               OnClick="SaveDraft"
-                               Disabled="@(_isSaving || _isLoadingLookups)">
-                        @(_isSaving ? "Saving..." : "Save draft")
-                    </MudButton>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.Send"
+                                   OnClick="SubmitToQc"
+                                   Disabled="@(_isSaving || _isLoadingLookups)">
+                            Submit to QC
+                        </MudButton>
+                    }
+                    else if (_model.Status == Models.ReleaseStatusDto.ReadyForQc)
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.Undo"
+                                   OnClick="WithdrawFromQc"
+                                   Disabled="@(_isSaving || _isLoadingLookups || _model.Status == Models.ReleaseStatusDto.Distributed)">
+                            Withdraw from QC
+                        </MudButton>
 
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Warning"
-                               StartIcon="@Icons.Material.Filled.Send"
-                               OnClick="SubmitToQc"
-                               Disabled="@(_isSaving || _isLoadingLookups)">
-                        Submit to QC
-                    </MudButton>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Default"
+                                   StartIcon="@Icons.Material.Filled.Save"
+                                   OnClick="SubmitToQc"
+                                   Disabled="@(_isSaving || _isLoadingLookups || _model.Status != Models.ReleaseStatusDto.ReadyForQc)">
+                            @(_isSaving ? "Updating..." : "Update")
+                        </MudButton>
+                    }
+                    else if (_model.Status == Models.ReleaseStatusDto.InQc)
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.Undo"
+                                   OnClick="WithdrawFromQc"
+                                   Disabled="@(_isSaving || _isLoadingLookups || _model.Status == Models.ReleaseStatusDto.Distributed)">
+                            Withdraw from QC
+                        </MudButton>
+                    }
                 </MudStack>
             </MudStack>
         </MudPaper>
