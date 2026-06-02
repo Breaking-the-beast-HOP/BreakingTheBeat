@@ -12,7 +12,7 @@ namespace PodcastCatalog.Features.Contributors.GetAll
             _repository = repository;
         }
 
-        public async Task<List<ContributorDTO>> Handle( GetAllContributorsQuery request, CancellationToken cancellationToken)
+        public async Task<List<ContributorDTO>> Handle(GetAllContributorsQuery request, CancellationToken cancellationToken)
         {
             var contributors = await _repository.GetAllAsync();
 

@@ -42,7 +42,7 @@
             EpisodeId = episodeId;
         }
 
-        public static Contribution ForPodcast(Guid podcastId,Guid contributorId,Guid roleId)
+        public static Contribution ForPodcast(Guid podcastId, Guid contributorId, Guid roleId)
         {
             return new Contribution(
                 contributorId,
@@ -51,7 +51,7 @@
                 null);
         }
 
-        public static Contribution ForEpisode(Guid episodeId,Guid contributorId,Guid roleId)
+        public static Contribution ForEpisode(Guid episodeId, Guid contributorId, Guid roleId)
         {
             return new Contribution(
                 contributorId,

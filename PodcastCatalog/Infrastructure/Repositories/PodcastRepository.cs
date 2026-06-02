@@ -91,7 +91,7 @@ public class PodcastRepository : IPodcastRepository
             .Include(p => p.Seasons)
             .FirstOrDefaultAsync(p => p.Id == podcastId);
 
-         if (podcast is null)
+        if (podcast is null)
             throw new KeyNotFoundException($"Podcast with ID {podcastId} not found.");
 
         var season = podcast.AddSeason(title, seasonNumber);

@@ -85,7 +85,7 @@ namespace Gateway.Controllers.Podcast
                 new UpdatePodcastContributionInput(
                     c.ContributorId,
                     c.ContributorRoleId
-                   
+
                 )).ToList();
 
             await _mediator.Send(

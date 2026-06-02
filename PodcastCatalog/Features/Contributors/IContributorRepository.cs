@@ -3,7 +3,7 @@ using SharedKernel;
 
 namespace PodcastCatalog.Features.Contributors
 {
-    public interface IContributorRepository: ICrudRepository<Contributor>
+    public interface IContributorRepository : ICrudRepository<Contributor>
     {
     }
 }

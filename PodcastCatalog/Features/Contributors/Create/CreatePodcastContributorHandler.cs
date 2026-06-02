@@ -4,7 +4,7 @@ using PodcastCatalog.Infrastructure.Repositories;
 
 namespace PodcastCatalog.Features.Contributors.Create;
 
-public class CreatePodcastContributorHandler: IRequestHandler<CreatePodcastContributorCommand, Guid>
+public class CreatePodcastContributorHandler : IRequestHandler<CreatePodcastContributorCommand, Guid>
 {
     private readonly IContributorRepository _repository;
 

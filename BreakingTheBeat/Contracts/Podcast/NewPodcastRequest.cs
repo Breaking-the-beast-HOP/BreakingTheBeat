@@ -13,7 +13,7 @@ public class NewPodcastRequest
     public List<ContributionRequest>? Contributions { get; set; }
 
     public List<NewPodcastSeasonRequest> Seasons { get; set; } = new();
-    
+
 }
 
 public class NewPodcastSeasonRequest

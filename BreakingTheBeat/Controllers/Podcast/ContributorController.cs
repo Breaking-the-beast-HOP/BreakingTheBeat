@@ -41,7 +41,7 @@ namespace Gateway.Controllers.Podcast
 
         [HttpPost]
         [Authorize(Roles = "Admin,Content Creator,Quality controller")]
-        public async Task<IActionResult> CreateContributor([FromBody] CreatePodcastContributorRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateContributor([FromBody] CreatePodcastContributorRequest request, CancellationToken cancellationToken)
         {
             var contributorId = await _mediator.Send(
                 new CreatePodcastContributorCommand(
