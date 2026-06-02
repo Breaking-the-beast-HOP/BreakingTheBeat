@@ -187,5 +187,11 @@ namespace MusicCatalogContext.Domain.Entities
             AddDomainEvent(new ReleaseSubmittedToQcEvent(Id, Title));
             Status = ReleaseStatus.ReadyForQc;
         }
+
+        public void WithdrawFromQc()
+        {
+            AddDomainEvent(new ReleaseWithdrawnFromQcEvent(Id, Title));
+            Status = ReleaseStatus.Draft;
+        }
     }
 }

@@ -55,7 +55,7 @@ public class OutboxProcessor
 
                     response.EnsureSuccessStatusCode();
                 }
-                else if (message.Type == "ReleaseDeleted")
+                else if (message.Type == "ReleaseWithdrawnFromQc")
                 {
                     var dto = JsonSerializer.Deserialize<ReleaseDeletedDto>(
                         message.Payload,

@@ -19,6 +19,8 @@
 
         public List<ReleaseVolumeResponse> Volumes { get; set; } = new();
         public List<ReleaseContributionResponse> Contributions { get; set; } = new();
+
+        public string Status { get; set; } = "";
     }
 
     public class ReleaseVolumeResponse

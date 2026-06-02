@@ -39,7 +39,7 @@ public class DeleteReleaseHandler : IRequestHandler<DeleteReleaseCommand, bool>
             if (release.Status != ReleaseStatus.Draft) //because a draft never left the catalog, we don't need to publish an event about it being deleted
             {
                 var outboxMessage = OutboxMessage.Create(
-                    "ReleaseDeleted",
+                    "ReleaseWithdrawnFromQc",
                     JsonSerializer.Serialize(new
                     {
                         ReleaseId = release.Id,

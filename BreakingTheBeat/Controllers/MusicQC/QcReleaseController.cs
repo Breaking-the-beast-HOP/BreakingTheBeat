@@ -63,15 +63,13 @@ public class QcReleaseController : ControllerBase
 
     [HttpDelete("{releaseId:guid}")]
     [AllowAnonymous]
-    public async Task<IActionResult> DeleteReleaseFromQc(Guid releaseId, [FromHeader(Name = "X-Worker-Key")] string workerKey,
+    public async Task<IActionResult> WithdrawReleaseFromQc(Guid releaseId, [FromHeader(Name = "X-Worker-Key")] string workerKey,
     CancellationToken cancellationToken)
     {
         if (workerKey != _configuration["WorkerAuth:Key"])
             return Unauthorized();
 
-        var deleted = await _mediator.Send(
-            new DeleteReleaseFromQcCommand(releaseId),
-            cancellationToken);
+        var deleted = await _mediator.Send(new WithdrawReleaseFromQcCommand(releaseId), cancellationToken);
 
         if (!deleted)
             return NotFound();

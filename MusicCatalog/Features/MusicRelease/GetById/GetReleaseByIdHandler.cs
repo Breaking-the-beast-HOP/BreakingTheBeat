@@ -34,6 +34,7 @@ namespace MusicCatalogContext.Features.MusicRelease.GetById
 
                 HasCover = false,
                 HasBooklet = false,
+                Status = release.Status,
 
                 Volumes = release.Volumes
                     .OrderBy(v => v.VolumeNumber)
