@@ -18,7 +18,7 @@ builder.Services.AddHttpClient("QcApi", client =>
     client.BaseAddress = new Uri(baseUrl!);
     client.DefaultRequestHeaders.Add("X-Worker-Key", workerKey);
 });
-builder.Services.AddScoped<OutboxProcessor>();
+builder.Services.AddScoped<MusicCatalogOutboxProcessor>();
 
 var workerEnabled = builder.Configuration.GetValue<bool>("OutboxWorker:Enabled");
 

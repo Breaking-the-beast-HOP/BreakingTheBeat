@@ -23,7 +23,7 @@ public class Worker : BackgroundService
             {
                 using var scope = _scopeFactory.CreateScope();
 
-                var processor = scope.ServiceProvider.GetRequiredService<OutboxProcessor>();
+                var processor = scope.ServiceProvider.GetRequiredService<MusicCatalogOutboxProcessor>();
 
                 await processor.ProcessPendingAsync(stoppingToken);
             }
