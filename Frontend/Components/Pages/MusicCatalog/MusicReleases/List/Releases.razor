@@ -99,72 +99,89 @@
     {
         <MudPaper Class="pa-4" Elevation="5">
             <MudTable Items="FilteredReleases" T="ReleaseDto"
-                      Hover="true" Dense="true" Elevation="0"
+                      Hover="true" Dense="false" Elevation="0"
                       OnRowClick="@(args => OnRowClicked(args))"
                       @bind-CurrentPage="_currentPage">
 
                 <HeaderContent>
-                    <MudTh>Title</MudTh>
-                    <MudTh>Release year</MudTh>
-                    <MudTh>Language</MudTh>
-                    <MudTh>Primary genre</MudTh>
-                    <MudTh>EAN</MudTh>
+                    <MudTh Style="width:96px"></MudTh>
+                    <MudTh>Release</MudTh>
+                    <MudTh>Details</MudTh>
                     <MudTh>Status</MudTh>
-                    <MudTh></MudTh>
+                    <MudTh Style="width:120px; text-align:right;">Actions</MudTh>
                 </HeaderContent>
 
                 <RowTemplate>
-                    <MudTd DataLabel="Title">
-                        <MudText Typo="Typo.subtitle2">@context.Title</MudText>
-                        @if (!string.IsNullOrWhiteSpace(context.Version))
-                        {
-                            <MudText Typo="Typo.caption" Color="Color.Secondary">@context.Version</MudText>
-                        }
+                    <MudTd DataLabel="Cover">
+                        <MudImage Src="/images/MissingCover.jpg"
+                                  Width="88"
+                                  Height="88"
+                                  ObjectFit="ObjectFit.Cover"
+                                  Class="rounded" />
                     </MudTd>
 
-                    <MudTd DataLabel="Release year">
-                        <MudChip T="string" Color="Color.Default" Variant="Variant.Outlined" Size="Size.Small">
-                            @FormatReleaseYear(context.ReleaseDate)
-                        </MudChip>
+                    <MudTd DataLabel="Release">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.subtitle1" Color="Color.Warning" Style="font-weight:600;">
+                                @context.Title
+                            </MudText>
+
+                            @if (!string.IsNullOrWhiteSpace(context.Version))
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Dark">
+                                    @context.Version
+                                </MudText>
+                            }
+
+                            <MudText Typo="Typo.caption" Color="Color.Dark">
+                                EAN: @(string.IsNullOrWhiteSpace(context.EAN) ? "-" : context.EAN)
+                            </MudText>
+                        </MudStack>
                     </MudTd>
 
-                    <MudTd DataLabel="Language">
-                        <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined" Size="Size.Small">
-                            @(context.LanguageName ?? "-")
-                        </MudChip>
+                    <MudTd DataLabel="Details">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.caption">
+                                Release year: @FormatReleaseYear(context.ReleaseDate)
+                            </MudText>
+
+                            <MudText Typo="Typo.caption">
+                                Language: @(context.LanguageName ?? "-")
+                            </MudText>
+
+                            <MudText Typo="Typo.caption">
+                                Genre: @(context.GenreName ?? "-")
+                            </MudText>
+                        </MudStack>
                     </MudTd>
 
-                    <MudTd DataLabel="Primary genre">
-                        <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled" Size="Size.Small">
-                            @(context.GenreName ?? "-")
-                        </MudChip>
-                    </MudTd>
-
-                    <MudTd DataLabel="EAN">
-                        <MudText Typo="Typo.body2">
-                            @(string.IsNullOrWhiteSpace(context.EAN) ? "-" : context.EAN)
-                        </MudText>
-                    </MudTd>
 
                     <MudTd DataLabel="Status">
                         @{
                             var (icon, color, label, tooltip) = GetStatusDisplay(context.Status);
                         }
+
                         <MudTooltip Text="@tooltip">
-                            <MudChip T="string" Color="@color" Variant="Variant.Filled" Size="Size.Small"
+                            <MudChip T="string"
+                                     Color="@color"
+                                     Variant="Variant.Filled"
+                                     Size="Size.Small"
                                      Icon="@icon">
                                 @label
                             </MudChip>
                         </MudTooltip>
                     </MudTd>
 
-                    <MudTd>
+                    <MudTd DataLabel="Actions" Style="text-align:right;">
                         <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                       Color="Color.Warning" Size="Size.Small"
+                                       Color="Color.Warning"
+                                       Size="Size.Small"
                                        Title="Edit release"
                                        OnClick="@(() => GoToEdit(context.Id))" />
+
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                       Color="Color.Error" Size="Size.Small"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
                                        Title="Delete release"
                                        OnClick="@(async () => await DeleteRelease(context.Id))" />
                     </MudTd>

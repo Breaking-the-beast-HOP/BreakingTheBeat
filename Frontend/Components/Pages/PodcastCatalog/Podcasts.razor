@@ -6,7 +6,6 @@
 
 <MudStack Spacing="3">
 
-    <!-- Header -->
     <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
         <MudText Typo="Typo.h4">Podcast Catalog</MudText>
 
@@ -18,35 +17,61 @@
         </MudButton>
     </MudStack>
 
-    <!-- Search -->
-    <MudTextField @bind-Value="_searchString"
-                  Placeholder="Search title..."
-                  Adornment="Adornment.Start"
-                  AdornmentIcon="@Icons.Material.Filled.Search"
-                  Variant="Variant.Outlined"
-                  Immediate="true" />
+    <!-- Filter panel -->
+    <MudPaper Class="pa-4" Elevation="2" Style="border: 0.5px solid var(--mud-palette-divider);">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Outlined.FilterAlt" Size="Size.Small" />
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Filters</MudText>
+            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined"
+                     Style="height: 20px; font-size: 11px; font-weight: 500; letter-spacing: 0.04em;">
+                ACTIVE
+            </MudChip>
+        </MudStack>
 
-    <!-- Content -->
+        <MudGrid Spacing="2">
+            <MudItem xs="12" md="11">
+                <MudTextField @bind-Value="_searchString"
+                              Label="Search"
+                              Placeholder="Search title..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Immediate="true"
+                              Clearable="true"
+                              FullWidth="true" />
+            </MudItem>
+
+            <MudItem xs="12" md="1" Class="d-flex align-end">
+                <MudTooltip Text="Clear all filters">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Default"
+                               StartIcon="@Icons.Material.Outlined.FilterAltOff"
+                               Size="Size.Medium"
+                               FullWidth="true"
+                               OnClick="@(() => _searchString = string.Empty)">
+                        Clear
+                    </MudButton>
+                </MudTooltip>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
     @if (isLoading)
     {
         <MudProgressCircular Indeterminate="true" />
     }
     else if (!string.IsNullOrWhiteSpace(errorMessage))
     {
-        <MudAlert Severity="Severity.Error">
-            @errorMessage
-        </MudAlert>
+        <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
     }
     else if (_podcasts == null || !_podcasts.Any())
     {
-        <MudAlert Severity="Severity.Info">
-            No podcasts found.
-        </MudAlert>
+        <MudAlert Severity="Severity.Info">No podcasts found.</MudAlert>
     }
     else
     {
-        <MudPaper Class="pa-4">
-
+        <MudPaper Class="pa-4" Elevation="5">
             <MudTable Items="FilteredPodcasts"
                       T="PodcastDto"
                       Hover="true"
@@ -55,28 +80,40 @@
                       OnRowClick="@(args => OnRowClicked(args))">
 
                 <HeaderContent>
+                    <MudTh Style="width:72px"></MudTh>
                     <MudTh>Title</MudTh>
+                    <MudTh>Host</MudTh>
+                    <MudTh></MudTh>
                 </HeaderContent>
 
                 <RowTemplate>
+                    <MudTd DataLabel="Cover">
+                        <MudImage Src="/images/PodcastMissingCover.png"
+                                  Width="72"
+                                  Height="72"
+                                  ObjectFit="ObjectFit.Cover"
+                                  Class="rounded" />
+                    </MudTd>
+
                     <MudTd DataLabel="Title">
                         <MudText Typo="Typo.subtitle2">@context.Title</MudText>
                     </MudTd>
+                    <MudTd DataLabel="Title">
+                        <MudText Typo="Typo.subtitle2">@context.Id</MudText> @* //skift mig *@
+                    </MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Warning"
+                                       Size="Size.Small"
+                                       Title="Edit podcast"
+                                       OnClick="@(() => GoToEdit(context.Id))" />
 
-                    <!-- Edit -->
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                   Color="Color.Warning"
-                                   Size="Size.Small"
-                                   Title="Edit podcast"
-                                   OnClick="@(() => GoToEdit(context.Id))" />
-
-                    <!-- Delete -->
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                   Color="Color.Error"
-                                   Size="Size.Small"
-                                   Title="Delete podcast"
-                                   OnClick="@(async () => await DeletePodcast(context.Id))" />
-
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       Title="Delete podcast"
+                                       OnClick="@(async () => await DeletePodcast(context.Id))" />
+                    </MudTd>
                 </RowTemplate>
 
             </MudTable>

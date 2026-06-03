@@ -136,70 +136,83 @@
             <MudTable Items="FilteredTracks"
                       T="TrackDto"
                       Hover="true"
-                      Dense="true"
+                      Dense="false"
                       Elevation="0"
                       OnRowClick="@(args => OnRowClicked(args))"
                       @bind-CurrentPage="_currentPage">
-                
 
                 <HeaderContent>
-                    <MudTh>Title</MudTh>
-                    <MudTh>Version</MudTh>
-                    <MudTh>ISRC</MudTh>
-                    <MudTh>Duration</MudTh>
-                    <MudTh>Language</MudTh>
-                    <MudTh>Genre</MudTh>
+                    <MudTh>Track</MudTh>
+                    <MudTh>Details</MudTh>
+                    <MudTh>Catalog</MudTh>
+                    <MudTh Style="width:120px; text-align:right;">Actions</MudTh>
                 </HeaderContent>
 
                 <RowTemplate>
-                    <MudTd DataLabel="Title">
-                        <MudText Typo="Typo.subtitle2">@context.Title</MudText>
+                    <MudTd DataLabel="Track">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.subtitle1" Color="Color.Warning" Style="font-weight:600;">
+                                @context.Title
+                            </MudText>
+
+                            @if (!string.IsNullOrWhiteSpace(context.Version))
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Dark">
+                                    @context.Version
+                                </MudText>
+                            }
+
+                            <MudText Typo="Typo.caption" Color="Color.Dark">
+                                ISRC: @(string.IsNullOrWhiteSpace(context.ISRC) ? "-" : context.ISRC)
+                            </MudText>
+                        </MudStack>
                     </MudTd>
 
-                    <MudTd DataLabel="Version">
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">
-                            @(string.IsNullOrWhiteSpace(context.Version) ? "-" : context.Version)
-                        </MudText>
+                    <MudTd DataLabel="Details">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.caption">
+                                Duration: @FormatDuration(context.DurationSeconds)
+                            </MudText>
+
+                            <MudText Typo="Typo.caption">
+                                Language: @(context.AudioLanguageName ?? "-")
+                            </MudText>
+
+                            <MudText Typo="Typo.caption">
+                                Genre: @(context.GenreName ?? "-")
+                            </MudText>
+                        </MudStack>
                     </MudTd>
 
-                    <MudTd DataLabel="ISRC">
-                        <MudText Typo="Typo.body2">
-                            @context.ISRC
-                        </MudText>
+                    <MudTd DataLabel="Catalog">
+                        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                            <MudChip T="string" Color="Color.Default" Variant="Variant.Outlined" Size="Size.Small">
+                                @FormatDuration(context.DurationSeconds)
+                            </MudChip>
+
+                            <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined" Size="Size.Small">
+                                @(context.AudioLanguageName ?? "-")
+                            </MudChip>
+
+                            <MudChip T="string" Color="Color.Secondary" Variant="Variant.Filled" Size="Size.Small">
+                                @(context.GenreName ?? "-")
+                            </MudChip>
+                        </MudStack>
                     </MudTd>
 
-                    <MudTd DataLabel="Duration">
-                        <MudChip T="string" Color="Color.Default" Variant="Variant.Outlined" Size="Size.Small">
-                            @FormatDuration(context.DurationSeconds)
-                        </MudChip>
+                    <MudTd DataLabel="Actions" Style="text-align:right;">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Warning"
+                                       Size="Size.Small"
+                                       Title="Edit track"
+                                       OnClick="@(() => GoToEdit(context.Id))" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       Title="Delete track"
+                                       OnClick="@(async () => await DeleteTrack(context.Id))" />
                     </MudTd>
-
-                    <MudTd DataLabel="Language">
-                        <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined" Size="Size.Small">
-                            @(context.AudioLanguageName ?? "-")
-                        </MudChip>
-                    </MudTd>
-
-                    <MudTd DataLabel="Genre">
-                        <MudChip T="string" Color="Color.Secondary" Variant="Variant.Filled" Size="Size.Small">
-                            @(context.GenreName ?? "-")
-                        </MudChip>
-                    </MudTd>
-
-                    <!-- Edit -->
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                   Color="Color.Warning"
-                                   Size="Size.Small"
-                                   Title="Edit track"
-                                   OnClick="@(() => GoToEdit(context.Id))" />
-
-                    <!-- Delete -->
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                   Color="Color.Error"
-                                   Size="Size.Small"
-                                   Title="Delete track"
-                                   OnClick="@(async () => await DeleteTrack(context.Id))" />
-
                 </RowTemplate>
 
                 <PagerContent>
