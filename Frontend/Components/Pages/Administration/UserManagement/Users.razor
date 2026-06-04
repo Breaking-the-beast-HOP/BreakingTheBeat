@@ -22,6 +22,44 @@
         </MudButton>
     </MudStack>
 
+    <MudPaper Class="pa-4 mb-4"
+              Elevation="2"
+              Style="border: 0.5px solid var(--mud-palette-divider);">
+
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Outlined.FilterAlt" Size="Size.Small" />
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Filters</MudText>
+        </MudStack>
+
+        <MudGrid Spacing="2">
+            <MudItem xs="12" md="8">
+                <MudTextField @bind-Value="_searchString"
+                              Label="Search"
+                              Placeholder="Search username or email..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Immediate="true"
+                              Clearable="true"
+                              FullWidth="true" />
+            </MudItem>
+
+            <MudItem xs="12" md="4">
+                <MudAutocomplete T="string"
+                                 Label="Role"
+                                 Placeholder="All roles"
+                                 @bind-Value="_selectedRole"
+                                 SearchFunc="SearchRoles"
+                                 Variant="Variant.Outlined"
+                                 Margin="Margin.Dense"
+                                 Clearable="true"
+                                 FullWidth="true"
+                                 />
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
     @if (_isLoading)
     {
         <MudProgressCircular Indeterminate="true" />
@@ -32,42 +70,77 @@
     }
     else
     {
-        <MudTable Items="_users" T="UserOverviewDto" Hover="true" Striped="true" Dense="true">
+        <MudTable Items="FilteredUsers"
+                  T="UserOverviewDto"
+                  Hover="true"
+                  Dense="false"
+                  Elevation="0">
+
             <HeaderContent>
-                <MudTh>Email</MudTh>
-                <MudTh>Brugernavn</MudTh>
-                <MudTh>Rolle</MudTh>
-                <MudTh Align="Align.Right">Handlinger</MudTh>
+                <MudTh Style="width:72px"></MudTh>
+                <MudTh>User</MudTh>
+                <MudTh>Role</MudTh>
+                <MudTh Align="Align.Right" Style="width:160px">Actions</MudTh>
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Email">@context.Email</MudTd>
-                <MudTd DataLabel="Brugernavn">@context.UserName</MudTd>
-                <MudTd DataLabel="Rolle">
-                    <MudChip T="string" Color="Color.Info" Size="Size.Small">
+                <MudTd DataLabel="Avatar">
+                    <MudAvatar Color="Color.Warning"
+                               Variant="Variant.Filled"
+                               Size="Size.Large">
+                        @GetUserInitials(context)
+                    </MudAvatar>
+                </MudTd>
+
+                <MudTd DataLabel="User">
+                    <MudStack Spacing="1">
+                        <MudText Typo="Typo.subtitle1"
+                                 Style="font-weight:600;">
+                            @context.UserName
+                        </MudText>
+
+                        <MudText Typo="Typo.caption"
+                                 Color="Color.Secondary">
+                            @context.Email
+                        </MudText>
+                    </MudStack>
+                </MudTd>
+
+                <MudTd DataLabel="Role">
+                    <MudChip T="string"
+                             Color="Color.Info"
+                             Variant="Variant.Filled"
+                             Size="Size.Small">
                         @context.Role
                     </MudChip>
                 </MudTd>
 
-                <MudTd Align="Align.Right">
+                <MudTd DataLabel="Actions" Align="Align.Right">
                     <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="1">
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                       Color="Color.Primary"
-                                       Size="Size.Small"
-                                       OnClick="@(() => OpenEditDialog(context))" />
+                        <MudTooltip Text="Edit user">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Warning"
+                                           Size="Size.Small"
+                                           OnClick="@(() => OpenEditDialog(context))" />
+                        </MudTooltip>
 
-                        <MudIconButton Icon="@Icons.Material.Filled.LockReset"
-                                       Color="Color.Warning"
-                                       Size="Size.Small"
-                                       OnClick="@(() => OpenPasswordDialog(context))" />
+                        <MudTooltip Text="Reset password">
+                            <MudIconButton Icon="@Icons.Material.Filled.LockReset"
+                                           Color="Color.Info"
+                                           Size="Size.Small"
+                                           OnClick="@(() => OpenPasswordDialog(context))" />
+                        </MudTooltip>
 
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                       Color="Color.Error"
-                                       Size="Size.Small"
-                                       OnClick="@(() => DeleteUser(context.Id))" />
+                        <MudTooltip Text="Delete user">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           OnClick="@(() => DeleteUser(context.Id))" />
+                        </MudTooltip>
                     </MudStack>
                 </MudTd>
             </RowTemplate>
+
         </MudTable>
     }
 
@@ -141,6 +214,47 @@
         NavigationManager.NavigateTo("/users/register");
     }
 
+    private string _searchString = string.Empty;
+    private string? _selectedRole;
+
+    private IEnumerable<UserOverviewDto> FilteredUsers =>
+       _users.Where(user =>
+           MatchesSearch(user) &&
+           MatchesRole(user));
+
+    private bool MatchesSearch(UserOverviewDto user)
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        return (user.UserName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (user.Email?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private bool MatchesRole(UserOverviewDto user)
+    {
+        if (string.IsNullOrWhiteSpace(_selectedRole))
+            return true;
+
+        return string.Equals(user.Role, _selectedRole, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private Task<IEnumerable<string>> SearchRoles(string value, CancellationToken cancellationToken)
+    {
+        IEnumerable<string> roles = _roles
+            .Select(r => r.Name)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!);
+
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            roles = roles.Where(role =>
+                role.Contains(value, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return Task.FromResult<IEnumerable<string>>(roles.OrderBy(role => role) );
+    }
+
     private void OpenEditDialog(UserOverviewDto user)
     {
         _editUser = new UserOverviewDto
@@ -176,5 +290,16 @@
         }
 
         await LoadUsers();
+    }
+    private static string GetUserInitials(UserOverviewDto user)
+    {
+        var source = string.IsNullOrWhiteSpace(user.UserName)
+            ? user.Email
+            : user.UserName;
+
+        if (string.IsNullOrWhiteSpace(source))
+            return "?";
+
+        return source.Trim()[0].ToString().ToUpperInvariant();
     }
 }

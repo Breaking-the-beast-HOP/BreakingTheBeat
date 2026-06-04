@@ -20,7 +20,7 @@ namespace Gateway.Controllers.MusicCatalog
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Content Creator")]
+        [Authorize(Roles = "Admin,Content creator")]
         public async Task<ActionResult<Guid>> Create([FromBody] CreateLabelRequest request, CancellationToken cancellationToken)
         {
             var command = new CreateLabelCommand(
@@ -47,7 +47,7 @@ namespace Gateway.Controllers.MusicCatalog
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        [Authorize(Roles = "Admin,Content creator,Quality controller")]
         public async Task<ActionResult<List<LabelResponse>>> GetAll(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetAllLabelsQuery(), cancellationToken);

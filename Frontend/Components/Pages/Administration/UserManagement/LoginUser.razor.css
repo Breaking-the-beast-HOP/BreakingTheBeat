@@ -4,18 +4,20 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.65)), url('/images/audiowaves.jpeg');
+    background: linear-gradient(rgba(0, 0, 0, 0.58), rgba(0, 0, 0, 0.72)), url('/images/audiowaves.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 
 .login-card {
-    padding: 36px 32px;
-    background: rgba(45, 45, 45, 0.94);
+    width: 430px;
+    max-width: 92vw;
+    padding: 500px 32px 500px !important;
+    background: rgba(45, 45, 45, 0.94) !important;
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
 }
 
 .login-logo {
@@ -24,14 +26,39 @@
     font-weight: 900;
     letter-spacing: -4px;
     color: white;
+    text-align: center;
 }
 
 .login-subtitle {
-    margin-top: -6px;
-    margin-bottom: 18px;
+    margin-top: -4px;
+    margin-bottom: 20px;
     font-size: 13px;
     letter-spacing: 5px;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.86);
+    text-align: center;
+}
+
+.login-card .mud-input-control {
+    max-width: 320px;
+    width: 100%;
+    align-self: center;
+}
+
+.login-card .mud-input-root {
+    min-height: 54px;
+}
+
+.login-card .mud-button-root {
+    max-width: 320px;
+    width: 100%;
+    align-self: center;
+    min-height: 40px;
+    font-weight: 800;
+}
+
+.login-card .mud-button-outlined {
+    min-height: 38px;
+    font-size: 13px;
 }
 
 .align-self-start {

@@ -1,6 +1,6 @@
 ﻿@page "/users/register"
 @rendermode InteractiveServer
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 
 @using Microsoft.AspNetCore.Authorization
 @using MudBlazor
@@ -75,10 +75,15 @@
                                   InputType="InputType.Password"
                                   Variant="Variant.Outlined" />
 
-                    <MudAlert Severity="Severity.Info" Dense="true">
-                        Ved oprettelse bekræfter administratoren, at brugeren må oprettes i systemet,
-                        og at nødvendige personoplysninger behandles til adgangsstyring og systemadministration.
-                    </MudAlert>
+                    <MudCheckBox T="bool"
+                                 @bind-Value="_gdprConfirmed"
+                                 Color="Color.Warning">
+
+                        Jeg bekræfter, at brugeren er informeret om,
+                        at DMG behandler personoplysninger i forbindelse
+                        med kontooprettelse, adgangsstyring og levering
+                        af distributionsydelser.
+                    </MudCheckBox>
 
                 </MudStack>
             </MudForm>
@@ -126,6 +131,7 @@
 
     private List<string> _errorMessages = new();
     private List<RoleDto> _roles = new();
+    private bool _gdprConfirmed;
 
     private RegisterUserRequest _model = new();
 

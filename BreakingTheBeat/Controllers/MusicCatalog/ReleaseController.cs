@@ -27,7 +27,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Content Creator")]
+        [Authorize(Roles = "Admin,Content creator")]
         public async Task<IActionResult> CreateRelease([FromBody] CreateReleaseRequest request, CancellationToken cancellationToken)
         {
             if (request is null)
@@ -88,7 +88,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        [Authorize(Roles = "Admin,Content creator,Quality controller")]
         public async Task<ActionResult<List<ReleaseResponse>>> GetAllReleases(CancellationToken cancellationToken)
         {
             var releases = await _mediator.Send(
@@ -111,7 +111,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet("{id:guid}")]
-        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        [Authorize(Roles = "Admin,Content creator,Quality controller")]
         public async Task<ActionResult<ReleaseDetailsResponse>> GetReleaseById(Guid id, CancellationToken cancellationToken)
         {
             var release = await _mediator.Send(new GetReleaseByIdQuery(id), cancellationToken);
@@ -123,7 +123,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpPut("{id:guid}")]
-        [Authorize(Roles = "Admin,Content Creator")]
+        [Authorize(Roles = "Admin,Content creator")]
         public async Task<IActionResult> UpdateRelease(Guid id, [FromBody] UpdateReleaseRequest request, CancellationToken cancellationToken)
         {
             if (request is null)
@@ -200,7 +200,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpDelete("{id:guid}")]
-        [Authorize(Roles = "Admin,Content Creator")]
+        [Authorize(Roles = "Admin,Content creator")]
         public async Task<IActionResult> DeleteRelease(Guid id, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(
@@ -214,6 +214,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpPost("{id:guid}/withdraw")]
+        [Authorize(Roles = "Admin,Content creator")]
         public async Task<IActionResult> Withdraw(Guid id)
         {
             var result = await _mediator.Send(new WithdrawReleaseCommand(id));

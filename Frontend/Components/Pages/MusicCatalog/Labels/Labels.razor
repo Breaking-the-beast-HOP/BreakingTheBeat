@@ -92,83 +92,79 @@
                           Elevation="0">
 
                     <HeaderContent>
-                        <MudTh>Logo</MudTh>
-                        <MudTh>Name</MudTh>
-                        <MudTh>Country</MudTh>
-                        <MudTh>Code</MudTh>
-                        <MudTh>Website</MudTh>
-                        <MudTh Align="Align.Right">Actions</MudTh>
+                        <MudTh Style="width:80px"></MudTh>
+                        <MudTh>Label</MudTh>
+                        <MudTh>Details</MudTh>
+                        <MudTh Style="width:120px" Align="Align.Right">Actions</MudTh>
                     </HeaderContent>
 
                     <RowTemplate>
+
                         <MudTd DataLabel="Logo">
                             @if (!string.IsNullOrWhiteSpace(context.LogoUrl))
                             {
                                 <MudAvatar Image="@context.LogoUrl"
-                                           Size="Size.Medium" />
+                                           Size="Size.Large" />
                             }
                             else
                             {
-                                <MudAvatar Size="Size.Medium"
+                                <MudAvatar Size="Size.Large"
                                            Color="Color.Warning"
                                            Variant="Variant.Outlined">
-                                    <MudIcon Icon="@Icons.Material.Filled.Image" />
+                                    <MudIcon Icon="@Icons.Material.Filled.Business" />
                                 </MudAvatar>
                             }
                         </MudTd>
 
-                        <MudTd DataLabel="Name">
-                            <MudText Typo="Typo.subtitle1">
-                                @context.Name
-                            </MudText>
-                        </MudTd>
+                        <MudTd DataLabel="Label">
+                            <MudStack Spacing="1">
 
-                        <MudTd DataLabel="Country">
-                            @if (!string.IsNullOrWhiteSpace(context.CountryName))
-                            {
-                                <MudChip T="string"
-                                         Size="Size.Small"
-                                         Variant="Variant.Outlined">
-                                    @context.CountryName
-                                </MudChip>
-                            }
-                            else
-                            {
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                    -
+                                <MudText Typo="Typo.subtitle1"
+                                         Color="Color.Warning"
+                                         Style="font-weight:600;">
+                                    @context.Name
                                 </MudText>
-                            }
-                        </MudTd>
 
-                        <MudTd DataLabel="Code">
-                            <MudText Typo="Typo.body2">
-                                @(string.IsNullOrWhiteSpace(context.LabelCode) ? "-" : context.LabelCode)
-                            </MudText>
-                        </MudTd>
-
-                        <MudTd DataLabel="Website">
-                            @if (!string.IsNullOrWhiteSpace(context.Website))
-                            {
-                                <MudLink Href="@context.Website" Target="_blank">
-                                    @context.Website
-                                </MudLink>
-                            }
-                            else
-                            {
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                    -
+                                <MudText Typo="Typo.caption"
+                                         Color="Color.Secondary">
+                                    Code: @(string.IsNullOrWhiteSpace(context.LabelCode)
+                                                        ? "-"
+                                                        : context.LabelCode)
                                 </MudText>
-                            }
+
+                            </MudStack>
                         </MudTd>
 
-                        <MudTd DataLabel="Actions" Align="Align.Right">
-                            <MudButton Variant="Variant.Text"
-                                       Color="Color.Warning"
-                                       StartIcon="@Icons.Material.Filled.Visibility"
-                                       OnClick="@(() => ViewLabel(context.Id))">
-                                View
-                            </MudButton>
+                        <MudTd DataLabel="Details">
+                            <MudStack Spacing="1">
+
+                                <MudText Typo="Typo.caption">
+                                    Country: @(context.CountryName ?? "-")
+                                </MudText>
+
+                                <MudText Typo="Typo.caption">
+                                    Website:
+                                    @(string.IsNullOrWhiteSpace(context.Website)
+                                        ? "-"
+                                        : context.Website)
+                                </MudText>
+
+                            </MudStack>
                         </MudTd>
+
+                        <MudTd Align="Align.Right">
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                           Color="Color.Info"
+                                           Size="Size.Small"
+                                           OnClick="@(() => ViewLabel(context.Id))" />
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Warning"
+                                           Size="Size.Small" />
+
+                        </MudTd>
+
                     </RowTemplate>
 
                 </MudTable>

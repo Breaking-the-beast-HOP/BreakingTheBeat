@@ -19,7 +19,7 @@ namespace Gateway.Controllers.MusicCatalog
         }
 
         [HttpGet(Name = "GetCountries")]
-        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        [Authorize(Roles = "Admin,Content creator,Quality controller")]
         public async Task<ActionResult<List<CountryResponse>>> Get(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetAllCountriesQuery(), cancellationToken);
