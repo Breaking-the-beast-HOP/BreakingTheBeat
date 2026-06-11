@@ -1,5 +1,4 @@
-﻿using Frontend.Components.Pages.MusicCatalog.Contributors;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace Frontend.Components.Pages.MusicCatalog.Contributors.List
