@@ -7,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("LoggingDb");
 
+Console.WriteLine($"[{connectionString}]");
+Console.WriteLine($"[{connectionString}]");
+
 if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("Connection string 'LoggingDb' not found in secrets");
 

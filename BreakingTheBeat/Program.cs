@@ -262,7 +262,7 @@ namespace Gateway
 
             var app = builder.Build();
 
-            app.UseSerilogRequestLogging();
+            app.UseSerilogRequestLogging(); //Logger alle HTTP kald 
 
 
 

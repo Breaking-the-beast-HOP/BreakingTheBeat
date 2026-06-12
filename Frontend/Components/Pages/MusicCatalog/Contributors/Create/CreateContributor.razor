@@ -7,7 +7,7 @@
 
 <PageTitle>Create Contributor</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="pa-6">
+<MudContainer MaxWidth="MaxWidth.Large" Class="pa-6">
 
     <MudStack Spacing="4">
 
@@ -41,40 +41,177 @@
             </MudAlert>
         }
 
-        <MudPaper Class="pa-4" Elevation="5">
-            <MudText Typo="Typo.h6" Class="mb-3">Contributor Info</MudText>
+        <MudGrid Spacing="4">
 
-            <MudGrid Spacing="2">
-                <MudItem xs="12">
-                    <MudTextField Label="Display name / Artist name"
-                                  @bind-Value="_model.DisplayName"
-                                  Variant="Variant.Outlined"
-                                  Required="true"
-                                  FullWidth="true" />
-                </MudItem>
+            <MudItem xs="12" md="7">
+                <MudStack Spacing="4">
 
-                <MudItem xs="12">
-                    <MudTextField Label="Legal name"
-                                  @bind-Value="_model.LegalName"
-                                  Variant="Variant.Outlined"
-                                  FullWidth="true" />
-                </MudItem>
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudStack Spacing="1" Class="mb-3">
+                            <MudText Typo="Typo.h6">Required Information</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                Fields marked with * are required.
+                            </MudText>
+                        </MudStack>
 
-                <MudItem xs="12" sm="6">
-                    <MudTextField Label="IPI"
-                                  @bind-Value="_model.IPI"
-                                  Variant="Variant.Outlined"
-                                  FullWidth="true" />
-                </MudItem>
+                        <MudGrid Spacing="2">
+                            <MudItem xs="12">
+                                <MudTextField Label="Display name / Artist name *"
+                                              @bind-Value="_model.DisplayName"
+                                              Variant="Variant.Outlined"
+                                              Required="true"
+                                              FullWidth="true" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
 
-                <MudItem xs="12" sm="6">
-                    <MudTextField Label="ISNI"
-                                  @bind-Value="_model.ISNI"
-                                  Variant="Variant.Outlined"
-                                  FullWidth="true" />
-                </MudItem>
-            </MudGrid>
-        </MudPaper>
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudStack Spacing="1" Class="mb-3">
+                            <MudText Typo="Typo.h6">Optional Information</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                Additional contributor metadata.
+                            </MudText>
+                        </MudStack>
+
+                        <MudGrid Spacing="2">
+                            <MudItem xs="12">
+                                <MudTextField Label="Legal name"
+                                              @bind-Value="_model.LegalName"
+                                              Variant="Variant.Outlined"
+                                              FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <MudTextField Label="IPI"
+                                              @bind-Value="_model.IPI"
+                                              Variant="Variant.Outlined"
+                                              FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6">
+                                <MudTextField Label="ISNI"
+                                              @bind-Value="_model.ISNI"
+                                              Variant="Variant.Outlined"
+                                              FullWidth="true" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-4" Elevation="5">
+                        <MudStack Spacing="3">
+                            <MudStack Spacing="1">
+                                <MudText Typo="Typo.h6">Biography / Notes</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Optional contributor biography, podcast host description or internal notes.
+                                    Support for storing biographies will be added in a future release.
+                                </MudText>
+                            </MudStack>
+
+                            <MudTextField T="string"
+                                          Variant="Variant.Outlined"
+                                          Lines="6"
+                                          Disabled="true"
+                                          FullWidth="true"
+                                          Placeholder="Contributor biography..." />
+                        </MudStack>
+                    </MudPaper>
+
+                </MudStack>
+            </MudItem>
+
+            <MudItem xs="12" md="5">
+                <MudPaper Class="pa-4" Elevation="5">
+                    <MudStack Spacing="3">
+
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.h6">Artist Profiles</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                Optional profile links for artist verification and identification.
+                                Support for storing these links will be added in a future release.
+                            </MudText>
+                        </MudStack>
+
+                        <MudGrid Spacing="2">
+
+                            <MudItem xs="12">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                    <MudImage Src="/images/platforms/youtube.png" Width="32" Height="32" />
+                                    <MudText>YouTube Artist Profile</MudText>
+                                </MudStack>
+
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Disabled="true"
+                                              FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                    <MudImage Src="/images/platforms/spotify.svg.png" Width="32" Height="32" />
+                                    <MudText>Spotify Artist Profile</MudText>
+                                </MudStack>
+
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Disabled="true"
+                                              FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                    <MudImage Src="/images/platforms/apple-music.png" Width="32" Height="32" />
+                                    <MudText>Apple Music Artist Profile</MudText>
+                                </MudStack>
+
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Disabled="true"
+                                              FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                    <MudImage Src="/images/platforms/deezer.png" Width="32" Height="32" />
+                                    <MudText>Deezer Artist Profile</MudText>
+                                </MudStack>
+
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Disabled="true"
+                                              FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                    <MudImage Src="/images/platforms/soundCloud.png" Width="32" Height="32" />
+                                    <MudText>SoundCloud Artist Profile</MudText>
+                                </MudStack>
+
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Disabled="true"
+                                              FullWidth="true" />
+                            </MudItem>
+
+                            <MudItem xs="12">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                    <MudImage Src="/images/platforms/beatport.png" Width="32" Height="32" />
+                                    <MudText>Beatport Artist Profile</MudText>
+                                </MudStack>
+
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Disabled="true"
+                                              FullWidth="true" />
+                            </MudItem>
+
+                        </MudGrid>
+
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+        </MudGrid>
 
     </MudStack>
 
