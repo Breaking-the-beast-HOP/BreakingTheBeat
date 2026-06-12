@@ -1,5 +1,4 @@
 ﻿using Frontend.Components.Pages.MusicCatalog.SharedModels;
-using static Frontend.Components.Pages.MusicCatalog.MusicReleases.Create.CreateRelease;
 
 namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Models;
 

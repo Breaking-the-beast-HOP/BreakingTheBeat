@@ -19,7 +19,7 @@ builder.Services.AddDbContextFactory<LoggingDbContext>(options =>
 });
 
 
-builder.Services.AddTransient<NpgsqlConnection>(options =>
+builder.Services.AddTransient(options =>
     new NpgsqlConnection(connectionString));
 
 // Add services to the container.

@@ -129,6 +129,11 @@
         {
             var response = await Http.PostAsJsonAsync("api/auth/login", _model);
 
+            //debugging logs - remove in production
+            var url = new Uri(Http.BaseAddress, "api/auth/login");
+            Console.WriteLine($"Api call sent to: {url}");
+            Console.WriteLine($"Api response: {response.ToString()}");
+
             if (!response.IsSuccessStatusCode)
             {
                 _error = "Forkert email eller adgangskode.";

@@ -1,7 +1,6 @@
 ﻿using Frontend.Components.Pages.MusicCatalog.MusicReleases.Models;
 using Frontend.Components.Shared;
 using Microsoft.AspNetCore.Components;
-using static System.Net.WebRequestMethods;
 
 namespace Frontend.Components.Pages.MusicCatalog.MusicReleases.Details
 {
