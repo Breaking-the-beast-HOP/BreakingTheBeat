@@ -24,7 +24,7 @@ namespace Gateway.Controllers.Music
 
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Content Creator")]
+        [Authorize(Roles = "Admin,Content creator")]
         public async Task<IActionResult> CreateContributor([FromBody] ContributorRequest request, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new CreateContributorCommand(request.LegalName, request.DisplayName, request.IPI, request.ISNI), cancellationToken);
@@ -33,7 +33,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet(Name = "GetContributors")]
-        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        [Authorize(Roles = "Admin,Content creator,Quality controller")]
         public async Task<ActionResult<List<ContributorResponse>>> Get(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetContributorsQuery(), cancellationToken);
@@ -41,7 +41,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpGet("{id:guid}")]
-        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        [Authorize(Roles = "Admin,Content creator,Quality controller")]
         public async Task<ActionResult<ContributorDetailsResponse>> Get(Guid id, CancellationToken cancellationToken)
         {
             var contributor = await _mediator.Send(new GetContributorByIdQuery(id), cancellationToken);
@@ -79,7 +79,7 @@ namespace Gateway.Controllers.Music
         }
 
         [HttpDelete("{id:guid}")]
-        [Authorize(Roles = "Admin,Content Creator")]
+        [Authorize(Roles = "Admin,Content creator")]
         public async Task<IActionResult> DeleteContributor(Guid id, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new DeleteContributorCommand(id), cancellationToken);

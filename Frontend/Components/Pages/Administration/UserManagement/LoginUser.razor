@@ -17,6 +17,7 @@
     <MudPaper Class="login-card"
               Style="width: 420px; max-width: 90vw;"
               Elevation="8">
+               <div style="padding: 25px 32px 20px;">
 
         <MudStack Spacing="3" AlignItems="AlignItems.Center">
 
@@ -26,25 +27,25 @@
             <MudTextField T="string"
                           Placeholder="Email"
                           Variant="Variant.Outlined"
-                          FullWidth="true"
+                          Style="width: 360px;"
                           @bind-Value="_model.Email" />
 
             <MudTextField T="string"
                           Placeholder="Password"
                           InputType="InputType.Password"
                           Variant="Variant.Outlined"
-                          FullWidth="true"
+                          Style="width: 360px;"
                           @bind-Value="_model.Password" />
 
             <MudCheckBox T="bool"
                          @bind-Checked="_rememberMe"
                          Label="Remember me"
                          Color="Color.Secondary"
-                         Class="align-self-start" />
+                         Style="width: 360px;" />
 
             <MudButton Variant="Variant.Filled"
                        Color="Color.Secondary"
-                       FullWidth="true"
+                       Style="width: 360px;"
                        OnClick="Login"
                        Disabled="_isLoading">
 
@@ -64,7 +65,7 @@
 
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
-                       FullWidth="true"
+                       Style="width: 360px;"
                        OnClick="DevQCLogin"
                        Disabled="_isLoading">
                 Snyde QC-login
@@ -72,7 +73,7 @@
 
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
-                       FullWidth="true"
+                       Style="width: 360px;"
                        OnClick="DevAdminLogin"
                        Disabled="_isLoading">
                 Snyde Admin-login
@@ -80,7 +81,7 @@
 
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
-                       FullWidth="true"
+                       Style="width: 360px;"
                        OnClick="DevCustomerLogin"
                        Disabled="_isLoading">
                 Snyde kunde-login
@@ -98,7 +99,7 @@
             }
 
         </MudStack>
-
+        </div>
     </MudPaper>
 </div>
 

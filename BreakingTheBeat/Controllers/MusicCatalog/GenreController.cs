@@ -19,7 +19,7 @@ namespace Gateway.Controllers
         }
 
         [HttpGet(Name = "GetGenres")]
-        [Authorize(Roles = "Admin,Content Creator,Quality controller")]
+        [Authorize(Roles = "Admin,Content creator,Quality controller")]
         public async Task<ActionResult<List<GenreResponse>>> Get(CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetGenresQuery(), cancellationToken);

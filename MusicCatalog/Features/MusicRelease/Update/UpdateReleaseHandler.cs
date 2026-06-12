@@ -36,6 +36,11 @@ namespace MusicCatalogContext.Features.MusicRelease.Update
                     return false;
                 }
 
+                if (release.Status == ReleaseStatus.InQc || release.Status == ReleaseStatus.Approved) //makes sure the release does not change during or after review is accepted
+                {
+                    throw new InvalidOperationException("Release can no longer be updated because review has started.");
+                }
+
                 release.UpdateDetails(
                     request.Title,
                     request.Version,

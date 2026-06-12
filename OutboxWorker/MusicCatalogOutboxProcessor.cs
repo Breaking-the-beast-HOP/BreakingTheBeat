@@ -6,13 +6,13 @@ using MusicCatalogContext.Infrastructure;
 
 namespace OutboxWorker;
 
-public class OutboxProcessor
+public class MusicCatalogOutboxProcessor
 {
     private readonly MusicCatalogDbContext _context;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<OutboxProcessor> _logger;
+    private readonly ILogger<MusicCatalogOutboxProcessor> _logger;
 
-    public OutboxProcessor(MusicCatalogDbContext context, IHttpClientFactory httpClientFactory, ILogger<OutboxProcessor> logger)
+    public MusicCatalogOutboxProcessor(MusicCatalogDbContext context, IHttpClientFactory httpClientFactory, ILogger<MusicCatalogOutboxProcessor> logger)
     {
         _context = context;
         _httpClientFactory = httpClientFactory;
