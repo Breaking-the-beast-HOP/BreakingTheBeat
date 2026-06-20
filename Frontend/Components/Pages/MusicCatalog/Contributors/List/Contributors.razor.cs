@@ -5,7 +5,6 @@ namespace Frontend.Components.Pages.MusicCatalog.Contributors.List
 {
     public partial class Contributors
     {
-
         [Inject]
         protected HttpClient Http { get; set; } = default!;
 
@@ -18,20 +17,52 @@ namespace Frontend.Components.Pages.MusicCatalog.Contributors.List
         private List<ContributorDto> _contributors = new();
         private bool isLoading = true;
         private string? errorMessage;
-        private string _searchString = string.Empty;
 
-        private IEnumerable<ContributorDto> FilteredContributors =>
-            _contributors.Where(c =>
-                string.IsNullOrWhiteSpace(_searchString) ||
-                (c.DisplayName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (c.LegalName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        private string _searchString = string.Empty;
+        private ContributorFilter _filter = ContributorFilter.All;
+
+        private IEnumerable<ContributorDto> FilteredContributors
+        {
+            get
+            {
+                var contributors = _contributors.AsEnumerable();
+
+                if (!string.IsNullOrWhiteSpace(_searchString))
+                {
+                    contributors = contributors.Where(c =>
+                        Contains(c.DisplayName, _searchString) ||
+                        Contains(c.LegalName, _searchString) ||
+                        Contains(c.IPI, _searchString) ||
+                        Contains(c.ISNI, _searchString));
+                }
+
+                contributors = _filter switch
+                {
+                    ContributorFilter.WithIPI => contributors
+                        .Where(c => !string.IsNullOrWhiteSpace(c.IPI)),
+
+                    ContributorFilter.WithISNI => contributors
+                        .Where(c => !string.IsNullOrWhiteSpace(c.ISNI)),
+
+                    ContributorFilter.MissingIdentifiers => contributors
+                        .Where(c =>
+                            string.IsNullOrWhiteSpace(c.IPI) ||
+                            string.IsNullOrWhiteSpace(c.ISNI)),
+
+                    _ => contributors
+                };
+
+                return contributors;
+            }
+        }
 
         protected override async Task OnInitializedAsync()
         {
             try
             {
-                _contributors = await Http.GetFromJsonAsync<List<ContributorDto>>("api/contributor")
-                               ?? new();
+                _contributors =
+                    await Http.GetFromJsonAsync<List<ContributorDto>>("api/contributor")
+                    ?? new();
             }
             catch (Exception ex)
             {
@@ -50,8 +81,12 @@ namespace Frontend.Components.Pages.MusicCatalog.Contributors.List
 
         private async Task DeleteContributor(Guid id)
         {
-            var confirm = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this contributor?");
-            if (!confirm) return;
+            var confirm = await JS.InvokeAsync<bool>(
+                "confirm",
+                "Are you sure you want to delete this contributor?");
+
+            if (!confirm)
+                return;
 
             try
             {
@@ -59,7 +94,9 @@ namespace Frontend.Components.Pages.MusicCatalog.Contributors.List
 
                 if (response.IsSuccessStatusCode)
                 {
-                    _contributors = _contributors.Where(c => c.Id != id).ToList();
+                    _contributors = _contributors
+                        .Where(c => c.Id != id)
+                        .ToList();
                 }
                 else
                 {
@@ -71,7 +108,37 @@ namespace Frontend.Components.Pages.MusicCatalog.Contributors.List
                 errorMessage = ex.Message;
             }
         }
+
+        private static bool Contains(string? value, string search)
+        {
+            return !string.IsNullOrWhiteSpace(value) &&
+                   value.Contains(search, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string DisplayValue(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? "-" : value;
+        }
+
+        private static string GetInitials(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "?";
+
+            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 1)
+                return parts[0][0].ToString().ToUpper();
+
+            return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+        }
+
+        private enum ContributorFilter
+        {
+            All,
+            WithIPI,
+            WithISNI,
+            MissingIdentifiers
+        }
     }
 }
-
-

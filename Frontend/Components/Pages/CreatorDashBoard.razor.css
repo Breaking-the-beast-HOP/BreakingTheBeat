@@ -1,0 +1,48 @@
+﻿.fake-area-chart {
+    height: 300px;
+    width: 100%;
+    position: relative;
+}
+
+    .fake-area-chart svg {
+        width: 100%;
+        height: 250px;
+    }
+
+.chart-fill {
+    fill: rgba(255, 152, 0, 0.55);
+}
+
+.chart-line {
+    fill: none;
+    stroke: #ff9800;
+    stroke-width: 4;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+    .chart-legend i {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 6px;
+    }
+
+.legend-streams {
+    background: #ff9800;
+}
+
+.legend-tracks,
+.legend-releases {
+    background: #444;
+}
+.dmg-news-item {
+    border-left: 4px solid #ff9800;
+    background: #fffaf2;
+}

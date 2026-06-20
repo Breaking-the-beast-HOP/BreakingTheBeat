@@ -91,37 +91,52 @@
                                 </MudItem>
                             </MudGrid>
                         </MudPaper>
-
                         <MudPaper Class="pa-4" Elevation="5">
                             <MudText Typo="Typo.h6" Class="mb-4">Social Media</MudText>
 
                             <MudGrid Spacing="3">
                                 <MudItem xs="12" sm="6">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                        <MudImage Src="/images/platforms/instagram.png" Width="32" Height="32" />
+                                        <MudText>Instagram</MudText>
+                                    </MudStack>
+
                                     <MudTextField @bind-Value="_model.InstagramUrl"
-                                                  Label="Instagram"
                                                   Variant="Variant.Outlined"
-                                                  Adornment="Adornment.Start"
-                                                  AdornmentIcon="@Icons.Material.Filled.CameraAlt" />
+                                                  FullWidth="true" />
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                        <MudImage Src="/images/platforms/tik-tok.png" Width="32" Height="32" />
+                                        <MudText>TikTok</MudText>
+                                    </MudStack>
+
                                     <MudTextField @bind-Value="_model.TikTokUrl"
-                                                  Label="TikTok"
-                                                  Variant="Variant.Outlined" />
-                                </MudItem>
-
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="_model.YouTubeUrl"
-                                                  Label="YouTube"
                                                   Variant="Variant.Outlined"
-                                                  Adornment="Adornment.Start"
-                                                  AdornmentIcon="@Icons.Material.Filled.SmartDisplay" />
+                                                  FullWidth="true" />
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                        <MudImage Src="/images/platforms/youtube.png" Width="32" Height="32" />
+                                        <MudText>YouTube</MudText>
+                                    </MudStack>
+
+                                    <MudTextField @bind-Value="_model.YouTubeUrl"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true" />
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                                        <MudImage Src="/images/platforms/facebook.png" Width="32" Height="32" />
+                                        <MudText>Facebook</MudText>
+                                    </MudStack>
+
                                     <MudTextField @bind-Value="_model.FacebookUrl"
-                                                  Label="Facebook"
-                                                  Variant="Variant.Outlined" />
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true" />
                                 </MudItem>
                             </MudGrid>
                         </MudPaper>

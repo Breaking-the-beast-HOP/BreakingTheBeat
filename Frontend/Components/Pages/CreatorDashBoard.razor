@@ -1,0 +1,369 @@
+﻿
+@page "/DashBoard"
+@attribute [Authorize(Roles = "Quality controller,Admin,Content creator")]
+@using Microsoft.AspNetCore.Authorization
+@using MudBlazor
+@inject NavigationManager Navigation
+
+<PageTitle>Creator Dashboard</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
+
+    <MudStack Spacing="4">
+
+        <!-- Header -->
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <div>
+                <MudText Typo="Typo.h4">Creator Dashboard</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Overview of your catalog, drafts, releases and royalty updates
+                </MudText>
+            </div>
+
+        </MudStack>
+
+        <!-- Stats -->
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 dashboard-card">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Tracks</MudText>
+                                <MudText Typo="Typo.h4">128</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.QueueMusic" Size="Size.Large" Color="Color.Warning" />
+                        </MudStack>
+
+                        <MudButton FullWidth="true"
+                                   Size="Size.Small"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   Href="/create-track">
+                            Create Track
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 dashboard-card">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Releases</MudText>
+                                <MudText Typo="Typo.h4">34</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.Album" Size="Size.Large" Color="Color.Warning" />
+                        </MudStack>
+
+                        <MudButton FullWidth="true"
+                                   Size="Size.Small"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   Href="/create-release">
+                            Create Release
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 dashboard-card">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Podcasts</MudText>
+                                <MudText Typo="Typo.h4">12</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.Podcasts" Size="Size.Large" Color="Color.Warning" />
+                        </MudStack>
+
+                        <MudButton FullWidth="true"
+                                   Size="Size.Small"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   Href="/create-podcast">
+                            Upload Podcast
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 dashboard-card">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Estimated Royalties</MudText>
+                                <MudText Typo="Typo.h4">€1,248</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.Payments" Size="Size.Large" Color="Color.Warning" />
+                        </MudStack>
+
+                        <MudButton FullWidth="true"
+                                   Size="Size.Small"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.ReceiptLong"
+                                   Href="/royalties">
+                            View Royalties
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Main content -->
+        <MudGrid>
+
+            <!-- Left column -->
+            <MudItem xs="12" md="8">
+                <MudStack Spacing="4">
+
+                    <!-- Action Required -->
+                    <MudPaper Class="pa-4">
+                        <MudText Typo="Typo.h6">Action Required</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Items that need your attention before they can move forward.
+                        </MudText>
+
+                        <MudDivider Class="my-3" />
+
+                        <MudList T="string">
+                            <MudListItem Icon="@Icons.Material.Filled.RateReview">
+                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="w-100">
+                                    <div>
+                                        <MudText Typo="Typo.body1">“Summer Vibes EP” has review feedback</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            Changes are requested before approval
+                                        </MudText>
+                                    </div>
+
+                                    <MudButton Variant="Variant.Text"
+                                               Color="Color.Warning"
+                                               Href="/release-review/1">
+                                        View feedback
+                                    </MudButton>
+                                </MudStack>
+                            </MudListItem>
+
+                   
+                        </MudList>
+                    </MudPaper>
+
+                    <!-- Drafts -->
+                    <MudPaper Class="pa-4">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.h6">Continue Drafts</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Unfinished releases and uploads you can continue working on.
+                                </MudText>
+                            </div>
+
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Warning"
+                                       Href="/drafts">
+                                View all
+                            </MudButton>
+                        </MudStack>
+
+                        <MudDivider Class="my-3" />
+
+                        <MudGrid>
+                            <MudItem xs="12" sm="4">
+                                <MudPaper Class="pa-3" Outlined="true">
+                                    <MudText Typo="Typo.subtitle2">Ocean Lights</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Release draft</MudText>
+                                    <MudProgressLinear Value="75" Color="Color.Warning" Class="my-2" />
+                                    <MudButton Size="Size.Small"
+                                               Variant="Variant.Text"
+                                               Color="Color.Warning"
+                                               Href="/edit-release/3">
+                                        Continue
+                                    </MudButton>
+                                </MudPaper>
+                            </MudItem>
+
+                            <MudItem xs="12" sm="4">
+                                <MudPaper Class="pa-3" Outlined="true">
+                                    <MudText Typo="Typo.subtitle2">New Single</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Track draft</MudText>
+                                    <MudProgressLinear Value="45" Color="Color.Warning" Class="my-2" />
+                                    <MudButton Size="Size.Small"
+                                               Variant="Variant.Text"
+                                               Color="Color.Warning"
+                                               Href="/edit-track/4">
+                                        Continue
+                                    </MudButton>
+                                </MudPaper>
+                            </MudItem>
+
+                            <MudItem xs="12" sm="4">
+                                <MudPaper Class="pa-3" Outlined="true">
+                                    <MudText Typo="Typo.subtitle2">Studio Talk #08</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Podcast draft</MudText>
+                                    <MudProgressLinear Value="30" Color="Color.Warning" Class="my-2" />
+                                    <MudButton Size="Size.Small"
+                                               Variant="Variant.Text"
+                                               Color="Color.Warning"
+                                               Href="/edit-podcast/8">
+                                        Continue
+                                    </MudButton>
+                                </MudPaper>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+
+                    <!-- Trends / Royalties -->
+                    <MudPaper Class="pa-4">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.h6">Daily trends last 30 days</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Streams, tracks and releases from the last 30 days.
+                                </MudText>
+                            </div>
+
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Warning"
+                                       Href="/trends">
+                                See more
+                            </MudButton>
+                        </MudStack>
+
+                        <MudDivider Class="my-3" />
+
+                        <div class="fake-area-chart">
+                            <svg viewBox="0 0 1000 280" preserveAspectRatio="none">
+                                <polygon class="chart-fill"
+                                         points="0,70 40,66 80,65 120,52 160,62 200,78 240,76 280,68 320,72 360,66 400,55 440,64 480,88 520,72 560,66 600,56 640,60 680,50 720,55 760,78 800,64 840,55 880,58 920,48 960,62 1000,82 1000,250 0,250" />
+
+                                <polyline class="chart-line"
+                                          points="0,70 40,66 80,65 120,52 160,62 200,78 240,76 280,68 320,72 360,66 400,55 440,64 480,88 520,72 560,66 600,56 640,60 680,50 720,55 760,78 800,64 840,55 880,58 920,48 960,62 1000,82" />
+                            </svg>
+
+                            <div class="chart-legend">
+                                <span><i class="legend-streams"></i> Streams</span>
+                                <span><i class="legend-tracks"></i> Tracks</span>
+                                <span><i class="legend-releases"></i> Releases</span>
+                            </div>
+                        </div>
+                    </MudPaper>
+
+                </MudStack>
+            </MudItem>
+
+            <!-- Right column -->
+            <MudItem xs="12" md="4">
+                <MudStack Spacing="4">
+
+                    <!-- Notifications -->
+                    <MudPaper Class="pa-4">
+                        <MudText Typo="Typo.h6">Notifications</MudText>
+                        <MudDivider Class="my-3" />
+
+                        <MudList T="string">
+                            <MudListItem Icon="@Icons.Material.Filled.CheckCircle">
+                                Release “Let It Go” was approved
+                            </MudListItem>
+
+                            <MudListItem Icon="@Icons.Material.Filled.CloudDone">
+                                3 tracks were distributed successfully
+                            </MudListItem>
+
+                            <MudListItem Icon="@Icons.Material.Filled.ReceiptLong">
+                                Royalty statement for May is ready
+                            </MudListItem>
+
+                            <MudListItem Icon="@Icons.Material.Filled.Schedule">
+                                “Ocean Lights” is scheduled for release
+                            </MudListItem>
+                        </MudList>
+                    </MudPaper>
+
+           
+
+                    <!-- DMG News -->
+                    <MudPaper Class="pa-4">
+                        <MudText Typo="Typo.h6">DMG News</MudText>
+                        <MudDivider Class="my-3" />
+
+                        <MudStack Spacing="2">
+                            <MudPaper Class="pa-3 dmg-news-item" Outlined="true">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">20/05/2026</MudText>
+                                <MudText Typo="Typo.body2"> Planned maintenance Sunday 02:00–04:00.</MudText>
+                            </MudPaper>
+
+                            <MudPaper Class="pa-3 dmg-news-item" Outlined="true">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">13/05/2026</MudText>
+                                <MudText Typo="Typo.body2">Spotify offsite notice</MudText>
+                            </MudPaper>
+
+                            <MudPaper Class="pa-3 dmg-news-item" Outlined="true">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">03/03/2026</MudText>
+                                <MudText Typo="Typo.body2">New and easier way to add contributors</MudText>
+                            </MudPaper>
+                        </MudStack>
+                    </MudPaper>
+                </MudStack>
+            </MudItem>
+
+        </MudGrid>
+
+    </MudStack>
+
+</MudContainer>
+
+@code {
+    private readonly List<ChartSeries<double>> _trendSeries = new()
+    {
+        new ChartSeries<double>
+        {
+            Name = "Streams",
+            Data = new double[]
+            {
+                4200000, 4300000, 4350000, 4550000, 4400000,
+                4200000, 4250000, 4350000, 4280000, 4320000,
+                4450000, 4350000, 4100000, 4250000, 4320000,
+                4480000, 4420000, 4550000, 4500000, 4200000,
+                4380000, 4500000, 4450000, 4480000, 4650000,
+                4550000, 4100000, 4280000, 4300000, 4350000
+            }
+        },
+        new ChartSeries<double>
+        {
+            Name = "Tracks",
+            Data = new double[]
+            {
+                120, 120, 121, 121, 122, 122, 122, 123, 123, 124,
+                124, 124, 125, 125, 125, 126, 126, 126, 127, 127,
+                127, 128, 128, 128, 128, 128, 128, 128, 128, 128
+            }
+        },
+        new ChartSeries<double>
+        {
+            Name = "Releases",
+            Data = new double[]
+            {
+                28, 28, 28, 29, 29, 29, 29, 30, 30, 30,
+                30, 31, 31, 31, 31, 32, 32, 32, 32, 33,
+                33, 33, 33, 33, 34, 34, 34, 34, 34, 34
+            }
+        }
+    };
+
+    private readonly string[] _trendLabels =
+    {
+        "19 May", "20 May", "21 May", "22 May", "23 May",
+        "24 May", "25 May", "26 May", "27 May", "28 May",
+        "29 May", "30 May", "31 May", "1 Jun", "2 Jun",
+        "3 Jun", "4 Jun", "5 Jun", "6 Jun", "7 Jun",
+        "8 Jun", "9 Jun", "10 Jun", "11 Jun", "12 Jun",
+        "13 Jun", "14 Jun", "15 Jun", "16 Jun", "17 Jun"
+    };
+}
