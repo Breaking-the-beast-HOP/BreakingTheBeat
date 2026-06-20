@@ -72,7 +72,8 @@
                                 </MudText>
                             }
 
-                            <MudAutocomplete T="ContributorRoleDto"
+                            <MudAutocomplete @key="row.value.RoleInputKey"
+                                             T="ContributorRoleDto"
                                              Placeholder="Add role..."
                                              Variant="Variant.Text"
                                              Dense="true"
@@ -182,7 +183,6 @@
 
         return Task.FromResult(result);
     }
-
     private void AddRole(int index, ContributorRoleDto? role)
     {
         if (role is null)
@@ -192,6 +192,8 @@
 
         if (!alreadyAdded)
             Rows[index].Roles.Add(role);
+
+        Rows[index].RoleInputKey = Guid.NewGuid();
     }
 
     private void RemoveRole(int index, ContributorRoleDto role)
@@ -316,7 +318,11 @@
     {
         public Guid? ContributorId { get; set; }
         public ContributorOption? Contributor { get; set; }
+
         public List<ContributorRoleDto> Roles { get; set; } = new();
+        public ContributorRoleDto? SelectedRoleToAdd { get; set; }
+        public string RoleSearchText { get; set; } = string.Empty;
+        public Guid RoleInputKey { get; set; } = Guid.NewGuid();
     }
 
 

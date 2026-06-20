@@ -12,10 +12,7 @@ namespace MusicCatalogContext.Features.MusicRelease.Update
         private readonly IOutBoxRepository _outboxRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public UpdateReleaseHandler(
-            IReleaseRepository releaseRepository,
-            IOutBoxRepository outboxRepository,
-            IUnitOfWork unitOfWork)
+        public UpdateReleaseHandler(IReleaseRepository releaseRepository, IOutBoxRepository outboxRepository, IUnitOfWork unitOfWork)
         {
             _releaseRepository = releaseRepository;
             _outboxRepository = outboxRepository;
@@ -36,7 +33,7 @@ namespace MusicCatalogContext.Features.MusicRelease.Update
                     return false;
                 }
 
-                if (release.Status == ReleaseStatus.InQc || release.Status == ReleaseStatus.Approved) //makes sure the release does not change during or after review is accepted
+                if (release.Status == ReleaseStatus.InQc || release.Status == ReleaseStatus.Approved) //if review is in process or the release already is approved
                 {
                     throw new InvalidOperationException("Release can no longer be updated because review has started.");
                 }
@@ -88,7 +85,6 @@ namespace MusicCatalogContext.Features.MusicRelease.Update
                         await _outboxRepository.AddAsync(outboxMessage);
                     }
                 }
-                
 
                 await _releaseRepository.UpdateAsync(release);
 

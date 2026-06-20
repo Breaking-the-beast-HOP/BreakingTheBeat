@@ -1,0 +1,374 @@
+﻿@page "/DashBoard"
+@* @page "/qc-dashboard" *@
+@attribute [Authorize(Roles = "Quality controller,Admin")]
+@using Microsoft.AspNetCore.Authorization
+@using MudBlazor
+
+<PageTitle>Quality Control Dashboard</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
+
+    <MudStack Spacing="4">
+
+        <!-- Header -->
+        <div>
+            <MudText Typo="Typo.h4">Quality Control Dashboard</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Review queues, rule updates and releases requiring extra attention
+            </MudText>
+        </div>
+
+        <!-- Stats -->
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 dashboard-card">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Music Reviews</MudText>
+                                <MudText Typo="Typo.h4">24</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.Album" Size="Size.Large" Color="Color.Warning" />
+                        </MudStack>
+
+                        <MudButton FullWidth="true"
+                                   Size="Size.Small"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.RateReview"
+                                   Href="/music-qc">
+                            Open Queue
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 dashboard-card">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Podcast Reviews</MudText>
+                                <MudText Typo="Typo.h4">11</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.Podcasts" Size="Size.Large" Color="Color.Warning" />
+                        </MudStack>
+
+                        <MudButton FullWidth="true"
+                                   Size="Size.Small"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Warning"
+                                   StartIcon="@Icons.Material.Filled.RateReview"
+                                   Href="/podcast-qc">
+                            Open Queue
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 dashboard-card">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Returned For Fixes</MudText>
+                                <MudText Typo="Typo.h4">7</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.AssignmentReturn" Size="Size.Large" Color="Color.Warning" />
+                        </MudStack>
+
+                        <MudButton FullWidth="true"
+                                   Size="Size.Small"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Warning"
+                                   Href="/returned-fixes">
+                            View Returns
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 dashboard-card">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Post-Approval Issues</MudText>
+                                <MudText Typo="Typo.h4">3</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.ReportProblem" Size="Size.Large" Color="Color.Warning" />
+                        </MudStack>
+
+                        <MudButton FullWidth="true"
+                                   Size="Size.Small"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Warning"
+                                   Href="/post-approval-issues">
+                            Investigate
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Main content -->
+        <MudGrid>
+
+            <!-- Left column -->
+            <MudItem xs="12" md="8">
+                <MudStack Spacing="4">
+
+                    <!-- Music Review Queue -->
+                    <MudPaper Class="pa-4">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.h6">Music Review Queue</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Releases waiting for quality control review.
+                                </MudText>
+                            </div>
+
+                            <MudButton Variant="Variant.Text" Color="Color.Warning" Href="/music-qc">
+                                View all
+                            </MudButton>
+                        </MudStack>
+
+                        <MudDivider Class="my-3" />
+
+                        <MudTable Items="@_musicQueue" Dense="true" Hover="true" Elevation="0">
+                            <HeaderContent>
+                                <MudTh>Release</MudTh>
+                                <MudTh>Creator</MudTh>
+                                <MudTh>Submitted</MudTh>
+                                <MudTh>Priority</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd>@context.Title</MudTd>
+                                <MudTd>@context.Creator</MudTd>
+                                <MudTd>@context.Submitted</MudTd>
+                                <MudTd>
+                                    <MudChip T="string"
+                                             Size="Size.Small"
+                                             Color="@context.PriorityColor"
+                                             Variant="Variant.Outlined">
+                                        @context.Priority
+                                    </MudChip>
+                                </MudTd>
+                                <MudTd Align="Align.Right">
+                                    <MudButton Size="Size.Small"
+                                               Variant="Variant.Text"
+                                               Color="Color.Warning"
+                                               Href="@context.Url">
+                                        Review
+                                    </MudButton>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudPaper>
+
+                    <!-- Podcast Review Queue -->
+                    <MudPaper Class="pa-4">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <div>
+                                <MudText Typo="Typo.h6">Podcast Review Queue</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Podcast episodes waiting for quality control review.
+                                </MudText>
+                            </div>
+
+                            <MudButton Variant="Variant.Text" Color="Color.Warning" Href="/podcast-qc">
+                                View all
+                            </MudButton>
+                        </MudStack>
+
+                        <MudDivider Class="my-3" />
+
+                        <MudTable Items="@_podcastQueue" Dense="true" Hover="true" Elevation="0">
+                            <HeaderContent>
+                                <MudTh>Episode</MudTh>
+                                <MudTh>Podcast</MudTh>
+                                <MudTh>Submitted</MudTh>
+                                <MudTh>Priority</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd>@context.Title</MudTd>
+                                <MudTd>@context.Creator</MudTd>
+                                <MudTd>@context.Submitted</MudTd>
+                                <MudTd>
+                                    <MudChip T="string"
+                                             Size="Size.Small"
+                                             Color="@context.PriorityColor"
+                                             Variant="Variant.Outlined">
+                                        @context.Priority
+                                    </MudChip>
+                                </MudTd>
+                                <MudTd Align="Align.Right">
+                                    <MudButton Size="Size.Small"
+                                               Variant="Variant.Text"
+                                               Color="Color.Warning"
+                                               Href="@context.Url">
+                                        Review
+                                    </MudButton>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudPaper>
+
+                    <!-- Recent Reviews -->
+                    <MudPaper Class="pa-4">
+                        <MudText Typo="Typo.h6">Recent Reviews</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Latest QC decisions made by the team.
+                        </MudText>
+
+                        <MudDivider Class="my-3" />
+
+                        <MudList T="string">
+                            <MudListItem Icon="@Icons.Material.Filled.CheckCircle">
+                                “Let It Go” approved by Mia Larsen
+                            </MudListItem>
+
+                            <MudListItem Icon="@Icons.Material.Filled.AssignmentReturn">
+                                “Ocean Lights” returned for artwork fixes
+                            </MudListItem>
+
+                            <MudListItem Icon="@Icons.Material.Filled.Cancel">
+                                “Night Drive Demo” rejected due to rights issue
+                            </MudListItem>
+                        </MudList>
+                    </MudPaper>
+
+                </MudStack>
+            </MudItem>
+
+            <!-- Right column -->
+            <MudItem xs="12" md="4">
+                <MudStack Spacing="4">
+
+                    <!-- Rule Updates -->
+                    <MudPaper Class="pa-4">
+                        <MudText Typo="Typo.h6">QC Rule Updates</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Important changes to review guidelines.
+                        </MudText>
+
+                        <MudDivider Class="my-3" />
+
+                        <MudStack Spacing="2">
+                            <MudPaper Class="pa-3 qc-news-item" Outlined="true">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">20/05/2026</MudText>
+                                <MudText Typo="Typo.body2">New artwork rule for low-resolution covers</MudText>
+                            </MudPaper>
+
+                            <MudPaper Class="pa-3 qc-news-item" Outlined="true">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">13/05/2026</MudText>
+                                <MudText Typo="Typo.body2">Explicit podcast content must be marked before approval</MudText>
+                            </MudPaper>
+
+                            <MudPaper Class="pa-3 qc-news-item" Outlined="true">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">03/05/2026</MudText>
+                                <MudText Typo="Typo.body2">Contributor splits must be reviewed on all multi-artist releases</MudText>
+                            </MudPaper>
+                        </MudStack>
+                    </MudPaper>
+
+                    <!-- Guidelines -->
+                    <MudPaper Class="pa-4">
+                        <MudText Typo="Typo.h6">Guidelines</MudText>
+                        <MudDivider Class="my-3" />
+
+                        <MudList T="string">
+                            <MudListItem Icon="@Icons.Material.Filled.Rule">
+                                Music release checklist
+                            </MudListItem>
+
+                            <MudListItem Icon="@Icons.Material.Filled.Rule">
+                                Podcast episode checklist
+                            </MudListItem>
+
+                            <MudListItem Icon="@Icons.Material.Filled.Image">
+                                Artwork requirements
+                            </MudListItem>
+
+                            <MudListItem Icon="@Icons.Material.Filled.Gavel">
+                                Rights and contributor rules
+                            </MudListItem>
+                        </MudList>
+                    </MudPaper>
+
+                    <!-- High Attention Queue -->
+                    <MudPaper Class="pa-4">
+                        <MudText Typo="Typo.h6">High Attention Queue</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Creators or releases that may require extra review.
+                        </MudText>
+
+                        <MudDivider Class="my-3" />
+
+                        <MudStack Spacing="2">
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
+                                Nordic Wave has 4 returned releases this month.
+                            </MudAlert>
+
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
+                                StudioX Uploads has repeated metadata conflicts.
+                            </MudAlert>
+
+                            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                                “Midnight Pulse” has similar artwork to another release.
+                            </MudAlert>
+                        </MudStack>
+                    </MudPaper>
+
+                    <!-- Post Approval Issues -->
+                    <MudPaper Class="pa-4">
+                        <MudText Typo="Typo.h6">Returned After Distribution</MudText>
+                        <MudDivider Class="my-3" />
+
+                        <MudList T="string">
+                            <MudListItem Icon="@Icons.Material.Filled.ReportProblem">
+                                “Summer Rain” flagged by platform after delivery
+                            </MudListItem>
+
+                            <MudListItem Icon="@Icons.Material.Filled.ReportProblem">
+                                Podcast episode #42 returned for missing explicit label
+                            </MudListItem>
+                        </MudList>
+                    </MudPaper>
+
+                </MudStack>
+            </MudItem>
+
+        </MudGrid>
+
+    </MudStack>
+
+</MudContainer>
+
+@code {
+    private List<QcQueueItem> _musicQueue = new()
+    {
+        new("Summer Vibes EP", "Nordic Wave", "2h ago", "High", Color.Warning, "/music-qc/1"),
+        new("Ocean Lights", "Anna Smith", "5h ago", "Normal", Color.Default, "/music-qc/2"),
+        new("Night Drive", "Neon City", "1d ago", "Normal", Color.Default, "/music-qc/3")
+    };
+
+    private List<QcQueueItem> _podcastQueue = new()
+    {
+        new("Episode 14", "Marketing Weekly", "1h ago", "High", Color.Warning, "/podcast-qc/14"),
+        new("Studio Talk #08", "Studio Talk", "4h ago", "Normal", Color.Default, "/podcast-qc/8"),
+        new("Startup Stories #27", "Startup Stories", "8h ago", "Normal", Color.Default, "/podcast-qc/27")
+    };
+
+    private record QcQueueItem(
+        string Title,
+        string Creator,
+        string Submitted,
+        string Priority,
+        Color PriorityColor,
+        string Url
+    );
+}
+
